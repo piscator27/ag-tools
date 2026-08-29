@@ -1,0 +1,1 @@
+{ name: "13", schueler: ["Adéle", "Alin", "Anna", "Anton", "Antonia", "Bo", "Celine-Elvira", "Emma", "Gotje", "Greta", "Hannes", "Ida R", "Ida H", "Jonas", "Lea", "Leni", "Levin", "Lina", "Maria", "Marianne-Lucie", "Marlon", "Martha", "Milo", "Nathan", "Nesrin", "Nils", "Sila", "Sinem", "Tim", "Tjark", "Veronica"] }

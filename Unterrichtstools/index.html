@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unterrichtstools</title>
+<style>
+:root{
+  --bg:#1a1a1a;
+  --panel:#242424;
+  --panel-hover:#2f2f2f;
+  --line:#3a3a3a;
+  --text:#f0f0f0;
+  --muted:#a0a0a0;
+  --accent:#ffd400;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:system-ui,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:34px 30px 90px}
+
+header{max-width:1500px;margin:0 auto 26px}
+h1{margin:0;font-size:clamp(34px,4.2vw,58px);font-weight:600;letter-spacing:.5px}
+.sub{margin:8px 0 0;color:var(--muted);font-size:clamp(17px,1.6vw,23px)}
+
+.toolbar{max-width:1500px;margin:0 auto 22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+#suche{flex:1 1 300px;min-width:240px;font-size:22px;padding:13px 18px;border-radius:12px;
+  border:1px solid var(--line);background:#111;color:var(--text)}
+#suche::placeholder{color:#777}
+#suche:focus{outline:none;border-color:var(--accent)}
+.chip{font-size:19px;padding:11px 20px;border-radius:999px;border:1px solid var(--line);
+  background:var(--panel);color:var(--muted);cursor:pointer;white-space:nowrap}
+.chip:hover{background:var(--panel-hover);color:var(--text)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#1a1a1a;font-weight:600}
+
+main{max-width:1500px;margin:0 auto}
+section{margin:0 0 40px}
+h2{font-size:clamp(23px,2.2vw,30px);font-weight:600;color:var(--accent);
+  margin:0 0 16px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(310px,1fr))}
+a.card{display:flex;gap:16px;align-items:flex-start;text-decoration:none;color:inherit;
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px;
+  transition:background .12s,border-color .12s,transform .12s}
+a.card:hover,a.card:focus-visible{background:var(--panel-hover);border-color:var(--accent);
+  transform:translateY(-2px);outline:none}
+.icon{font-size:38px;line-height:1;flex:0 0 auto}
+.txt{min-width:0;display:block}
+.name{display:block;font-size:24px;font-weight:600;margin-bottom:5px;line-height:1.2}
+.desc{display:block;font-size:17px;color:var(--muted);line-height:1.4}
+
+#leer{display:none;color:var(--muted);font-size:24px;padding:40px 4px}
+#fi{position:fixed;right:18px;bottom:12px;color:#888;opacity:.4;font-size:16px;
+  user-select:none;pointer-events:none}
+@media (max-width:620px){
+  body{padding:22px 16px 80px}
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Unterrichtstools</h1>
+  <p class="sub">Interaktive HTML-Apps für Beamer und Klassenzimmer – einfach anklicken.</p>
+</header>
+
+<div class="toolbar">
+  <input id="suche" type="search" placeholder="Suchen … (z. B. Würfel, Skalarprodukt, Timer)" autocomplete="off">
+  <button class="chip active" data-kat="alle">Alle</button>
+  <button class="chip" data-kat="werkzeuge">Klassenzimmer</button>
+  <button class="chip" data-kat="spiele">Spiele &amp; Üben</button>
+  <button class="chip" data-kat="geometrie">Analytische Geometrie</button>
+  <button class="chip" data-kat="bingo">Bingo &amp; Quiz</button>
+</div>
+
+<main>
+
+<section data-kat="werkzeuge">
+  <h2>Klassenzimmer-Werkzeuge</h2>
+  <div class="grid">
+    <a class="card" href="Arbeitslautstaerke.html">
+      <span class="icon">🔊</span><span class="txt">
+      <span class="name">Arbeitslautstärke</span>
+      <span class="desc">Lautstärkeanzeige über das Mikrofon – visualisiert die Arbeitsruhe der Klasse.</span></span></a>
+
+    <a class="card" href="sanduhr.html">
+      <span class="icon">⏳</span><span class="txt">
+      <span class="name">Arbeitszeit-Sanduhr</span>
+      <span class="desc">Timer von 1 bis 60 Minuten als große Sanduhr mit Restzeit-Anzeige.</span></span></a>
+
+    <a class="card" href="Zufallsauswahl/Randomizer.html">
+      <span class="icon">🎯</span><span class="txt">
+      <span class="name">Namens-Randomizer</span>
+      <span class="desc">Zufällige Schülerauswahl aus einer Namensliste – fair und nachvollziehbar.</span></span></a>
+
+    <a class="card" href="Gruppenbildung/Gruppenbildung.html">
+      <span class="icon">👥</span><span class="txt">
+      <span class="name">Gruppenbildung</span>
+      <span class="desc">Teilt die Klasse per Zufall in Gruppen oder Teams auf.</span></span></a>
+
+    <a class="card" href="Beteiligungsmonitor/beteiligungsmonitor.html">
+      <span class="icon">✋</span><span class="txt">
+      <span class="name">Beteiligungsmonitor</span>
+      <span class="desc">Mündliche Beteiligung während der Stunde erfassen und im Blick behalten.</span></span></a>
+
+    <a class="card" href="Klassenrekord.html">
+      <span class="icon">🏆</span><span class="txt">
+      <span class="name">Klassenrekord</span>
+      <span class="desc">Ergebnisse der Klasse sammeln und Bestleistungen anzeigen.</span></span></a>
+
+    <a class="card" href="Zahlenrad.html">
+      <span class="icon">🎡</span><span class="txt">
+      <span class="name">Zahlenrad</span>
+      <span class="desc">Glücksrad für Zufallszahlen – z. B. für Aufgabennummern oder Platzwahl.</span></span></a>
+
+    <a class="card" href="wuerfel.html">
+      <span class="icon">🎲</span><span class="txt">
+      <span class="name">Würfelsimulation</span>
+      <span class="desc">Würfeln per Leertaste, mit Häufigkeitsstatistik der Augenzahlen.</span></span></a>
+
+    <a class="card" href="W%C3%BCrfelsimulation.html">
+      <span class="icon">🎲</span><span class="txt">
+      <span class="name">Würfelsimulation (kompakt)</span>
+      <span class="desc">Schlanke Variante der Würfelsimulation für schnelle Zufallsversuche.</span></span></a>
+  </div>
+</section>
+
+<section data-kat="spiele">
+  <h2>Spiele &amp; Üben</h2>
+  <div class="grid">
+    <a class="card" href="einmaleins.html">
+      <span class="icon">✖️</span><span class="txt">
+      <span class="name">Einmaleins-Aufgaben</span>
+      <span class="desc">Kopfrechenaufgaben zum kleinen und großen Einmaleins für die Projektion.</span></span></a>
+
+    <a class="card" href="einmaleins-selbsttest.html">
+      <span class="icon">📝</span><span class="txt">
+      <span class="name">Einmaleins-Selbsttest</span>
+      <span class="desc">Selbstständiger Test mit Eingabe und Auswertung der Ergebnisse.</span></span></a>
+
+    <a class="card" href="MatheFussball.html">
+      <span class="icon">⚽</span><span class="txt">
+      <span class="name">MatheFussball</span>
+      <span class="desc">Rechenspiel im Fußball-Format – zwei Teams treten gegeneinander an.</span></span></a>
+
+    <a class="card" href="Hangman.html">
+      <span class="icon">🔤</span><span class="txt">
+      <span class="name">Hangman</span>
+      <span class="desc">Begriffe raten als Klassenspiel – ideal zur Wiederholung von Fachbegriffen.</span></span></a>
+
+    <a class="card" href="kreuz_und_quer/kreuz_und_quer.html">
+      <span class="icon">🧩</span><span class="txt">
+      <span class="name">Kreuz und Quer</span>
+      <span class="desc">Digitale Fassung des Rätselspiels mit Begriffen in Zeilen und Spalten.</span></span></a>
+
+    <a class="card" href="Winkel-Schaetzer.html">
+      <span class="icon">📐</span><span class="txt">
+      <span class="name">Winkel-Schätzer</span>
+      <span class="desc">Winkelgrößen schätzen und auflösen – Training für das Augenmaß.</span></span></a>
+
+    <a class="card" href="Zahlenstrahl-Schaetzer_Klasse5_V2.html">
+      <span class="icon">📏</span><span class="txt">
+      <span class="name">Zahlenstrahl-Schätzer</span>
+      <span class="desc">Zahlen am Zahlenstrahl verorten und schätzen (ab Klasse 5).</span></span></a>
+  </div>
+</section>
+
+<section data-kat="geometrie">
+  <h2>Analytische Geometrie – dynamische Tafelbilder</h2>
+  <div class="grid">
+    <a class="card" href="Skalarprodukt.html">
+      <span class="icon">📊</span><span class="txt">
+      <span class="name">Skalarprodukt</span>
+      <span class="desc">Dynamisches Tafelbild zum Skalarprodukt in der Ebene.</span></span></a>
+
+    <a class="card" href="Skalarprodukt3d.html">
+      <span class="icon">🧭</span><span class="txt">
+      <span class="name">Skalarprodukt im Raum</span>
+      <span class="desc">Skalarprodukt und Winkel zwischen Vektoren – frei drehbar in 3D.</span></span></a>
+
+    <a class="card" href="GeradeEbene3d.html">
+      <span class="icon">🛩️</span><span class="txt">
+      <span class="name">Winkel Gerade – Ebene</span>
+      <span class="desc">Schnittwinkel zwischen Gerade und Ebene räumlich veranschaulicht.</span></span></a>
+
+    <a class="card" href="Gleichungsformen3d.html">
+      <span class="icon">🧮</span><span class="txt">
+      <span class="name">Geraden- &amp; Ebenengleichungen</span>
+      <span class="desc">Parameter-, Normalen- und Koordinatenform im Vergleich – interaktiv in 3D.</span></span></a>
+  </div>
+</section>
+
+<section data-kat="bingo">
+  <h2>Bingo &amp; Quiz</h2>
+  <div class="grid">
+    <a class="card" href="Bingo_Quiz/spiel/spiel.html">
+      <span class="icon">🔢</span><span class="txt">
+      <span class="name">Bingo-Spiel</span>
+      <span class="desc">Bingo-App zur Aufgabendatenbank – Aufgaben ziehen und aufdecken.</span></span></a>
+
+    <a class="card" href="Bingo_Quiz/daten/bingo_zahlen_1bis60_standalone.html">
+      <span class="icon">🎱</span><span class="txt">
+      <span class="name">Zahlen-Bingo 1–60</span>
+      <span class="desc">Klassisches Zahlenbingo als eigenständige Datei – ohne Datenauswahl startklar.</span></span></a>
+
+    <a class="card" href="Bingo_Quiz/quiz/quiz.html">
+      <span class="icon">❓</span><span class="txt">
+      <span class="name">Quiz-Show</span>
+      <span class="desc">Quiz im Kahoot-Stil aus derselben Aufgabendatenbank wie das Bingo.</span></span></a>
+
+    <a class="card" href="Bingo_Quiz/editor/editor.html">
+      <span class="icon">🛠️</span><span class="txt">
+      <span class="name">Aufgaben-Editor</span>
+      <span class="desc">JSON-Editor zum Anlegen und Pflegen der Aufgabendatenbank für Bingo und Quiz.</span></span></a>
+  </div>
+</section>
+
+<p id="leer">Keine App gefunden.</p>
+
+</main>
+
+<div id="fi">Fi</div>
+
+<script>
+(function(){
+  const suche    = document.getElementById('suche');
+  const leer     = document.getElementById('leer');
+  const chips    = Array.from(document.querySelectorAll('.chip'));
+  const sections = Array.from(document.querySelectorAll('section[data-kat]'));
+  const karten   = Array.from(document.querySelectorAll('a.card'));
+
+  karten.forEach(k => k.dataset.text = k.textContent.toLowerCase());
+
+  let kategorie = 'alle';
+
+  function filtern(){
+    const q = suche.value.trim().toLowerCase();
+    let sichtbar = 0;
+
+    sections.forEach(sec => {
+      const katOk = (kategorie === 'alle' || kategorie === sec.dataset.kat);
+      let treffer = 0;
+
+      sec.querySelectorAll('a.card').forEach(k => {
+        const zeigen = katOk && (q === '' || k.dataset.text.includes(q));
+        k.style.display = zeigen ? '' : 'none';
+        if (zeigen) treffer++;
+      });
+
+      sec.style.display = treffer ? '' : 'none';
+      sichtbar += treffer;
+    });
+
+    leer.style.display = sichtbar ? 'none' : 'block';
+  }
+
+  suche.addEventListener('input', filtern);
+
+  chips.forEach(c => c.addEventListener('click', () => {
+    chips.forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    kategorie = c.dataset.kat;
+    filtern();
+  }));
+
+  // Tippen startet die Suche, Escape leert sie
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape'){ suche.value = ''; filtern(); suche.blur(); return; }
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+    if (document.activeElement !== suche && e.key.length === 1){
+      suche.focus();
+    }
+  });
+
+  filtern();
+})();
+</script>
+</body>
+</html>

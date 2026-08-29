@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gruppenbildung</title>
+<style>
+  :root{
+    --tafel:#1b2b22;
+    --tafel-rand:#3c5a44;
+    --kreide:#f2ede1;
+    --kreide-matt:#c9c2ae;
+    --gelb:#e8c468;
+    --karte:#22352a;
+    --karte-rand:#4a6b53;
+    --rot:#c96a5a;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    background:var(--tafel);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.03), transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(255,255,255,0.03), transparent 60%);
+    color:var(--kreide);
+    font-family:"Segoe UI", Verdana, Arial, sans-serif;
+  }
+
+  header{
+    padding:18px 24px 10px 24px;
+    border-bottom:2px dashed var(--tafel-rand);
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:22px;
+  }
+  header h1{
+    margin:0 18px 0 0;
+    font-size:22px;
+    letter-spacing:0.5px;
+    color:var(--gelb);
+    font-weight:600;
+  }
+  .feld{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    font-size:13px;
+    color:var(--kreide-matt);
+  }
+  select, button{
+    font-family:inherit;
+    font-size:15px;
+    background:var(--karte);
+    color:var(--kreide);
+    border:1.5px solid var(--karte-rand);
+    border-radius:6px;
+    padding:7px 10px;
+  }
+  select:focus, button:focus{outline:2px solid var(--gelb);}
+  button{cursor:pointer;}
+  button:hover{border-color:var(--gelb);}
+
+  .groessen{display:flex;gap:6px;}
+  .groessen button{
+    width:38px;
+    padding:7px 0;
+    text-align:center;
+  }
+  .groessen button.aktiv{
+    background:var(--gelb);
+    color:#20291a;
+    border-color:var(--gelb);
+    font-weight:700;
+  }
+  .modus button{
+    width:auto;
+    padding:7px 12px;
+  }
+  .versteckt{display:none !important;}
+
+  #erstellen{
+    background:var(--gelb);
+    color:#20291a;
+    font-weight:700;
+    border-color:var(--gelb);
+    padding:9px 18px;
+  }
+  #erstellen:hover{filter:brightness(1.08);}
+
+  #zuruecksetzen{color:var(--kreide-matt);}
+
+  main{
+    display:flex;
+    height:calc(100% - 96px);
+  }
+
+  #schuelerliste{
+    width:230px;
+    flex-shrink:0;
+    padding:14px 16px;
+    overflow-y:auto;
+    border-right:2px dashed var(--tafel-rand);
+  }
+  #schuelerliste .hinweis{
+    font-size:12px;
+    color:var(--kreide-matt);
+    margin:0 0 10px 0;
+  }
+  .schueler{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 4px;
+    border-radius:4px;
+    font-size:15px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .schueler:hover{background:rgba(255,255,255,0.04);}
+  .schueler input{
+    width:16px;height:16px;
+    accent-color:var(--gelb);
+    cursor:pointer;
+  }
+  .schueler.abwesend{color:var(--kreide-matt);text-decoration:line-through;opacity:0.55;}
+
+  #anzahlInfo{
+    margin-top:14px;
+    font-size:12.5px;
+    color:var(--kreide-matt);
+  }
+
+  #ausgabe{
+    flex:1;
+    padding:22px 26px;
+    overflow-y:auto;
+  }
+  #ausgabe .platzhalter{
+    color:var(--kreide-matt);
+    font-size:15px;
+    margin-top:40px;
+    text-align:center;
+  }
+  #gruppen{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+    gap:18px;
+  }
+  .gruppe{
+    background:var(--karte);
+    border:2px dashed var(--karte-rand);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .gruppe h2{
+    margin:0 0 10px 0;
+    font-size:15px;
+    color:var(--gelb);
+    letter-spacing:0.5px;
+    border-bottom:1px solid var(--karte-rand);
+    padding-bottom:6px;
+  }
+  .gruppe ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  .gruppe li{
+    font-size:19px;
+    padding:4px 0;
+  }
+
+  #logo{
+    position:fixed;
+    right:16px;
+    bottom:12px;
+    font-size:26px;
+    font-weight:800;
+    color:rgba(255,255,255,0.18);
+    letter-spacing:1px;
+    pointer-events:none;
+    user-select:none;
+  }
+
+  @media (max-width:700px){
+    main{flex-direction:column;}
+    #schuelerliste{width:100%;border-right:none;border-bottom:2px dashed var(--tafel-rand);max-height:35vh;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gruppenbildung</h1>
+
+  <div class="feld">
+    <label for="klasseAuswahl">Klasse</label>
+    <select id="klasseAuswahl"></select>
+  </div>
+
+  <div class="feld">
+    <label>Aufteilen nach</label>
+    <div class="groessen modus" id="modusAuswahl">
+      <button data-modus="groesse">Gruppengröße</button>
+      <button data-modus="anzahl">Anzahl Gruppen</button>
+    </div>
+  </div>
+
+  <div class="feld" id="feldGroesse">
+    <label>Gruppengröße</label>
+    <div class="groessen" id="groessenAuswahl">
+      <button data-groesse="2">2er</button>
+      <button data-groesse="3">3er</button>
+      <button data-groesse="4">4er</button>
+      <button data-groesse="5">5er</button>
+      <button data-groesse="6">6er</button>
+    </div>
+  </div>
+
+  <div class="feld versteckt" id="feldAnzahl">
+    <label>Anzahl Gruppen</label>
+    <div class="groessen" id="anzahlAuswahl">
+      <button data-anzahl="2">2</button>
+      <button data-anzahl="3">3</button>
+      <button data-anzahl="4">4</button>
+      <button data-anzahl="5">5</button>
+      <button data-anzahl="6">6</button>
+      <button data-anzahl="7">7</button>
+      <button data-anzahl="8">8</button>
+    </div>
+  </div>
+
+  <div class="feld">
+    <label>&nbsp;</label>
+    <button id="erstellen">Gruppen erstellen</button>
+  </div>
+
+  <div class="feld">
+    <label>&nbsp;</label>
+    <button id="zuruecksetzen">Alle anwesend</button>
+  </div>
+</header>
+
+<main>
+  <div id="schuelerliste">
+    <p class="hinweis">Häkchen entfernen, wenn jemand fehlt:</p>
+    <div id="schuelerBox"></div>
+    <div id="anzahlInfo"></div>
+  </div>
+
+  <div id="ausgabe">
+    <div id="gruppen"></div>
+    <p class="platzhalter" id="platzhalter">Klasse und Aufteilung wählen, dann auf „Gruppen erstellen" klicken.</p>
+  </div>
+</main>
+
+<div id="logo">Fi</div>
+
+<!-- Echte Klassenlisten (lokal, nicht im Repo). Fehlt die Datei,
+     greifen die Beispielnamen weiter unten. -->
+<script src="klassen.js"></script>
+<script>
+/* ============================================================
+   Hier neue Klassen ergänzen.
+   Einfach nach demselben Muster einen weiteren Eintrag
+   im KLASSEN-Objekt anlegen:
+
+   "Meine Klasse 5b": [
+     "Anna", "Ben", "Clara", ...
+   ],
+
+   Der Name links (in Anführungszeichen) erscheint in der
+   Dropdown-Auswahl oben.
+   ============================================================ */
+const KLASSEN = window.KLASSEN || {
+  "Beispielklasse A": [
+    "Anna", "Ben", "Clara", "David", "Elif", "Finn", "Greta", "Hugo", "Ida", "Jonas", "Karla",
+    "Leon", "Mara", "Nico", "Olivia", "Paul", "Quirin", "Rosa", "Sami", "Tom", "Ulla",
+    "Viktor", "Wanda", "Xenia", "Yusuf", "Zoe", "Amir", "Bea", "Carlo", "Dilara"
+  ],
+  "Beispielklasse B": [
+    "Alina", "Bela", "Cem", "Dora", "Emil", "Frida", "Georg", "Hanna", "Ilias", "Jule", "Kian",
+    "Lotta", "Mats", "Nele", "Oskar", "Pia", "Rafael", "Sina", "Theo", "Vera", "Wim", "Yara",
+    "Zeno", "Anton", "Britta", "Cosima", "Dennis", "Ella", "Felix", "Gina"
+  ]
+};
+
+const klasseAuswahl = document.getElementById("klasseAuswahl");
+const schuelerBox = document.getElementById("schuelerBox");
+const anzahlInfo = document.getElementById("anzahlInfo");
+const groessenAuswahl = document.getElementById("groessenAuswahl");
+const anzahlAuswahl = document.getElementById("anzahlAuswahl");
+const modusAuswahl = document.getElementById("modusAuswahl");
+const feldGroesse = document.getElementById("feldGroesse");
+const feldAnzahl = document.getElementById("feldAnzahl");
+const gruppenBox = document.getElementById("gruppen");
+const platzhalter = document.getElementById("platzhalter");
+
+let gewaehlteGroesse = 4;   // Personen pro Gruppe
+let gewaehlteAnzahl = 4;    // Anzahl der Gruppen
+let modus = "groesse";      // "groesse" oder "anzahl"
+
+// Klassen-Dropdown befüllen
+Object.keys(KLASSEN).forEach(name=>{
+  let opt = document.createElement("option");
+  opt.value = name;
+  opt.textContent = name;
+  klasseAuswahl.appendChild(opt);
+});
+
+function schuelerlisteAnzeigen(){
+  schuelerBox.innerHTML = "";
+  gruppenBox.innerHTML = "";
+  platzhalter.style.display = "block";
+
+  const namen = KLASSEN[klasseAuswahl.value] || [];
+  namen.forEach(name=>{
+    let label = document.createElement("label");
+    label.className = "schueler";
+    let cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = true;
+    cb.dataset.name = name;
+    cb.addEventListener("change", ()=>{
+      label.classList.toggle("abwesend", !cb.checked);
+      anzahlAktualisieren();
+    });
+    let text = document.createElement("span");
+    text.textContent = name;
+    label.appendChild(cb);
+    label.appendChild(text);
+    schuelerBox.appendChild(label);
+  });
+  anzahlAktualisieren();
+}
+
+function anzahlAktualisieren(){
+  const gesamt = schuelerBox.querySelectorAll("input").length;
+  const anwesend = schuelerBox.querySelectorAll("input:checked").length;
+  anzahlInfo.textContent = anwesend + " von " + gesamt + " Schüler:innen anwesend";
+}
+
+klasseAuswahl.addEventListener("change", schuelerlisteAnzeigen);
+
+// Modus-Buttons: nach Gruppengröße oder nach Anzahl der Gruppen
+modusAuswahl.querySelectorAll("button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    modusAuswahl.querySelectorAll("button").forEach(b=>b.classList.remove("aktiv"));
+    btn.classList.add("aktiv");
+    modus = btn.dataset.modus;
+    feldGroesse.classList.toggle("versteckt", modus !== "groesse");
+    feldAnzahl.classList.toggle("versteckt", modus !== "anzahl");
+  });
+});
+modusAuswahl.querySelector('[data-modus="groesse"]').classList.add("aktiv");
+
+// Gruppengrößen-Buttons
+groessenAuswahl.querySelectorAll("button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    groessenAuswahl.querySelectorAll("button").forEach(b=>b.classList.remove("aktiv"));
+    btn.classList.add("aktiv");
+    gewaehlteGroesse = parseInt(btn.dataset.groesse);
+  });
+});
+groessenAuswahl.querySelector('[data-groesse="4"]').classList.add("aktiv");
+
+// Buttons für die Anzahl der Gruppen
+anzahlAuswahl.querySelectorAll("button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    anzahlAuswahl.querySelectorAll("button").forEach(b=>b.classList.remove("aktiv"));
+    btn.classList.add("aktiv");
+    gewaehlteAnzahl = parseInt(btn.dataset.anzahl);
+  });
+});
+anzahlAuswahl.querySelector('[data-anzahl="4"]').classList.add("aktiv");
+
+document.getElementById("zuruecksetzen").addEventListener("click", ()=>{
+  schuelerBox.querySelectorAll("input").forEach(cb=>{
+    cb.checked = true;
+    cb.closest(".schueler").classList.remove("abwesend");
+  });
+  anzahlAktualisieren();
+});
+
+function mischen(array){
+  let a = array.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+document.getElementById("erstellen").addEventListener("click", ()=>{
+  const anwesende = Array.from(schuelerBox.querySelectorAll("input:checked"))
+    .map(cb => cb.dataset.name);
+
+  if(anwesende.length === 0){
+    alert("Es sind keine Schüler:innen ausgewählt.");
+    return;
+  }
+
+  // Anzahl der Gruppen bestimmen – je nach gewähltem Modus.
+  // Danach werden die Anwesenden gleichmäßig verteilt (Rest wird auf die
+  // ersten Gruppen verteilt), sodass sich die Gruppengrößen um höchstens 1
+  // unterscheiden. Leere Gruppen entstehen so nie.
+  let numGruppen;
+  if(modus === "anzahl"){
+    numGruppen = Math.min(gewaehlteAnzahl, anwesende.length);
+  } else {
+    numGruppen = Math.ceil(anwesende.length / gewaehlteGroesse);
+  }
+  numGruppen = Math.max(1, numGruppen);
+
+  const basis = Math.floor(anwesende.length / numGruppen);
+  let rest = anwesende.length - basis * numGruppen;
+
+  const gemischt = mischen(anwesende);
+  const gruppen = [];
+  let index = 0;
+  for(let i = 0; i < numGruppen; i++){
+    let groesseDieserGruppe = basis + (rest > 0 ? 1 : 0);
+    if(rest > 0) rest--;
+    gruppen.push(gemischt.slice(index, index + groesseDieserGruppe));
+    index += groesseDieserGruppe;
+  }
+
+  gruppenBox.innerHTML = "";
+  platzhalter.style.display = "none";
+
+  gruppen.forEach((gruppe, i)=>{
+    const karte = document.createElement("div");
+    karte.className = "gruppe";
+    const titel = document.createElement("h2");
+    titel.textContent = "Gruppe " + (i + 1) + " (" + gruppe.length + ")";
+    const liste = document.createElement("ul");
+    gruppe.forEach(name=>{
+      const li = document.createElement("li");
+      li.textContent = name;
+      liste.appendChild(li);
+    });
+    karte.appendChild(titel);
+    karte.appendChild(liste);
+    gruppenBox.appendChild(karte);
+  });
+});
+
+schuelerlisteAnzeigen();
+</script>
+</body>
+</html>

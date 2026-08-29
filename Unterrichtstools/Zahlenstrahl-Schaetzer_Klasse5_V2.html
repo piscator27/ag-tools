@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zahlenstrahl-Schätzer V2</title>
+<style>
+html,body{margin:0;background:#000;color:#fff;font-family:Arial;height:100%}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center}
+svg{width:95vw;height:45vh}
+button{font-size:1.2rem;padding:.7rem 1.5rem;margin:.5rem;border:none;border-radius:10px;background:#333;color:#fff}
+#value{font-size:3rem;color:#ffd400;font-weight:bold;height:3.5rem;visibility:hidden}
+text{fill:#fff;font-size:22px}
+#fi{position:absolute;right:15px;bottom:10px;color:#666}
+</style>
+</head>
+<body>
+
+<div id="value"></div>
+
+<svg viewBox="0 0 1000 300">
+  <line x1="100" y1="150" x2="900" y2="150" stroke="white" stroke-width="6"/>
+  <g id="ticks"></g>
+  <line id="marker" x1="0" y1="125" x2="0" y2="175" stroke="red" stroke-width="5"/>
+  <circle id="dot" cx="0" cy="150" r="7" fill="red"/>
+</svg>
+
+<div>
+<button id="show">Auflösen</button>
+<button id="next">Neu</button>
+</div>
+
+<div id="fi">Fi</div>
+
+<script>
+const ticks=document.getElementById("ticks");
+const marker=document.getElementById("marker");
+const dot=document.getElementById("dot");
+const value=document.getElementById("value");
+
+const ranges=[
+ {a:0,b:10,s:1},
+ {a:0,b:20,s:2},
+ {a:0,b:100,s:10},
+ {a:0,b:1000,s:100},
+ {a:0,b:10000,s:1000},
+ {a:0,b:100000,s:10000},
+ {a:3000,b:7000,s:500},
+ {a:25000,b:35000,s:1000},
+ {a:48000,b:52000,s:500}
+];
+
+const fmt=n=>n.toLocaleString("de-DE");
+
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+function neu(){
+  value.style.visibility="hidden";
+  ticks.innerHTML="";
+  const r=ranges[randInt(0,ranges.length-1)];
+  const n=(r.b-r.a)/r.s;
+
+  for(let i=0;i<=n;i++){
+    const x=100+i*(800/n);
+    ticks.innerHTML+=`<line x1="${x}" y1="138" x2="${x}" y2="162" stroke="white" stroke-width="3"/>`;
+    if(i===0||i===n){
+      ticks.innerHTML+=`<text x="${x}" y="195" text-anchor="middle">${fmt(i===0?r.a:r.b)}</text>`;
+    }
+  }
+
+  // Lösung bewusst auf einer ganzen Zahl wählen!
+  const solution=randInt(r.a,r.b);
+  value.textContent=fmt(solution);
+
+  const pos=(solution-r.a)/(r.b-r.a);
+  const x=100+800*pos;
+
+  marker.setAttribute("x1",x);
+  marker.setAttribute("x2",x);
+  dot.setAttribute("cx",x);
+}
+
+show.onclick=()=>value.style.visibility="visible";
+next.onclick=neu;
+document.addEventListener("keydown",e=>{
+ if(e.code==="Enter") value.style.visibility="visible";
+ if(e.code==="Space"){e.preventDefault();neu();}
+});
+neu();
+</script>
+</body>
+</html>

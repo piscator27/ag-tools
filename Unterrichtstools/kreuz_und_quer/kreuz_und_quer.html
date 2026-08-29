@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kreuz und Quer</title>
+<style>
+  /* ============================================================
+     KREUZ UND QUER — digitale Fassung
+     Einzelne HTML-Datei, keine externen Abhängigkeiten.
+     ============================================================ */
+
+  :root{
+    --bg: #202020;
+    --bg-panel: #2a2a2a;
+    --bg-panel-2: #313131;
+    --bg-cell: #3a3a3a;
+    --bg-cell-hover: #454545;
+    --bg-header: #4a4a4a;
+    --text: #f2f2f2;
+    --text-dim: #a8a8a8;
+    --accent: #5b9bd5;
+    --accent-dark: #3d7cb8;
+    --green: #4caf7d;
+    --green-dark: #3a8a63;
+    --grey-miss: #4a4a4a;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 14px rgba(0,0,0,0.4);
+    font-size: 16px;
+  }
+
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body{
+    margin:0; padding:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  #app{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+  }
+
+  .wrap{
+    width: 100%;
+    max-width: 560px;
+  }
+
+  h1{
+    text-align: center;
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin: 4px 0 22px;
+  }
+
+  h1 span{ color: var(--accent); }
+
+  .panel{
+    background: var(--bg-panel);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .field{ margin-bottom: 18px; }
+  .field:last-child{ margin-bottom: 0; }
+
+  label.field-label{
+    display:block;
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  select, input[type="number"]{
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1.05rem;
+    background: var(--bg-panel-2);
+    border: 1px solid #444;
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    outline: none;
+  }
+
+  select:focus, input[type="number"]:focus{
+    border-color: var(--accent);
+  }
+
+  .radio-row{
+    display:flex;
+    gap: 10px;
+  }
+
+  .radio-opt{
+    flex:1;
+    background: var(--bg-panel-2);
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 12px 10px;
+    text-align:center;
+    cursor:pointer;
+    font-size: 0.95rem;
+    transition: border-color .15s, background .15s;
+  }
+
+  .radio-opt.active{
+    border-color: var(--accent);
+    background: #2f4a5e;
+  }
+
+  .custom-grid-input{
+    display:none;
+    margin-top: 14px;
+  }
+
+  .custom-grid-input.show{ display:block; }
+
+  .headers-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .headers-grid input{ text-align:center; padding: 10px 6px; }
+
+  .mini-label{
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin: 10px 0 6px;
+  }
+
+  button{
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    outline: none;
+  }
+
+  .btn-primary{
+    width: 100%;
+    padding: 16px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    background: var(--accent);
+    color: #10202b;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    transition: background .15s, transform .08s;
+  }
+
+  .btn-primary:active{ background: var(--accent-dark); transform: scale(0.98); }
+
+  .btn-secondary{
+    width: 100%;
+    padding: 14px;
+    font-size: 1.02rem;
+    font-weight: 600;
+    background: var(--bg-panel-2);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+    transition: background .15s, transform .08s;
+  }
+
+  .btn-secondary:active{ background: #3d3d3d; transform: scale(0.98); }
+
+  /* ---------- Spielbildschirm ---------- */
+
+  #gameScreen{ display:none; }
+  #gameScreen.show{ display:block; }
+  #settingsScreen.hide{ display:none; }
+
+  .current-number-panel{
+    text-align:center;
+    background: var(--bg-panel);
+    border-radius: var(--radius);
+    padding: 22px 10px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .current-number-label{
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .current-number{
+    font-size: 3.6rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .current-number.zoom{
+    animation: zoomIn .32s ease;
+  }
+
+  @keyframes zoomIn{
+    0%{ transform: scale(0.4); opacity: 0; }
+    70%{ transform: scale(1.12); opacity: 1; }
+    100%{ transform: scale(1); }
+  }
+
+  .remaining-label{
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 1rem;
+    margin-bottom: 18px;
+  }
+
+  .remaining-label b{ color: var(--text); }
+
+  .board-wrap{
+    display:flex;
+    justify-content:center;
+    margin-bottom: 18px;
+  }
+
+  .board{
+    display:grid;
+    grid-template-columns: minmax(58px,1fr) repeat(3, minmax(70px,1fr));
+    grid-template-rows: minmax(58px,1fr) repeat(3, minmax(70px,1fr));
+    gap: 6px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .board-corner{ /* leere Ecke oben links */ }
+
+  .board-header{
+    background: var(--bg-header);
+    border-radius: var(--radius-sm);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .board-header.col{ }
+  .board-header.row{ }
+
+  .cell{
+    background: var(--bg-cell);
+    border-radius: var(--radius-sm);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    transition: background .15s, transform .08s;
+    aspect-ratio: 1 / 1;
+  }
+
+  .cell.empty:active{ background: var(--bg-cell-hover); transform: scale(0.96); }
+  .cell.filled{ cursor: default; }
+
+  /* Zelle: diagonal geteilt in Zeilen-Treffer (oben links) und
+     Spalten-Treffer (unten rechts), damit die beiden separat
+     ausgewiesenen Werte (Zeilen / Spalten) nachvollziehbar bleiben. */
+  .cell.eval-row-hit.eval-col-hit{
+    background: var(--green);
+    color: #0d1f16;
+  }
+
+  .cell.eval-row-hit:not(.eval-col-hit){
+    background: linear-gradient(135deg, var(--green) 50%, var(--grey-miss) 50%);
+    color: var(--text);
+  }
+
+  .cell.eval-col-hit:not(.eval-row-hit){
+    background: linear-gradient(135deg, var(--grey-miss) 50%, var(--green) 50%);
+    color: var(--text);
+  }
+
+  .cell.eval-row-hit:not(.eval-col-hit),
+  .cell.eval-col-hit:not(.eval-row-hit){
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  }
+
+  .cell.wrong{
+    background: var(--grey-miss);
+  }
+
+  .cell.reveal{
+    animation: popIn .25s ease;
+  }
+
+  @keyframes popIn{
+    0%{ transform: scale(0.6); opacity: 0.3; }
+    100%{ transform: scale(1); opacity: 1; }
+  }
+
+  .eval-panel{
+    background: var(--bg-panel);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    display:none;
+  }
+
+  .eval-panel.show{ display:block; }
+
+  .eval-cols{
+    display:flex;
+    gap: 20px;
+    justify-content:center;
+    text-align:center;
+    margin-bottom: 16px;
+  }
+
+  .eval-col h3{
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin: 0 0 8px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+  }
+
+  .eval-col .val{
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .eval-total{
+    text-align:center;
+    padding-top: 14px;
+    border-top: 1px solid #3f3f3f;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .eval-total span{ font-size: 1rem; color: var(--text-dim); font-weight: 500; }
+
+  /* ---------- Statistik ---------- */
+
+  .stats-panel{
+    background: var(--bg-panel);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    display:flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .stat{
+    text-align:center;
+    flex:1;
+  }
+
+  .stat .num{
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .stat .lbl{
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ---------- Wasserzeichen ---------- */
+
+  .watermark{
+    position: fixed;
+    bottom: 10px;
+    right: 16px;
+    font-size: 0.85rem;
+    color: #4a4a4a;
+    font-weight: 700;
+    letter-spacing: 1px;
+    pointer-events:none;
+    user-select:none;
+  }
+
+  @media (max-width: 420px){
+    .current-number{ font-size: 2.8rem; }
+    .cell{ font-size: 1.3rem; }
+    .board-header{ font-size: 1.05rem; }
+    .eval-cols{ gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="wrap">
+    <h1>Kreuz <span>und</span> Quer</h1>
+
+    <!-- ================= EINSTELLUNGEN ================= -->
+    <div id="settingsScreen">
+
+      <div class="panel">
+        <div class="field">
+          <label class="field-label">Zahlenbereich</label>
+          <select id="rangeSelect">
+            <option value="6">1 – 6</option>
+            <option value="8">1 – 8</option>
+            <option value="10" selected>1 – 10</option>
+            <option value="12">1 – 12</option>
+            <option value="13">1 – 13</option>
+            <option value="custom">Benutzerdefiniert</option>
+          </select>
+        </div>
+
+        <div class="field" id="customRangeField" style="display:none;">
+          <label class="field-label">Größte Zahl</label>
+          <input type="number" id="customRangeInput" min="2" max="999" value="20">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Zeilen- und Spaltenzahlen</label>
+          <div class="radio-row">
+            <div class="radio-opt active" data-mode="random">zufällig erzeugen</div>
+            <div class="radio-opt" data-mode="manual">selbst eingeben</div>
+          </div>
+
+          <div class="custom-grid-input" id="manualHeaders">
+            <div class="mini-label">Spaltenzahlen (oben)</div>
+            <div class="headers-grid">
+              <input type="number" id="col0" placeholder="Sp. 1">
+              <input type="number" id="col1" placeholder="Sp. 2">
+              <input type="number" id="col2" placeholder="Sp. 3">
+            </div>
+            <div class="mini-label">Zeilenzahlen (links)</div>
+            <div class="headers-grid">
+              <input type="number" id="row0" placeholder="Zl. 1">
+              <input type="number" id="row1" placeholder="Zl. 2">
+              <input type="number" id="row2" placeholder="Zl. 3">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="startBtn">Neues Spiel</button>
+
+      <div class="stats-panel" id="statsPanel">
+        <div class="stat"><div class="num" id="statGames">0</div><div class="lbl">Spiele</div></div>
+        <div class="stat"><div class="num" id="statAvg">–</div><div class="lbl">Ø Punkte</div></div>
+        <div class="stat"><div class="num" id="statBest">–</div><div class="lbl">Bestleistung</div></div>
+      </div>
+    </div>
+
+    <!-- ================= SPIELBILDSCHIRM ================= -->
+    <div id="gameScreen">
+
+      <div class="current-number-panel" id="currentNumberPanel">
+        <div class="current-number-label">Aktuelle Zahl</div>
+        <div class="current-number" id="currentNumber">–</div>
+      </div>
+
+      <div class="remaining-label" id="remainingLabel">Noch <b>9</b> Zahlen</div>
+
+      <div class="board-wrap">
+        <div class="board" id="board"><!-- wird per JS befüllt --></div>
+      </div>
+
+      <div class="eval-panel" id="evalPanel">
+        <div class="legend-row" id="legendRow" style="display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:16px;font-size:0.85rem;color:var(--text-dim);">
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg, var(--green) 50%, var(--grey-miss) 50%);display:inline-block;"></span>Zeile trifft</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg, var(--grey-miss) 50%, var(--green) 50%);display:inline-block;"></span>Spalte trifft</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;border-radius:4px;background:var(--green);display:inline-block;"></span>beides</span>
+        </div>
+        <div class="eval-cols">
+          <div class="eval-col">
+            <h3>Zeilen</h3>
+            <div class="val" id="rowScores">– / – / –</div>
+          </div>
+          <div class="eval-col">
+            <h3>Spalten</h3>
+            <div class="val" id="colScores">– / – / –</div>
+          </div>
+        </div>
+        <div class="eval-total"><span>Gesamt</span><br><span id="totalScore" style="font-size:1.6rem;color:var(--accent);"></span> Punkte</div>
+      </div>
+
+      <button class="btn-primary" id="againBtn" style="display:none;">Noch einmal</button>
+      <button class="btn-secondary" id="backBtn">Einstellungen ändern</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="watermark">Fi</div>
+
+<script>
+/* ==================================================================
+   KREUZ UND QUER — Spiellogik
+   Sauber gekapselt, leicht erweiterbar.
+   ================================================================== */
+
+(function () {
+  "use strict";
+
+  /* ---------------- Konstanten ---------------- */
+
+  const STORAGE_KEY = "kreuzUndQuer_stats_v1";
+  const ROUND_SIZE = 9;              // Anzahl Felder / Würfe pro Runde
+  const GRID_SIZE = 3;               // 3x3 Spielfeld
+
+  /* ---------------- DOM-Referenzen ---------------- */
+
+  const el = {
+    settingsScreen: document.getElementById("settingsScreen"),
+    gameScreen: document.getElementById("gameScreen"),
+    rangeSelect: document.getElementById("rangeSelect"),
+    customRangeField: document.getElementById("customRangeField"),
+    customRangeInput: document.getElementById("customRangeInput"),
+    radioOpts: document.querySelectorAll(".radio-opt"),
+    manualHeaders: document.getElementById("manualHeaders"),
+    startBtn: document.getElementById("startBtn"),
+    againBtn: document.getElementById("againBtn"),
+    backBtn: document.getElementById("backBtn"),
+    currentNumber: document.getElementById("currentNumber"),
+    currentNumberPanel: document.getElementById("currentNumberPanel"),
+    remainingLabel: document.getElementById("remainingLabel"),
+    board: document.getElementById("board"),
+    evalPanel: document.getElementById("evalPanel"),
+    rowScores: document.getElementById("rowScores"),
+    colScores: document.getElementById("colScores"),
+    totalScore: document.getElementById("totalScore"),
+    statGames: document.getElementById("statGames"),
+    statAvg: document.getElementById("statAvg"),
+    statBest: document.getElementById("statBest"),
+  };
+
+  /* ---------------- Einstellungs-Status ---------------- */
+
+  const settings = {
+    maxNumber: 10,
+    headerMode: "random"   // "random" | "manual"
+  };
+
+  /* ---------------- Spiel-Status ---------------- */
+
+  let game = null;
+  /*
+    game = {
+      rowHeaders: [n,n,n],
+      colHeaders: [n,n,n],
+      sequence: [n x9],       // gewürfelte Zahlen in Reihenfolge
+      pointer: 0,             // Index der naechsten Zahl
+      cells: [ {value:null} x9 ],  // Belegung der 9 Felder (0..8, row-major)
+      finished: false
+    }
+  */
+
+  /* ================= Hilfsfunktionen ================= */
+
+  function randInt(min, max) {
+    // ganze Zahl inklusive min und max
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function isDivisor(a, b) {
+    // prueft ob a ein Teiler von b ist (a,b > 0)
+    if (a <= 0) return false;
+    return b % a === 0;
+  }
+
+  /* ================= Einstellungen: UI-Verhalten ================= */
+
+  el.rangeSelect.addEventListener("change", () => {
+    const isCustom = el.rangeSelect.value === "custom";
+    el.customRangeField.style.display = isCustom ? "block" : "none";
+  });
+
+  el.radioOpts.forEach(opt => {
+    opt.addEventListener("click", () => {
+      el.radioOpts.forEach(o => o.classList.remove("active"));
+      opt.classList.add("active");
+      settings.headerMode = opt.dataset.mode;
+      el.manualHeaders.classList.toggle("show", settings.headerMode === "manual");
+    });
+  });
+
+  function readSettingsFromUI() {
+    if (el.rangeSelect.value === "custom") {
+      const v = parseInt(el.customRangeInput.value, 10);
+      settings.maxNumber = (v && v >= 2) ? v : 20;
+    } else {
+      settings.maxNumber = parseInt(el.rangeSelect.value, 10);
+    }
+  }
+
+  function readManualHeaders() {
+    const ids = ["row0", "row1", "row2", "col0", "col1", "col2"];
+    const vals = {};
+    for (const id of ids) {
+      const raw = parseInt(document.getElementById(id).value, 10);
+      vals[id] = (raw && raw > 0) ? raw : randInt(2, settings.maxNumber * 4);
+    }
+    return {
+      rowHeaders: [vals.row0, vals.row1, vals.row2],
+      colHeaders: [vals.col0, vals.col1, vals.col2]
+    };
+  }
+
+  function generateRandomHeaders() {
+    // Zeilen-/Spaltenzahlen zufällig, deutlich größer als der Wurfbereich,
+    // damit sinnvolle Teiler-Entscheidungen möglich sind.
+    const lo = Math.max(6, settings.maxNumber);
+    const hi = settings.maxNumber * 6;
+    const headers = [];
+    for (let i = 0; i < 6; i++) headers.push(randInt(lo, hi));
+    return {
+      rowHeaders: headers.slice(0, 3),
+      colHeaders: headers.slice(3, 6)
+    };
+  }
+
+  /* ================= Spiel starten ================= */
+
+  el.startBtn.addEventListener("click", () => {
+    readSettingsFromUI();
+    startNewGame();
+  });
+
+  el.againBtn.addEventListener("click", () => {
+    // Einstellungen bleiben erhalten -> gleiche settings, neue Zahlen
+    startNewGame();
+  });
+
+  el.backBtn.addEventListener("click", () => {
+    el.gameScreen.classList.remove("show");
+    el.settingsScreen.classList.remove("hide");
+  });
+
+  function startNewGame() {
+    const headers = settings.headerMode === "manual"
+      ? readManualHeaders()
+      : generateRandomHeaders();
+
+    const sequence = [];
+    for (let i = 0; i < ROUND_SIZE; i++) {
+      sequence.push(randInt(1, settings.maxNumber));
+    }
+
+    const cells = [];
+    for (let i = 0; i < ROUND_SIZE; i++) cells.push({ value: null });
+
+    game = {
+      rowHeaders: headers.rowHeaders,
+      colHeaders: headers.colHeaders,
+      sequence: sequence,
+      pointer: 0,
+      cells: cells,
+      finished: false
+    };
+
+    el.settingsScreen.classList.add("hide");
+    el.gameScreen.classList.add("show");
+    el.evalPanel.classList.remove("show");
+    el.againBtn.style.display = "none";
+
+    renderBoard();
+    renderCurrentNumber();
+  }
+
+  /* ================= Board rendern ================= */
+
+  function renderBoard() {
+    el.board.innerHTML = "";
+
+    // Zeile 0: leere Ecke + 3 Spaltenköpfe
+    const corner = document.createElement("div");
+    corner.className = "board-corner";
+    el.board.appendChild(corner);
+
+    for (let c = 0; c < GRID_SIZE; c++) {
+      const h = document.createElement("div");
+      h.className = "board-header col";
+      h.textContent = game.colHeaders[c];
+      el.board.appendChild(h);
+    }
+
+    // Zeilen 1..3: Zeilenkopf + 3 Zellen
+    for (let r = 0; r < GRID_SIZE; r++) {
+      const rh = document.createElement("div");
+      rh.className = "board-header row";
+      rh.textContent = game.rowHeaders[r];
+      el.board.appendChild(rh);
+
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const idx = r * GRID_SIZE + c;
+        const cellData = game.cells[idx];
+        const cellEl = document.createElement("div");
+        cellEl.className = "cell " + (cellData.value === null ? "empty" : "filled");
+        cellEl.dataset.index = idx;
+        cellEl.textContent = cellData.value === null ? "" : cellData.value;
+
+        if (cellData.value === null && !game.finished) {
+          cellEl.addEventListener("click", onCellClick);
+        }
+        el.board.appendChild(cellEl);
+      }
+    }
+  }
+
+  function renderCurrentNumber() {
+    if (game.pointer >= ROUND_SIZE) {
+      el.currentNumber.textContent = "✓";
+      el.remainingLabel.innerHTML = "Alle Zahlen platziert";
+      return;
+    }
+    const num = game.sequence[game.pointer];
+    el.currentNumber.textContent = num;
+    el.currentNumber.classList.remove("zoom");
+    // Reflow erzwingen, damit die Animation erneut abspielt
+    void el.currentNumber.offsetWidth;
+    el.currentNumber.classList.add("zoom");
+
+    const remaining = ROUND_SIZE - game.pointer;
+    el.remainingLabel.innerHTML = "Noch <b>" + remaining + "</b> " + (remaining === 1 ? "Zahl" : "Zahlen");
+  }
+
+  /* ================= Zelle anklicken ================= */
+
+  function onCellClick(ev) {
+    if (game.finished) return;
+    const idx = parseInt(ev.currentTarget.dataset.index, 10);
+    if (game.cells[idx].value !== null) return;       // bereits belegt
+    if (game.pointer >= ROUND_SIZE) return;            // keine Zahlen mehr
+
+    const num = game.sequence[game.pointer];
+    game.cells[idx].value = num;
+    game.pointer++;
+
+    renderBoard();
+    renderCurrentNumber();
+
+    if (game.pointer >= ROUND_SIZE) {
+      // alle Felder gefuellt -> automatische Auswertung
+      game.finished = true;
+      setTimeout(evaluateGame, 350);
+    }
+  }
+
+  /* ================= Auswertung ================= */
+
+  function evaluateGame() {
+    const rowScores = [0, 0, 0];
+    const colScores = [0, 0, 0];
+    const hitMatrix = [];   // true/false pro Zelle: zaehlt fuer Zeile ODER Spalte
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const idx = r * GRID_SIZE + c;
+        const val = game.cells[idx].value;
+        const hitsRow = isDivisor(val, game.rowHeaders[r]);
+        const hitsCol = isDivisor(val, game.colHeaders[c]);
+
+        if (hitsRow) rowScores[r]++;
+        if (hitsCol) colScores[c]++;
+
+        hitMatrix[idx] = { hitsRow, hitsCol, hit: (hitsRow || hitsCol) };
+      }
+    }
+
+    const total = rowScores.reduce((a, b) => a + b, 0) + colScores.reduce((a, b) => a + b, 0);
+
+    // Zellen einfaerben, nacheinander (kleine Verzoegerung pro Zelle)
+    const cellEls = el.board.querySelectorAll(".cell");
+    let delay = 0;
+    cellEls.forEach(cellEl => {
+      const idx = parseInt(cellEl.dataset.index, 10);
+      const info = hitMatrix[idx];
+      setTimeout(() => {
+        cellEl.classList.add("reveal");
+        if (info.hitsRow) cellEl.classList.add("eval-row-hit");
+        if (info.hitsCol) cellEl.classList.add("eval-col-hit");
+        if (!info.hitsRow && !info.hitsCol) cellEl.classList.add("wrong");
+      }, delay);
+      delay += 80;
+    });
+
+    // Zusammenfassung anzeigen
+    setTimeout(() => {
+      el.rowScores.textContent = rowScores.join(" / ");
+      el.colScores.textContent = colScores.join(" / ");
+      el.totalScore.textContent = total;
+      el.evalPanel.classList.add("show");
+      el.againBtn.style.display = "block";
+      el.remainingLabel.innerHTML = "Runde beendet";
+    }, delay + 150);
+
+    saveResult(total);
+  }
+
+  /* ================= Statistik (localStorage) ================= */
+
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { games: 0, totalScore: 0, best: 0 };
+      const parsed = JSON.parse(raw);
+      return {
+        games: parsed.games || 0,
+        totalScore: parsed.totalScore || 0,
+        best: parsed.best || 0
+      };
+    } catch (e) {
+      return { games: 0, totalScore: 0, best: 0 };
+    }
+  }
+
+  function saveResult(score) {
+    const stats = loadStats();
+    stats.games++;
+    stats.totalScore += score;
+    stats.best = Math.max(stats.best, score);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+    } catch (e) {
+      // localStorage evtl. nicht verfuegbar -> Statistik geht fuer diese Sitzung verloren
+    }
+    renderStats();
+  }
+
+  function renderStats() {
+    const stats = loadStats();
+    el.statGames.textContent = stats.games;
+    el.statAvg.textContent = stats.games > 0 ? (stats.totalScore / stats.games).toFixed(1) : "–";
+    el.statBest.textContent = stats.games > 0 ? stats.best : "–";
+  }
+
+  /* ================= Initialisierung ================= */
+
+  renderStats();
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Einmaleins-Selbsttest – Version 0.1</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#f8f8f8;margin:30px}
+.card{background:#fff;max-width:700px;margin:auto;padding:20px;border-radius:8px;
+box-shadow:0 0 8px rgba(0,0,0,.15)}
+h1{margin-top:0}
+label{display:inline-block;margin:6px 10px 6px 0}
+input[type=number]{width:70px;font-size:18px;text-align:center}
+.answer{font-size:24px;width:100px;text-align:center}
+button{font-size:18px;padding:8px 18px;margin-top:18px}
+#task{font-size:36px;margin:25px 0}
+.hidden{display:none}
+#info{font-size:20px;color:#444}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Einmaleins‑Selbsttest</h1>
+<p>Überprüfe, wie sicher du das Einmaleins bereits beherrschst.</p>
+
+<div id="setup">
+<label>Kleinste Reihe <input id="von" type="number" min="2" max="20" value="8"></label>
+<label>Größte Reihe <input id="bis" type="number" min="2" max="20" value="14"></label><br>
+<button onclick="startTest()">Start</button>
+</div>
+
+<div id="quiz" class="hidden">
+<div id="info"></div>
+<div id="task"></div>
+<div id="forwardBox">
+<input id="ans1" class="answer" type="number" autocomplete="off">
+</div>
+<div id="backwardBox" class="hidden">
+<input id="fac1" class="answer" type="number"> ·
+<input id="fac2" class="answer" type="number">
+</div>
+<button id="nextBtn" onclick="nextTask()">Weiter</button>
+</div>
+</div>
+
+<script>
+let pool=[],forward=[],backward=[];
+let index=0,phase="forward";
+let answers=[];
+
+function weightedChoice(list){
+ while(true){
+   let a=list[Math.floor(Math.random()*list.length)];
+   let row=a.b;
+   if((row===10||row===11)&&Math.random()<0.5) continue;
+   return a;
+ }
+}
+
+function buildPool(von,bis){
+ pool=[];
+ for(let b=von;b<=bis;b++){
+   for(let a=2;a<=10;a++){
+     pool.push({a:a,b:b,prod:a*b});
+   }
+ }
+}
+
+function createSets(){
+ forward=[];
+ while(forward.length<10){
+   let c=weightedChoice(pool);
+   if(!forward.some(x=>x.a===c.a&&x.b===c.b)) forward.push(c);
+ }
+ backward=[];
+ while(backward.length<10){
+   let c=weightedChoice(pool);
+   if(!backward.some(x=>x.prod===c.prod)) backward.push(c);
+ }
+}
+
+function startTest(){
+ let von=+document.getElementById("von").value;
+ let bis=+document.getElementById("bis").value;
+ if(von>bis){alert("Ungültiger Reihenbereich.");return;}
+ buildPool(von,bis);
+ createSets();
+ document.getElementById("setup").classList.add("hidden");
+ document.getElementById("quiz").classList.remove("hidden");
+ index=0; phase="forward"; answers=[];
+ showTask();
+}
+
+function showTask(){
+ if(phase==="forward"){
+   document.getElementById("info").textContent="Vorwärts – Aufgabe "+(index+1)+" von 10";
+   let t=forward[index];
+   document.getElementById("task").textContent=t.a+" · "+t.b+" = ?";
+   document.getElementById("forwardBox").classList.remove("hidden");
+   document.getElementById("backwardBox").classList.add("hidden");
+   document.getElementById("ans1").value="";
+   document.getElementById("ans1").focus();
+ }else{
+   document.getElementById("info").textContent="Rückwärts – Aufgabe "+(index+1)+" von 10";
+   let t=backward[index];
+   document.getElementById("task").textContent=t.prod+" = ?";
+   document.getElementById("forwardBox").classList.add("hidden");
+   document.getElementById("backwardBox").classList.remove("hidden");
+   fac1.value=""; fac2.value="";
+   fac1.focus();
+ }
+}
+
+function auswerten(){
+
+    let richtig = 0;
+    let fehler = "";
+
+    // ---------- Vorwärts ----------
+
+    for(let i=0;i<10;i++){
+
+        let aufgabe = forward[i];
+        let antwort = Number(answers[i].eingabe);
+
+        if(antwort === aufgabe.prod){
+
+            richtig++;
+
+        }else{
+
+            fehler += "<h3>Vorwärts</h3>";
+
+            fehler +=
+                aufgabe.a+" · "+aufgabe.b+
+                " = "+
+                (answers[i].eingabe==="" ? "—" : answers[i].eingabe)+
+                "<br>Richtig: "+
+                aufgabe.prod+
+                "<br><br>";
+
+        }
+
+    }
+
+    // ---------- Rückwärts ----------
+
+    let titelRueck = false;
+
+    for(let i=0;i<10;i++){
+
+        let aufgabe = backward[i];
+        let antwort = answers[10+i];
+
+        let a = Number(antwort.a);
+        let b = Number(antwort.b);
+
+        if (a * b === aufgabe.prod) {
+    richtig++;
+}else{
+
+            if(!titelRueck){
+                fehler += "<h3>Rückwärts</h3>";
+                titelRueck = true;
+            }
+
+            fehler +=
+                aufgabe.prod+
+                " = "+
+                (antwort.a==="" ? "—" : antwort.a)+
+                " · "+
+                (antwort.b==="" ? "—" : antwort.b)+
+                "<br>Richtig: "+
+                aufgabe.a+" · "+aufgabe.b+
+                " oder "+
+                aufgabe.b+" · "+aufgabe.a+
+                "<br><br>";
+
+        }
+
+    }
+
+    document.querySelector(".card").innerHTML = `
+        <h1>Auswertung</h1>
+
+        <h2>${richtig} von 20 Aufgaben richtig.</h2>
+
+        ${fehler==="" ? "<p>Keine Fehler.</p>" : fehler}
+
+        <button onclick="location.reload()">
+            Neuer Selbsttest
+        </button>
+    `;
+
+}
+
+function nextTask(){
+ if(phase==="forward"){
+   answers.push({
+    typ: "vor",
+    eingabe: ans1.value.trim()
+});
+   index++;
+   if(index===10){phase="backward";index=0;}
+   showTask();
+ }else{
+  answers.push({
+    typ: "rueck",
+    a: fac1.value.trim(),
+b: fac2.value.trim()
+});
+   index++;
+   if(index===10){
+      auswerten();
+      return;
+   }
+   showTask();
+ }
+}
+</script>
+<div style="position:fixed; bottom:10px; right:15px; color:#999; font-size:12px; font-family:Arial,Helvetica,sans-serif;">
+    © Fi
+</div>
+</body>
+</html>

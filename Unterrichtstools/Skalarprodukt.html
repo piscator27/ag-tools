@@ -1,0 +1,954 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skalarprodukt – dynamisches Tafelbild</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    .app {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    .canvas-area {
+      position: relative;
+      width: 72%;
+      height: 100%;
+      background: #000;
+      border-right: 2px solid #222;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      cursor: default;
+      touch-action: none;
+    }
+
+    .info {
+      position: absolute;
+      left: 24px;
+      bottom: 20px;
+      color: #aaa;
+      font-size: 18px;
+      line-height: 1.4;
+      pointer-events: none;
+    }
+
+    .fi {
+      position: absolute;
+      right: 22px;
+      bottom: 16px;
+      color: #555;
+      font-size: 26px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .panel {
+      width: 28%;
+      height: 100%;
+      padding: 24px 28px;
+      background: #050505;
+      overflow-y: auto;
+      font-size: 21px;
+      line-height: 1.35;
+    }
+
+    h1 {
+      margin: 0 0 18px 0;
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    h2 {
+      margin: 26px 0 10px 0;
+      font-size: 23px;
+      color: #ddd;
+      border-bottom: 1px solid #333;
+      padding-bottom: 4px;
+    }
+
+    .vector-row {
+      display: flex;
+      gap: 34px;
+      align-items: flex-start;
+      margin-top: 10px;
+    }
+
+    .vector-block {
+      min-width: 110px;
+    }
+
+    .vector-name {
+      font-size: 25px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    .green {
+      color: #39d353;
+    }
+
+    .orange {
+      color: #ff9f1c;
+    }
+
+    .paren-vector {
+      display: inline-flex;
+      align-items: center;
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .paren {
+      font-size: 64px;
+      font-weight: 300;
+      line-height: 0.9;
+      color: #fff;
+    }
+
+    .vector-values {
+      display: inline-grid;
+      grid-template-rows: auto auto;
+      gap: 4px;
+      min-width: 56px;
+      text-align: right;
+      font-size: 29px;
+      line-height: 1.1;
+      padding: 4px 6px;
+    }
+
+    .formula {
+      margin: 8px 0;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 21px;
+    }
+
+    .result {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .math-line {
+      margin: 6px 0;
+      white-space: nowrap;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #151515;
+      color: #fff;
+      border: 2px solid #555;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 19px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #252525;
+      border-color: #999;
+    }
+
+    button:active {
+      background: #333;
+    }
+
+    sub {
+      font-size: 0.7em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="canvas-area">
+      <canvas id="canvas"></canvas>
+<div class="fi">Fi</div>
+    </div>
+
+    <aside class="panel">
+      <h1>Skalarprodukt</h1>
+
+      <h2>Vektoren</h2>
+
+      <div class="vector-row">
+        <div class="vector-block">
+          <div class="vector-name green">a⃗</div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values">
+              <span id="a1">0</span>
+              <span id="a2">0</span>
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+
+        <div class="vector-block">
+          <div class="vector-name orange">b⃗</div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values">
+              <span id="b1">0</span>
+              <span id="b2">0</span>
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+      </div>
+
+      <h2>Beträge</h2>
+
+      <div class="formula">
+        |a⃗| = √(<span id="a1sq">0</span> + <span id="a2sq">0</span>)
+        = <span id="lenA" class="result">0</span>
+      </div>
+
+      <div class="formula">
+        |b⃗| = √(<span id="b1sq">0</span> + <span id="b2sq">0</span>)
+        = <span id="lenB" class="result">0</span>
+      </div>
+
+      <h2>Winkel</h2>
+
+      <div class="formula">
+        α = <span id="angle" class="result">0</span>°
+      </div>
+
+      <div class="button-row">
+        <button id="set0">0° einstellen</button>
+        <button id="set90">90° einstellen</button>
+      </div>
+
+      <h2>Modus</h2>
+
+      <div style="margin-top:10px;font-size:19px;line-height:1.8">
+        <label><input type="radio" name="mode" value="free" checked> Freies Ziehen</label><br>
+        <label><input type="radio" name="mode" value="angle"> Nur Winkel ändern</label><br>
+        <label><input type="radio" name="mode" value="length"> Nur Länge ändern</label>
+      </div>
+
+      <h2>Geometrischer Weg</h2>
+
+      <div class="math-line">
+        a⃗ · b⃗ = |a⃗| · |b⃗| · cos(α)
+      </div>
+
+      <div class="math-line">
+        = <span id="geoLenA">0</span>
+        ·
+        <span id="geoLenB">0</span>
+        · cos(<span id="geoAngle">0</span>°)
+      </div>
+
+      <div class="math-line">
+        = <span id="geoProductLengths">0</span>
+        ·
+        <span id="cosAngle">0</span>
+      </div>
+
+      <div class="math-line">
+        = <span id="geoResult" class="result">0</span>
+      </div>
+
+      <h2>Algebraischer Weg</h2>
+
+      <div class="math-line">
+        a⃗ · b⃗ = a<sub>1</sub>b<sub>1</sub> + a<sub>2</sub>b<sub>2</sub>
+      </div>
+
+      <div class="math-line">
+        = <span id="algA1">0</span> · <span id="algB1">0</span>
+        +
+        <span id="algA2">0</span> · <span id="algB2">0</span>
+      </div>
+
+      <div class="math-line">
+        = <span id="algPart1">0</span> <span id="algPart2">+ 0</span>
+      </div>
+
+      <div class="math-line">
+        = <span id="algResult" class="result">0</span>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const colors = {
+      background: "#000000",
+      grid: "#222222",
+      axis: "#ffffff",
+      labels: "#cccccc",
+      green: "#39d353",
+      orange: "#ff9f1c",
+      point: "#ffffff",
+      angle: "#dddddd"
+    };
+
+    let width = 0;
+    let height = 0;
+    let scale = 60;
+    let origin = { x: 0, y: 0 };
+
+    const start = { x: -2, y: -1 };
+
+    let vectorA = { x: 4, y: 2 };
+    let vectorB = { x: 2, y: 4 };
+
+    let dragging = null;
+    let dragMode = "free";
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+
+      width = rect.width;
+      height = rect.height;
+
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+
+      ctx.setTransform(
+        window.devicePixelRatio,
+        0,
+        0,
+        window.devicePixelRatio,
+        0,
+        0
+      );
+
+      origin = {
+        x: width * 0.48,
+        y: height * 0.55
+      };
+
+      draw();
+    }
+
+    function toScreen(point) {
+      return {
+        x: origin.x + point.x * scale,
+        y: origin.y - point.y * scale
+      };
+    }
+
+    function toMath(point) {
+      return {
+        x: (point.x - origin.x) / scale,
+        y: (origin.y - point.y) / scale
+      };
+    }
+
+    function vectorEnd(vector) {
+      return {
+        x: start.x + vector.x,
+        y: start.y + vector.y
+      };
+    }
+
+    function format(value, digits = 2) {
+      if (Math.abs(value) < 0.0000001) value = 0;
+      return Number(value).toFixed(digits).replace(".", ",");
+    }
+
+    function formatShort(value) {
+      if (Math.abs(value) < 0.0000001) value = 0;
+
+      const rounded = Math.round(value * 100) / 100;
+
+      if (Number.isInteger(rounded)) {
+        return String(rounded).replace(".", ",");
+      }
+
+      return String(rounded).replace(".", ",");
+    }
+
+
+    function factor(value) {
+      const s = formatShort(value);
+      return value < 0 ? "(" + s + ")" : s;
+    }
+
+    function length(v) {
+      return Math.sqrt(v.x * v.x + v.y * v.y);
+    }
+
+    function dot(a, b) {
+      return a.x * b.x + a.y * b.y;
+    }
+
+    function angleBetween(a, b) {
+      const lenA = length(a);
+      const lenB = length(b);
+
+      if (lenA === 0 || lenB === 0) {
+        return null;
+      }
+
+      let cosValue = dot(a, b) / (lenA * lenB);
+      cosValue = Math.max(-1, Math.min(1, cosValue));
+
+      return Math.acos(cosValue) * 180 / Math.PI;
+    }
+
+    function clear() {
+      ctx.fillStyle = colors.background;
+      ctx.fillRect(0, 0, width, height);
+    }
+
+    function drawGrid() {
+      ctx.save();
+
+      ctx.strokeStyle = colors.grid;
+      ctx.lineWidth = 1;
+
+      const minX = Math.floor(-origin.x / scale) - 1;
+      const maxX = Math.ceil((width - origin.x) / scale) + 1;
+      const minY = Math.floor(-(height - origin.y) / scale) - 1;
+      const maxY = Math.ceil(origin.y / scale) + 1;
+
+      for (let x = minX; x <= maxX; x++) {
+        const sx = origin.x + x * scale;
+        ctx.beginPath();
+        ctx.moveTo(sx, 0);
+        ctx.lineTo(sx, height);
+        ctx.stroke();
+      }
+
+      for (let y = minY; y <= maxY; y++) {
+        const sy = origin.y - y * scale;
+        ctx.beginPath();
+        ctx.moveTo(0, sy);
+        ctx.lineTo(width, sy);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawAxes() {
+      ctx.save();
+
+      ctx.strokeStyle = colors.axis;
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.moveTo(0, origin.y);
+      ctx.lineTo(width, origin.y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(origin.x, 0);
+      ctx.lineTo(origin.x, height);
+      ctx.stroke();
+
+      drawArrowHead(
+        { x: width - 18, y: origin.y },
+        { x: width - 52, y: origin.y },
+        colors.axis,
+        12
+      );
+
+      drawArrowHead(
+        { x: origin.x, y: 18 },
+        { x: origin.x, y: 52 },
+        colors.axis,
+        12
+      );
+
+      ctx.fillStyle = colors.labels;
+      ctx.font = "20px Arial";
+      ctx.fillText("x", width - 36, origin.y - 12);
+      ctx.fillText("y", origin.x + 12, 30);
+
+      ctx.restore();
+    }
+
+    function drawAxisNumbers() {
+      ctx.save();
+
+      ctx.fillStyle = colors.labels;
+      ctx.font = "15px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+
+      const minX = Math.floor(-origin.x / scale);
+      const maxX = Math.ceil((width - origin.x) / scale);
+
+      for (let x = minX; x <= maxX; x++) {
+        if (x === 0) continue;
+        const sx = origin.x + x * scale;
+        ctx.fillText(String(x), sx, origin.y + 7);
+      }
+
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+
+      const minY = Math.floor(-(height - origin.y) / scale);
+      const maxY = Math.ceil(origin.y / scale);
+
+      for (let y = minY; y <= maxY; y++) {
+        if (y === 0) continue;
+        const sy = origin.y - y * scale;
+        ctx.fillText(String(y), origin.x - 8, sy);
+      }
+
+      ctx.textAlign = "right";
+      ctx.textBaseline = "top";
+      ctx.fillText("0", origin.x - 8, origin.y + 7);
+
+      ctx.restore();
+    }
+
+    function drawArrowHead(tip, tail, color, size = 16) {
+      const angle = Math.atan2(tip.y - tail.y, tip.x - tail.x);
+
+      ctx.save();
+      ctx.fillStyle = color;
+
+      ctx.beginPath();
+      ctx.moveTo(tip.x, tip.y);
+      ctx.lineTo(
+        tip.x - size * Math.cos(angle - Math.PI / 6),
+        tip.y - size * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        tip.x - size * Math.cos(angle + Math.PI / 6),
+        tip.y - size * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawVector(vector, color, label) {
+      const startScreen = toScreen(start);
+      const endScreen = toScreen(vectorEnd(vector));
+
+      ctx.save();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
+
+      ctx.beginPath();
+      ctx.moveTo(startScreen.x, startScreen.y);
+      ctx.lineTo(endScreen.x, endScreen.y);
+      ctx.stroke();
+
+      drawArrowHead(endScreen, startScreen, color, 18);
+
+      ctx.fillStyle = color;
+      ctx.font = "bold 28px Arial";
+
+      const labelOffsetX = vector.x >= 0 ? 12 : -36;
+      const labelOffsetY = vector.y >= 0 ? -12 : 32;
+
+      ctx.fillText(label, endScreen.x + labelOffsetX, endScreen.y + labelOffsetY);
+
+      ctx.restore();
+    }
+
+    function drawStartPoint() {
+      const p = toScreen(start);
+
+      ctx.save();
+
+      ctx.fillStyle = colors.point;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawEndpoint(vector, color) {
+      const p = toScreen(vectorEnd(vector));
+
+      ctx.save();
+
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawProjectionHint() {
+      const startScreen = toScreen(start);
+      const endA = toScreen(vectorEnd(vectorA));
+      const endB = toScreen(vectorEnd(vectorB));
+
+      ctx.save();
+
+      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 1.5;
+
+      ctx.strokeStyle = "rgba(57, 211, 83, 0.45)";
+      ctx.beginPath();
+      ctx.moveTo(startScreen.x, endA.y);
+      ctx.lineTo(endA.x, endA.y);
+      ctx.lineTo(endA.x, startScreen.y);
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(255, 159, 28, 0.45)";
+      ctx.beginPath();
+      ctx.moveTo(startScreen.x, endB.y);
+      ctx.lineTo(endB.x, endB.y);
+      ctx.lineTo(endB.x, startScreen.y);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawAngleArc() {
+      const lenA = length(vectorA);
+      const lenB = length(vectorB);
+
+      if (lenA < 0.15 || lenB < 0.15) {
+        return;
+      }
+
+      const startScreen = toScreen(start);
+
+      const angleA = Math.atan2(vectorA.y, vectorA.x);
+      const angleB = Math.atan2(vectorB.y, vectorB.x);
+
+      let delta = angleB - angleA;
+
+      while (delta > Math.PI) {
+        delta -= 2 * Math.PI;
+      }
+
+      while (delta < -Math.PI) {
+        delta += 2 * Math.PI;
+      }
+
+      const radius = Math.min(
+        85,
+        Math.max(42, Math.min(lenA, lenB) * scale * 0.33)
+      );
+
+      const steps = 60;
+
+      ctx.save();
+
+      ctx.strokeStyle = colors.angle;
+      ctx.lineWidth = 4;
+      ctx.lineCap = "round";
+
+      ctx.beginPath();
+
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const currentAngle = angleA + delta * t;
+
+        const point = {
+          x: start.x + Math.cos(currentAngle) * radius / scale,
+          y: start.y + Math.sin(currentAngle) * radius / scale
+        };
+
+        const screenPoint = toScreen(point);
+
+        if (i === 0) {
+          ctx.moveTo(screenPoint.x, screenPoint.y);
+        } else {
+          ctx.lineTo(screenPoint.x, screenPoint.y);
+        }
+      }
+
+      ctx.stroke();
+
+      const labelAngle = angleA + delta * 0.5;
+      const labelRadius = radius + 26;
+
+      const labelPoint = {
+        x: start.x + Math.cos(labelAngle) * labelRadius / scale,
+        y: start.y + Math.sin(labelAngle) * labelRadius / scale
+      };
+
+      const labelScreen = toScreen(labelPoint);
+
+      ctx.fillStyle = colors.angle;
+      ctx.font = "bold 28px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("α", labelScreen.x, labelScreen.y);
+
+      ctx.restore();
+    }
+
+    function draw() {
+      clear();
+      drawGrid();
+      drawAxes();
+      drawAxisNumbers();
+      drawProjectionHint();
+
+      drawAngleArc();
+
+      drawVector(vectorA, colors.green, "a⃗");
+      drawVector(vectorB, colors.orange, "b⃗");
+
+      drawStartPoint();
+      drawEndpoint(vectorA, colors.green);
+      drawEndpoint(vectorB, colors.orange);
+
+      updatePanel();
+    }
+
+    function updatePanel() {
+      const a = vectorA;
+      const b = vectorB;
+
+      const lenA = length(a);
+      const lenB = length(b);
+      const dotProduct = dot(a, b);
+      const angle = angleBetween(a, b);
+
+      const cosValue = angle === null ? null : Math.cos(angle * Math.PI / 180);
+      const productLengths = lenA * lenB;
+
+      const a1sq = a.x * a.x;
+      const a2sq = a.y * a.y;
+      const b1sq = b.x * b.x;
+      const b2sq = b.y * b.y;
+
+      const algPart1 = a.x * b.x;
+      const algPart2 = a.y * b.y;
+
+      document.getElementById("a1").textContent = formatShort(a.x);
+      document.getElementById("a2").textContent = formatShort(a.y);
+      document.getElementById("b1").textContent = formatShort(b.x);
+      document.getElementById("b2").textContent = formatShort(b.y);
+
+      document.getElementById("a1sq").textContent = formatShort(a1sq);
+      document.getElementById("a2sq").textContent = formatShort(a2sq);
+      document.getElementById("b1sq").textContent = formatShort(b1sq);
+      document.getElementById("b2sq").textContent = formatShort(b2sq);
+
+      document.getElementById("lenA").textContent = format(lenA);
+      document.getElementById("lenB").textContent = format(lenB);
+
+      document.getElementById("angle").textContent =
+        angle === null ? "nicht definiert" : format(angle);
+
+      document.getElementById("geoLenA").textContent = format(lenA);
+      document.getElementById("geoLenB").textContent = format(lenB);
+      document.getElementById("geoAngle").textContent =
+        angle === null ? "–" : format(angle);
+
+      document.getElementById("geoProductLengths").textContent = format(productLengths);
+      document.getElementById("cosAngle").textContent =
+        cosValue === null ? "–" : factor(cosValue);
+
+      document.getElementById("geoResult").textContent =
+        angle === null ? "nicht definiert" : format(productLengths * cosValue);
+
+      document.getElementById("algA1").textContent = factor(a.x);
+      document.getElementById("algB1").textContent = factor(b.x);
+      document.getElementById("algA2").textContent = factor(a.y);
+      document.getElementById("algB2").textContent = factor(b.y);
+
+      document.getElementById("algPart1").textContent = formatShort(algPart1);
+      document.getElementById("algPart2").textContent =
+        algPart2 < 0
+          ? "− " + formatShort(Math.abs(algPart2))
+          : "+ " + formatShort(algPart2);
+      document.getElementById("algResult").textContent = format(dotProduct);
+    }
+
+    function getPointerPosition(event) {
+      const rect = canvas.getBoundingClientRect();
+
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+    }
+
+    function distance(p1, p2) {
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function hitTestEndpoint(pointer, vector) {
+      const endpoint = toScreen(vectorEnd(vector));
+      return distance(pointer, endpoint) < 36;
+    }
+
+    function detectVectorAtPointer(pointer) {
+      if (hitTestEndpoint(pointer, vectorA)) {
+        return "a";
+      }
+
+      if (hitTestEndpoint(pointer, vectorB)) {
+        return "b";
+      }
+
+      return null;
+    }
+
+    function setAngle(degrees) {
+      let lenA = length(vectorA);
+      let lenB = length(vectorB);
+
+      if (lenA < 0.001) {
+        vectorA = { x: 4, y: 2 };
+        lenA = length(vectorA);
+      }
+
+      if (lenB < 0.001) {
+        lenB = 4;
+      }
+
+      const unitA = {
+        x: vectorA.x / lenA,
+        y: vectorA.y / lenA
+      };
+
+      if (degrees === 0) {
+        vectorB = {
+          x: unitA.x * lenB,
+          y: unitA.y * lenB
+        };
+      }
+
+      if (degrees === 90) {
+        vectorB = {
+          x: -unitA.y * lenB,
+          y: unitA.x * lenB
+        };
+      }
+
+      draw();
+    }
+
+    canvas.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+
+      const pointer = getPointerPosition(event);
+      dragging = detectVectorAtPointer(pointer);
+
+      if (dragging) {
+        canvas.setPointerCapture(event.pointerId);
+        canvas.style.cursor = "grabbing";
+      }
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      event.preventDefault();
+
+      const pointer = getPointerPosition(event);
+
+      if (!dragging) {
+        const hoverVector = detectVectorAtPointer(pointer);
+        canvas.style.cursor = hoverVector ? "grab" : "default";
+        return;
+      }
+
+      const mathPoint = toMath(pointer);
+
+      let target = dragging==="a" ? vectorA : vectorB;
+
+      let newVector = {
+        x: mathPoint.x - start.x,
+        y: mathPoint.y - start.y
+      };
+
+      if(dragMode==="angle"){
+        const len=Math.hypot(target.x,target.y);
+        const ang=Math.atan2(newVector.y,newVector.x);
+        newVector={x:len*Math.cos(ang),y:len*Math.sin(ang)};
+      }else if(dragMode==="length"){
+        const ang=Math.atan2(target.y,target.x);
+        const len=Math.hypot(newVector.x,newVector.y);
+        newVector={x:len*Math.cos(ang),y:len*Math.sin(ang)};
+      }
+
+      if (dragging === "a") vectorA = newVector;
+      if (dragging === "b") vectorB = newVector;
+
+      draw();
+    });
+
+    canvas.addEventListener("pointerup", (event) => {
+      event.preventDefault();
+
+      dragging = null;
+      canvas.style.cursor = "default";
+
+      try {
+        canvas.releasePointerCapture(event.pointerId);
+      } catch (error) {
+        // Falls der Pointer nicht mehr erfasst ist, ist nichts weiter zu tun.
+      }
+    });
+
+    canvas.addEventListener("pointercancel", () => {
+      dragging = null;
+      canvas.style.cursor = "default";
+    });
+
+    canvas.addEventListener("pointerleave", () => {
+      if (!dragging) {
+        canvas.style.cursor = "default";
+      }
+    });
+
+    document.getElementById("set0").addEventListener("click", () => {
+      setAngle(0);
+    });
+
+    document.getElementById("set90").addEventListener("click", () => {
+      setAngle(90);
+    });
+
+
+    document.querySelectorAll('input[name="mode"]').forEach(r=>{
+      r.addEventListener("change",e=>dragMode=e.target.value);
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+
+    resizeCanvas();
+  </script>
+</body>
+</html>

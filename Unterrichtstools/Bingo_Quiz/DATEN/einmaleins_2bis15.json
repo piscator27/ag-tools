@@ -1,0 +1,1140 @@
+{
+  "meta": {
+    "titel": "Einmaleins 2er bis 15er Reihe",
+    "version": 1,
+    "kartenfeld": "antwort"
+  },
+  "eintraege": [
+    {
+      "id": 1,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 2"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "4"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 2,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 3"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "6"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 3,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "8"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 4,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "10"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 5,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "12"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 6,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "14"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 7,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "16"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 8,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "18"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 9,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "24"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 10,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "26"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 11,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "28"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 12,
+      "frage": {
+        "typ": "latex",
+        "text": "2 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "30"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 13,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 3"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "9"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 14,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "12"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 15,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "15"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 16,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "18"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 17,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "21"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 18,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "24"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 19,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "27"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 20,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "36"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 21,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "39"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 22,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "42"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 23,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "45"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 24,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "16"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 25,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "20"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 26,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "24"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 27,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "28"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 28,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "32"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 29,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "36"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 30,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 11"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "44"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 31,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "48"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 32,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "52"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 33,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "56"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 34,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "60"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 35,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "25"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 36,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "30"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 37,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "35"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 38,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "40"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 39,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "45"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 40,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 10"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "50"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 41,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "60"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 42,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "65"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 43,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "70"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 44,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "75"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 45,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "36"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 46,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "42"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 47,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "48"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 48,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "54"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 49,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 11"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "66"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 50,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "72"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 51,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "78"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 52,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "84"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 53,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "90"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 54,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "49"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 55,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "56"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 56,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "63"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 57,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 10"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "70"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 58,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "84"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 59,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "91"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 60,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "98"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 61,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "105"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 62,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "64"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 63,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "72"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 64,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 10"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "80"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 65,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "96"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 66,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "104"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 67,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "112"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 68,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "120"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 69,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "81"
+      },
+      "thema": "Einmaleins",
+      "niveau": 2
+    },
+    {
+      "id": 70,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 11"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "99"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 71,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "108"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 72,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "117"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 73,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "126"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 74,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "135"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 75,
+      "frage": {
+        "typ": "latex",
+        "text": "10 \\cdot 10"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "100"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 76,
+      "frage": {
+        "typ": "latex",
+        "text": "10 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "130"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 77,
+      "frage": {
+        "typ": "latex",
+        "text": "11 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "165"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 78,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "144"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 79,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "156"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 80,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "168"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 81,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "180"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 82,
+      "frage": {
+        "typ": "latex",
+        "text": "13 \\cdot 13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "169"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 83,
+      "frage": {
+        "typ": "latex",
+        "text": "13 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "182"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 84,
+      "frage": {
+        "typ": "latex",
+        "text": "13 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "195"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 85,
+      "frage": {
+        "typ": "latex",
+        "text": "14 \\cdot 14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "196"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 86,
+      "frage": {
+        "typ": "latex",
+        "text": "14 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "210"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    },
+    {
+      "id": 87,
+      "frage": {
+        "typ": "latex",
+        "text": "15 \\cdot 15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "225"
+      },
+      "thema": "Einmaleins",
+      "niveau": 3
+    }
+  ]
+}

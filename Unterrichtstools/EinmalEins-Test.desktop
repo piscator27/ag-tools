@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=Primfaktorzerlegung
+Comment=Eine Kurzbeschreibung dieser Anwendung
+Icon=/home/thomas/Programme/icons/Zahlenbuch_Beitragsbild_Einmaleins_Ausgabe_8-400x277.png
+Exec=google-chrome --app="file:/home/thomas/Projekte/EinmalEins/einmaleins.html"
+Terminal=true
+Actions=
+Categories=Education;
+Name[de_DE]=EinmalEins-Test

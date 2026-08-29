@@ -1,0 +1,1 @@
+{ name: "5d", schueler: ["Amelia", "Amélie", "Arthur", "Boje", "Emil", "Emmi", "Friedrich", "Huda", "Ida", "Jannis", "Johan", "Joulya", "Junis", "Lena", "Levi", "Louis", "Lulia", "Lykka", "Maila Joy", "Mathilda", "Mieke", "Milan", "Mykhailo", "Nora", "Samira", "Sila", "Susanna", "Tilda S", "Tilda M.", "Vladyslav", "Yara"] }
