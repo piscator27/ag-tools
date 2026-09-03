@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tastatur zeigen</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: #1a1a1a; color: #f0f0f0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  #buehne { height: 100%; display: flex; flex-direction: column;
+            padding: 14px 20px 12px; gap: 10px; }
+
+  /* ---------- Anzeigefeld ---------- */
+  #anzeige {
+    flex: 0 0 auto; background: #232323; border: 2px solid #333;
+    border-radius: 10px; padding: 10px 18px; min-height: 96px;
+    display: flex; align-items: center; gap: 22px;
+  }
+  #getippt {
+    flex: 1 1 auto; font-family: "Consolas", "DejaVu Sans Mono", monospace;
+    font-size: 46px; line-height: 1.1; word-break: break-all;
+    overflow: hidden; max-height: 110px; color: #f0f0f0;
+  }
+  #getippt .cursor { color: #e07b1f; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  #letztes {
+    flex: 0 0 130px; text-align: center; border-left: 2px solid #383838;
+    padding-left: 18px;
+  }
+  #letztesZeichen {
+    font-family: "Consolas", "DejaVu Sans Mono", monospace;
+    font-size: 60px; font-weight: 700; color: #e07b1f; line-height: 1;
+  }
+  #letztesWeg { font-size: 15px; color: #8a8a8a; margin-top: 4px; height: 20px; }
+
+  /* ---------- Zeigeleiste ---------- */
+  #leiste { flex: 0 0 auto; display: flex; align-items: center;
+            gap: 8px; flex-wrap: wrap; }
+  #leiste .lab { font-size: 16px; color: #8a8a8a; margin-right: 4px; }
+  .zeigknopf {
+    font-family: "Consolas", "DejaVu Sans Mono", monospace;
+    font-size: 24px; font-weight: 700; min-width: 52px; height: 44px;
+    background: #2c2c2c; color: #e8e8e8; border: 1px solid #444;
+    border-radius: 7px; cursor: pointer;
+  }
+  .zeigknopf:hover { background: #3c3c3c; }
+  .zeigknopf.an { background: #e07b1f; color: #1a1a1a; border-color: #ffb066; }
+  .textknopf {
+    font-family: inherit; font-size: 15px; height: 44px; padding: 0 16px;
+    background: #2c2c2c; color: #c8c8c8; border: 1px solid #444;
+    border-radius: 7px; cursor: pointer; margin-left: auto;
+  }
+  .textknopf:hover { background: #3c3c3c; }
+
+  #capsWarn {
+    display: none; background: #7a2323; color: #ffdede;
+    padding: 6px 14px; border-radius: 7px; font-size: 17px; font-weight: 600;
+  }
+  #capsWarn.an { display: block; }
+
+  /* ---------- Tastatur ---------- */
+  #tastatur { flex: 1 1 auto; display: flex; flex-direction: column;
+              justify-content: center; gap: 6px; }
+  .reihe { display: flex; gap: 6px; }
+  .taste {
+    position: relative; flex: 1 1 0; min-width: 0; height: 100%;
+    background: #2c2c2c; border: 2px solid #3d3d3d; border-radius: 8px;
+    color: #cfcfcf; font-family: "Consolas", "DejaVu Sans Mono", monospace;
+    transition: background 0.04s;
+  }
+  .reihe { height: 17%; }
+  .taste .mitte { position: absolute; inset: 0; display: flex;
+                  align-items: center; justify-content: center; font-size: 30px; }
+  .taste .lo { position: absolute; top: 5px;    left: 9px;  font-size: 19px; }
+  .taste .lu { position: absolute; bottom: 5px; left: 9px;  font-size: 24px; }
+  .taste .ru { position: absolute; bottom: 5px; right: 9px; font-size: 19px; color: #7fb0d8; }
+  .taste .bs { position: absolute; inset: 0; display: flex;
+               align-items: center; justify-content: center;
+               font-size: 17px; color: #8a8a8a; font-family: "Segoe UI", Arial, sans-serif; }
+
+  /* gedrückt (live) */
+  .taste.gedrueckt { background: #5ab552; border-color: #9ae094; color: #10240f; }
+  .taste.gedrueckt .ru, .taste.gedrueckt .bs { color: #10240f; }
+
+  /* gezeigt (Zielzeichen) */
+  .taste.ziel { background: #e07b1f; border-color: #ffb066; color: #1a1a1a; }
+  .taste.ziel .ru, .taste.ziel .bs { color: #1a1a1a; }
+  .taste.zielmod { background: #2f5f86; border-color: #7fb0d8; color: #ffffff; }
+  .taste.zielmod .bs { color: #ffffff; }
+
+  .taste.capsan { border-color: #c94f4f; }
+
+  /* ---------- Fußzeile ---------- */
+  #fuss { position: fixed; bottom: 6px; right: 12px; text-align: right;
+          color: #808080; opacity: 0.4; font-size: 12px; line-height: 1.2; }
+  #fuss .fi { font-size: 19px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div id="buehne">
+
+  <div id="anzeige">
+    <div id="getippt"><span class="cursor">|</span></div>
+    <div id="letztes">
+      <div id="letztesZeichen">&nbsp;</div>
+      <div id="letztesWeg">&nbsp;</div>
+    </div>
+  </div>
+
+  <div id="leiste">
+    <span class="lab">Zeigen:</span>
+    <span id="zeigknoepfe"></span>
+    <div id="capsWarn">Feststelltaste ist AN</div>
+    <button class="textknopf" id="btnLeeren">Text löschen (Esc)</button>
+  </div>
+
+  <div id="tastatur"></div>
+</div>
+
+<div id="fuss"><div class="fi">Fi</div>FischerTools</div>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   LAYOUT (deutsch, QWERTZ) mit physikalischen Tastencodes
+   b = Grundzeichen, s = mit Umschalt, a = mit AltGr
+   l = feste Beschriftung, w = Breitenfaktor, code = KeyboardEvent.code
+   ===================================================================== */
+function B(gross, code, alt) {
+  return { b: gross.toLowerCase(), s: gross, a: alt, code: code, buchstabe: true };
+}
+
+var REIHEN = [
+  [ {b:"^",s:"°",code:"Backquote"},
+    {b:"1",s:"!",code:"Digit1"}, {b:"2",s:"\"",a:"²",code:"Digit2"},
+    {b:"3",s:"§",a:"³",code:"Digit3"}, {b:"4",s:"$",code:"Digit4"},
+    {b:"5",s:"%",code:"Digit5"}, {b:"6",s:"&",code:"Digit6"},
+    {b:"7",s:"/",a:"{",code:"Digit7"}, {b:"8",s:"(",a:"[",code:"Digit8"},
+    {b:"9",s:")",a:"]",code:"Digit9"}, {b:"0",s:"=",a:"}",code:"Digit0"},
+    {b:"ß",s:"?",a:"\\",code:"Minus"}, {b:"´",s:"`",code:"Equal"},
+    {l:"\u232B",w:2,code:"Backspace"} ],
+
+  [ {l:"Tab",w:1.5,code:"Tab"},
+    B("Q","KeyQ","@"), B("W","KeyW"), B("E","KeyE","€"), B("R","KeyR"),
+    B("T","KeyT"), B("Z","KeyY"), B("U","KeyU"), B("I","KeyI"), B("O","KeyO"),
+    B("P","KeyP"), B("Ü","BracketLeft"), {b:"+",s:"*",a:"~",code:"BracketRight"} ],
+
+  [ {l:"\u21EA",w:1.8,code:"CapsLock",rolle:"caps"},
+    B("A","KeyA"), B("S","KeyS"), B("D","KeyD"), B("F","KeyF"), B("G","KeyG"),
+    B("H","KeyH"), B("J","KeyJ"), B("K","KeyK"), B("L","KeyL"),
+    B("Ö","Semicolon"), B("Ä","Quote"), {b:"#",s:"'",code:"Backslash"},
+    {l:"\u23CE",w:1.6,code:"Enter"} ],
+
+  [ {l:"\u21E7",w:2.4,code:"ShiftLeft",rolle:"shift"},
+    {b:"<",s:">",a:"|",code:"IntlBackslash"},
+    B("Y","KeyZ"), B("X","KeyX"), B("C","KeyC"), B("V","KeyV"), B("B","KeyB"),
+    B("N","KeyN"), B("M","KeyM","µ"),
+    {b:",",s:";",code:"Comma"}, {b:".",s:":",code:"Period"},
+    {b:"-",s:"_",code:"Slash"},
+    {l:"\u21E7",w:2.4,code:"ShiftRight",rolle:"shift"} ],
+
+  [ {l:"Strg",w:1.5,code:"ControlLeft"}, {l:"\u229E",w:1.2,code:"MetaLeft"},
+    {l:"Alt",w:1.2,code:"AltLeft"}, {l:"Leertaste",w:6.6,b:" ",code:"Space"},
+    {l:"AltGr",w:1.6,code:"AltRight",rolle:"altgr"},
+    {l:"Strg",w:1.5,code:"ControlRight"} ]
+];
+
+/* Nachschlagetabellen */
+var NACH_CODE = {};
+var NACH_ZEICHEN = {};
+REIHEN.forEach(function (reihe, ri) {
+  reihe.forEach(function (t, ki) {
+    var pos = {ri:ri, ki:ki};
+    if (t.code) NACH_CODE[t.code] = pos;
+    if (t.b !== undefined && !NACH_ZEICHEN[t.b]) NACH_ZEICHEN[t.b] = {ri:ri, ki:ki, mod:null};
+    if (t.s !== undefined && !NACH_ZEICHEN[t.s]) NACH_ZEICHEN[t.s] = {ri:ri, ki:ki, mod:"shift"};
+    if (t.a !== undefined && !NACH_ZEICHEN[t.a]) NACH_ZEICHEN[t.a] = {ri:ri, ki:ki, mod:"altgr"};
+  });
+});
+
+var el = function (id) { return document.getElementById(id); };
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/* =====================================================================
+   TASTATUR ZEICHNEN
+   ===================================================================== */
+function zeichneTastatur() {
+  var wrap = el("tastatur");
+  wrap.innerHTML = "";
+  REIHEN.forEach(function (reihe, ri) {
+    var rd = document.createElement("div");
+    rd.className = "reihe";
+    reihe.forEach(function (t, ki) {
+      var kd = document.createElement("div");
+      kd.className = "taste";
+      kd.style.flexGrow = (t.w || 1);
+      kd.dataset.ri = ri; kd.dataset.ki = ki;
+      if (t.rolle) kd.dataset.rolle = t.rolle;
+
+      if (t.buchstabe) {
+        kd.innerHTML = '<span class="mitte">' + t.s + "</span>" +
+          (t.a ? '<span class="ru">' + esc(t.a) + "</span>" : "");
+      } else if (t.l) {
+        kd.innerHTML = '<span class="bs">' + t.l + "</span>";
+      } else {
+        var h = "";
+        if (t.s !== undefined) h += '<span class="lo">' + esc(t.s) + "</span>";
+        if (t.b !== undefined) h += '<span class="lu">' + esc(t.b) + "</span>";
+        if (t.a !== undefined) h += '<span class="ru">' + esc(t.a) + "</span>";
+        kd.innerHTML = h;
+      }
+      rd.appendChild(kd);
+    });
+    wrap.appendChild(rd);
+  });
+}
+
+function tasteEl(ri, ki) {
+  return document.querySelector('.taste[data-ri="' + ri + '"][data-ki="' + ki + '"]');
+}
+
+/* =====================================================================
+   ZEIGEN: Zielzeichen dauerhaft markieren
+   ===================================================================== */
+var ZEIGZEICHEN = ["@", "€", "#", "_", "-", "!", "?", "A", "ß", "+"];
+var aktivesZiel = null;
+
+function baueZeigknoepfe() {
+  var box = el("zeigknoepfe");
+  ZEIGZEICHEN.forEach(function (z) {
+    var b = document.createElement("button");
+    b.className = "zeigknopf";
+    b.textContent = z;
+    b.dataset.zeichen = z;
+    b.addEventListener("click", function () { setzeZiel(z); });
+    box.appendChild(b);
+  });
+}
+
+function loescheZiel() {
+  document.querySelectorAll(".taste.ziel, .taste.zielmod").forEach(function (k) {
+    k.classList.remove("ziel", "zielmod");
+  });
+  document.querySelectorAll(".zeigknopf.an").forEach(function (b) {
+    b.classList.remove("an");
+  });
+  aktivesZiel = null;
+}
+
+function setzeZiel(zeichen) {
+  var warSchon = (aktivesZiel === zeichen);
+  loescheZiel();
+  if (warSchon) return;              // zweiter Klick schaltet aus
+
+  var pos = NACH_ZEICHEN[zeichen];
+  if (!pos) return;
+  aktivesZiel = zeichen;
+
+  var k = tasteEl(pos.ri, pos.ki);
+  if (k) k.classList.add("ziel");
+  if (pos.mod) {
+    var sel = pos.mod === "shift" ? '[data-rolle="shift"]' : '[data-rolle="altgr"]';
+    document.querySelectorAll(".taste" + sel).forEach(function (m) {
+      m.classList.add("zielmod");
+    });
+  }
+  document.querySelectorAll(".zeigknopf").forEach(function (b) {
+    if (b.dataset.zeichen === zeichen) b.classList.add("an");
+  });
+
+  el("letztesZeichen").textContent = zeichen;
+  el("letztesWeg").textContent = pos.mod === "shift" ? "Umschalt + Taste"
+                              : pos.mod === "altgr" ? "AltGr + Taste"
+                              : "einfach drücken";
+}
+
+/* =====================================================================
+   LIVE: gedrückte Tasten grün färben
+   ===================================================================== */
+var text = "";
+
+function zeigeText() {
+  if (text.length > 46) { text = text.slice(-46); }   /* vorne abschneiden */
+  el("getippt").innerHTML = esc(text).replace(/ /g, "&nbsp;") +
+    '<span class="cursor">|</span>';
+}
+
+function markiereCode(code, an) {
+  var pos = NACH_CODE[code];
+  if (!pos) return;
+  var k = tasteEl(pos.ri, pos.ki);
+  if (k) k.classList.toggle("gedrueckt", an);
+}
+
+document.addEventListener("keydown", function (e) {
+  /* Feststelltaste */
+  var caps = false;
+  try { caps = e.getModifierState && e.getModifierState("CapsLock"); } catch (err) {}
+  el("capsWarn").classList.toggle("an", !!caps);
+  document.querySelectorAll('.taste[data-rolle="caps"]').forEach(function (k) {
+    k.classList.toggle("capsan", !!caps);
+  });
+
+  /* AltGr meldet sich unter Windows zusätzlich als ControlLeft */
+  markiereCode(e.code, true);
+  if (e.code === "AltRight") markiereCode("ControlLeft", false);
+
+  if (e.key === "Escape") {
+    text = ""; zeigeText(); loescheZiel();
+    el("letztesZeichen").innerHTML = "&nbsp;";
+    el("letztesWeg").innerHTML = "&nbsp;";
+    e.preventDefault(); return;
+  }
+  if (e.key === "Backspace") {
+    text = text.slice(0, -1); zeigeText(); e.preventDefault(); return;
+  }
+  if (e.key === "Enter") { e.preventDefault(); return; }
+  if (e.ctrlKey && !e.altKey) return;   /* echte Strg-Kürzel durchlassen */
+  if (e.metaKey) return;
+
+  if (e.key.length === 1) {
+    text += e.key;
+    zeigeText();
+    el("letztesZeichen").textContent = (e.key === " ") ? "\u2423" : e.key;
+    var pos = NACH_ZEICHEN[e.key];
+    el("letztesWeg").textContent =
+      !pos ? "" :
+      pos.mod === "shift" ? "Umschalt + Taste" :
+      pos.mod === "altgr" ? "AltGr + Taste" : "einfach drücken";
+    e.preventDefault();
+  }
+});
+
+document.addEventListener("keyup", function (e) {
+  markiereCode(e.code, false);
+  if (e.code === "AltRight") markiereCode("ControlLeft", false);
+});
+
+/* Fokusverlust: alle grünen Markierungen zurücksetzen */
+window.addEventListener("blur", function () {
+  document.querySelectorAll(".taste.gedrueckt").forEach(function (k) {
+    k.classList.remove("gedrueckt");
+  });
+});
+
+el("btnLeeren").addEventListener("click", function () {
+  text = ""; zeigeText(); loescheZiel();
+  el("letztesZeichen").innerHTML = "&nbsp;";
+  el("letztesWeg").innerHTML = "&nbsp;";
+});
+
+/* =====================================================================
+   START
+   ===================================================================== */
+zeichneTastatur();
+baueZeigknoepfe();
+zeigeText();
+</script>
+</body>
+</html>
