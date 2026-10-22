@@ -151,6 +151,7 @@ alle Einstellungen stehen als Konstanten oben im jeweiligen Skript.
 | `generiere_einmaleins.py`   | Einmaleins-Aufgaben (`a · b`) über einen wählbaren Reihen-Bereich | `MIN_REIHE`/`MAX_REIHE`, `SELTENERE_REIHEN`, `SELTENER_ANTEIL` |
 | `generiere_bruchrechnen.py` | Bruchrechenaufgaben (`+ − · :`) mit exakt gekürzten Ergebnissen   | `MIN_NENNER`/`MAX_NENNER`, `OPERATIONEN`, `ANZAHL_AUFGABEN`    |
 | `generiere_bingo_zahlen.py` | Klassisches Zahlen-Bingo (Frage = Antwort, keine Kopfrechnung)    | `MIN_ZAHL`/`MAX_ZAHL`                                          |
+| `generiere_kopfrechnen_mix.py` | Kopfrechen-Mix Kl. 5: 1×1, 11er/12er, Geteilt, Plus/Minus, Römisch; alle Ergebnisse verschieden | `ANZAHL_*`, `ROEMISCH_NACH_ARABISCH`, `ARABISCH_NACH_ROEMISCH` |
 
 Aufruf, jeweils aus dem Projektordner:
 
@@ -158,6 +159,7 @@ Aufruf, jeweils aus dem Projektordner:
 python3 daten/generiere_einmaleins.py
 python3 daten/generiere_bruchrechnen.py
 python3 daten/generiere_bingo_zahlen.py
+python3 daten/generiere_kopfrechnen_mix.py
 ```
 
 Jedes Skript schreibt seine eigene JSON-Datei nach `daten/` und gibt eine
@@ -264,6 +266,11 @@ Ergebnis:
    | F                       | Vollbild ein/aus                        |
    | O                       | Übersicht der bisher gezogenen Aufgaben |
    | Esc                     | Übersicht schließen                     |
+   | S                       | Übersicht: Sortierung umschalten (Ziehreihenfolge ↔ nach Kartenwert) |
+
+   Die Übersicht zeigt pro gezogener Aufgabe beide Felder (`Aufgabe → Kartenwert`),
+   der Kartenwert ist hervorgehoben. Nach Kartenwert sortiert lässt sich ein
+   „Bingo!" schnell überprüfen.
    
    Alles auch über die Knöpfe oben erreichbar. **„Felder tauschen"**, falls
    die im Editor festgelegte Kartenfeld-Richtung doch nicht passt.

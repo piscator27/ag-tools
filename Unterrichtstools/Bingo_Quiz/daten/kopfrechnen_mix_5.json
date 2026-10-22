@@ -1,0 +1,672 @@
+{
+  "meta": {
+    "titel": "Kopfrechen-Bingo",
+    "version": 1,
+    "kartenfeld": "antwort"
+  },
+  "eintraege": [
+    {
+      "id": 1,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "20"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 2,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "18"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 3,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "56"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 4,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "28"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 5,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "36"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 6,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "40"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 7,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 3"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "9"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 8,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "35"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 9,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "72"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 10,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "16"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 11,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "49"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 12,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 3"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "21"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 13,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 3"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "12"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 14,
+      "frage": {
+        "typ": "latex",
+        "text": "6 \\cdot 5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "30"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 15,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "32"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 16,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 3"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "27"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 17,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "63"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 18,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "48"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 19,
+      "frage": {
+        "typ": "latex",
+        "text": "5 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "45"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 20,
+      "frage": {
+        "typ": "latex",
+        "text": "4 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "24"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 21,
+      "frage": {
+        "typ": "latex",
+        "text": "8 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "64"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 22,
+      "frage": {
+        "typ": "latex",
+        "text": "3 \\cdot 5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "15"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 23,
+      "frage": {
+        "typ": "latex",
+        "text": "7 \\cdot 6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "42"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 24,
+      "frage": {
+        "typ": "latex",
+        "text": "9 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "81"
+      },
+      "thema": "Einmaleins",
+      "niveau": 1
+    },
+    {
+      "id": 25,
+      "frage": {
+        "typ": "latex",
+        "text": "11 \\cdot 11"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "121"
+      },
+      "thema": "11er-Reihe",
+      "niveau": 2
+    },
+    {
+      "id": 26,
+      "frage": {
+        "typ": "latex",
+        "text": "11 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "99"
+      },
+      "thema": "11er-Reihe",
+      "niveau": 2
+    },
+    {
+      "id": 27,
+      "frage": {
+        "typ": "latex",
+        "text": "11 \\cdot 5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "55"
+      },
+      "thema": "11er-Reihe",
+      "niveau": 2
+    },
+    {
+      "id": 28,
+      "frage": {
+        "typ": "latex",
+        "text": "11 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "88"
+      },
+      "thema": "11er-Reihe",
+      "niveau": 2
+    },
+    {
+      "id": 29,
+      "frage": {
+        "typ": "latex",
+        "text": "11 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "77"
+      },
+      "thema": "11er-Reihe",
+      "niveau": 2
+    },
+    {
+      "id": 30,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "84"
+      },
+      "thema": "12er-Reihe",
+      "niveau": 3
+    },
+    {
+      "id": 31,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 10"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "120"
+      },
+      "thema": "12er-Reihe",
+      "niveau": 3
+    },
+    {
+      "id": 32,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 11"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "132"
+      },
+      "thema": "12er-Reihe",
+      "niveau": 3
+    },
+    {
+      "id": 33,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "60"
+      },
+      "thema": "12er-Reihe",
+      "niveau": 3
+    },
+    {
+      "id": 34,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "108"
+      },
+      "thema": "12er-Reihe",
+      "niveau": 3
+    },
+    {
+      "id": 35,
+      "frage": {
+        "typ": "latex",
+        "text": "12 \\cdot 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "96"
+      },
+      "thema": "12er-Reihe",
+      "niveau": 3
+    },
+    {
+      "id": 36,
+      "frage": {
+        "typ": "latex",
+        "text": "104 : 8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "13"
+      },
+      "thema": "Geteilt",
+      "niveau": 2
+    },
+    {
+      "id": 37,
+      "frage": {
+        "typ": "latex",
+        "text": "98 : 7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "14"
+      },
+      "thema": "Geteilt",
+      "niveau": 2
+    },
+    {
+      "id": 38,
+      "frage": {
+        "typ": "latex",
+        "text": "76 : 4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "19"
+      },
+      "thema": "Geteilt",
+      "niveau": 2
+    },
+    {
+      "id": 39,
+      "frage": {
+        "typ": "latex",
+        "text": "68 : 4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "17"
+      },
+      "thema": "Geteilt",
+      "niveau": 2
+    },
+    {
+      "id": 40,
+      "frage": {
+        "typ": "latex",
+        "text": "33 : 3"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "11"
+      },
+      "thema": "Geteilt",
+      "niveau": 2
+    },
+    {
+      "id": 41,
+      "frage": {
+        "typ": "latex",
+        "text": "34 + 36"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "70"
+      },
+      "thema": "Plus/Minus",
+      "niveau": 2
+    },
+    {
+      "id": 42,
+      "frage": {
+        "typ": "latex",
+        "text": "65 + 38"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "103"
+      },
+      "thema": "Plus/Minus",
+      "niveau": 2
+    },
+    {
+      "id": 43,
+      "frage": {
+        "typ": "latex",
+        "text": "47 + 33"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "80"
+      },
+      "thema": "Plus/Minus",
+      "niveau": 2
+    },
+    {
+      "id": 44,
+      "frage": {
+        "typ": "latex",
+        "text": "68 + 19"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "87"
+      },
+      "thema": "Plus/Minus",
+      "niveau": 2
+    },
+    {
+      "id": 45,
+      "frage": {
+        "typ": "latex",
+        "text": "91 - 44"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "47"
+      },
+      "thema": "Plus/Minus",
+      "niveau": 2
+    },
+    {
+      "id": 46,
+      "frage": {
+        "typ": "latex",
+        "text": "49 + 17"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "66"
+      },
+      "thema": "Plus/Minus",
+      "niveau": 2
+    },
+    {
+      "id": 47,
+      "frage": {
+        "typ": "text",
+        "text": "die Hälfte von 170"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "85"
+      },
+      "thema": "Doppelt/Halb",
+      "niveau": 2
+    },
+    {
+      "id": 48,
+      "frage": {
+        "typ": "text",
+        "text": "die Hälfte von 130"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "65"
+      },
+      "thema": "Doppelt/Halb",
+      "niveau": 2
+    },
+    {
+      "id": 49,
+      "frage": {
+        "typ": "text",
+        "text": "die Hälfte von 190"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "95"
+      },
+      "thema": "Doppelt/Halb",
+      "niveau": 2
+    },
+    {
+      "id": 50,
+      "frage": {
+        "typ": "text",
+        "text": "LXII = ?"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "62"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 51,
+      "frage": {
+        "typ": "text",
+        "text": "49 als römische Zahl"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "XLIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    }
+  ]
+}

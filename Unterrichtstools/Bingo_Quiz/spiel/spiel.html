@@ -97,8 +97,9 @@ html, body {
 #uebersicht-kopf h2 { margin: 0; }
 #uebersicht-liste {
   flex: 1; overflow: auto; display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .6rem; align-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .6rem; align-content: start;
 }
+#uebersicht-kopf .knopf-gruppe { display: flex; gap: .6rem; flex-wrap: wrap; }
 .uebersicht-eintrag {
   border: 1px solid var(--rand); border-radius: 8px; padding: .5rem;
   display: flex; gap: .4rem; align-items: baseline; background: var(--hell);
@@ -107,6 +108,11 @@ html, body {
 .uebersicht-inhalt .inhalt-text { font-size: 1.3rem; font-weight: 600; }
 .uebersicht-inhalt .inhalt-latex { font-size: 1.1rem; }
 .uebersicht-inhalt .inhalt-graph, .uebersicht-inhalt .inhalt-bild { max-width: 100px; max-height: 80px; }
+.uebersicht-inhalt .katex-display { margin: 0; }
+.uebersicht-pfeil { color: var(--text-schwach); }
+/* Das Feld, das auf den Karten steht, hervorheben -- danach wird bei „Bingo!" gesucht */
+.uebersicht-inhalt.karte .inhalt-text { color: var(--akzent); font-size: 1.6rem; font-weight: 700; }
+.uebersicht-inhalt.karte .inhalt-latex { color: var(--akzent); font-size: 1.3rem; }
 
 [hidden] { display: none !important; }
 
@@ -194,7 +200,10 @@ html, body {
 <div id="uebersicht" hidden>
   <div id="uebersicht-kopf">
     <h2>Bereits gezogene Aufgaben</h2>
-    <button class="button" id="btn-uebersicht-schliessen">Schließen (Esc)</button>
+    <div class="knopf-gruppe">
+      <button class="button" id="btn-uebersicht-sortierung" title="Sortierung umschalten (S)">Sortiert: Ziehreihenfolge</button>
+      <button class="button" id="btn-uebersicht-schliessen">Schließen (Esc)</button>
+    </div>
   </div>
   <div id="uebersicht-liste"></div>
 </div>
@@ -249,6 +258,8 @@ const btnWeiter = document.getElementById('btn-weiter');
 const btnLoesung = document.getElementById('btn-loesung');
 const btnUebersicht = document.getElementById('btn-uebersicht');
 const btnUebersichtSchliessen = document.getElementById('btn-uebersicht-schliessen');
+const btnUebersichtSortierung = document.getElementById('btn-uebersicht-sortierung');
+let uebersichtNachKartenwert = false; // false = Ziehreihenfolge, true = sortiert nach Karten-Feld
 const btnVollbild = document.getElementById('btn-vollbild');
 const btnMischen = document.getElementById('btn-mischen');
 const btnTausch = document.getElementById('btn-tausch');
@@ -534,22 +545,58 @@ function renderFeld(feld, container) {
   }
 }
 
+// Sortierschlüssel für ein Feld: Zahlen numerisch, sonst alphabetisch
+function feldSchluessel(feld) {
+  if (!feld) return '';
+  if (feld.typ === 'text' || feld.typ === 'latex') return String(feld.text || '');
+  return '';
+}
+function vergleicheFelder(a, b) {
+  const sa = feldSchluessel(a), sb = feldSchluessel(b);
+  const na = Number(sa.replace(',', '.')), nb = Number(sb.replace(',', '.'));
+  const zahlA = sa.trim() !== '' && !isNaN(na), zahlB = sb.trim() !== '' && !isNaN(nb);
+  if (zahlA && zahlB) return na - nb;
+  if (zahlA !== zahlB) return zahlA ? -1 : 1;
+  return sa.localeCompare(sb, 'de', { numeric: true });
+}
+
+// Übersicht zeigt pro gezogener Aufgabe beide Felder: angezeigtes Feld → Karten-Feld.
+// Das Karten-Feld ist hervorgehoben, damit man ein „Bingo!" schnell prüfen kann.
 function aktualisiereUebersicht() {
   uebersichtListeEl.innerHTML = '';
+  if (!ziehreihenfolge || position < 0) return;
+  const gezogen = [];
   for (let i = 0; i <= position; i++) {
-    const eintrag = eintraegeById.get(ziehreihenfolge[i]);
+    gezogen.push({ nr: i + 1, eintrag: eintraegeById.get(ziehreihenfolge[i]) });
+  }
+  if (uebersichtNachKartenwert) {
+    gezogen.sort((x, y) => vergleicheFelder(x.eintrag[kartenFeld], y.eintrag[kartenFeld]) || x.nr - y.nr);
+  }
+  for (const { nr: nummer, eintrag } of gezogen) {
     const zeile = document.createElement('div');
     zeile.className = 'uebersicht-eintrag';
     const nr = document.createElement('span');
     nr.className = 'uebersicht-nr';
-    nr.textContent = (i + 1) + '.';
-    const inhalt = document.createElement('span');
-    inhalt.className = 'uebersicht-inhalt';
-    renderFeld(eintrag[anzeigeFeld], inhalt);
-    zeile.appendChild(nr);
-    zeile.appendChild(inhalt);
+    nr.textContent = nummer + '.';
+    const anzeige = document.createElement('span');
+    anzeige.className = 'uebersicht-inhalt';
+    renderFeld(eintrag[anzeigeFeld], anzeige);
+    const pfeil = document.createElement('span');
+    pfeil.className = 'uebersicht-pfeil';
+    pfeil.textContent = '→';
+    const karte = document.createElement('span');
+    karte.className = 'uebersicht-inhalt karte';
+    renderFeld(eintrag[kartenFeld], karte);
+    zeile.append(nr, anzeige, pfeil, karte);
     uebersichtListeEl.appendChild(zeile);
   }
+  btnUebersichtSortierung.textContent = uebersichtNachKartenwert
+    ? 'Sortiert: nach Kartenwert' : 'Sortiert: Ziehreihenfolge';
+}
+
+function toggleUebersichtSortierung() {
+  uebersichtNachKartenwert = !uebersichtNachKartenwert;
+  aktualisiereUebersicht();
 }
 
 // ---------------------------------------------------------------------
@@ -765,15 +812,22 @@ function zeichneGraph(canvas, feld) {
 // Vollbild, Übersicht, Tastatursteuerung
 // ---------------------------------------------------------------------
 function toggleVollbild() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
-  } else {
-    document.exitFullscreen();
-  }
+  const el = document.documentElement;
+  const aktiv = document.fullscreenElement || document.webkitFullscreenElement;
+  try {
+    if (!aktiv) {
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) Promise.resolve(req.call(el)).catch(() => {});
+    } else {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) Promise.resolve(exit.call(document)).catch(() => {});
+    }
+  } catch (e) { /* Vollbild nicht verfügbar (z. B. iPhone) */ }
 }
 
 function toggleUebersicht() {
   uebersichtEl.hidden = !uebersichtEl.hidden;
+  if (!uebersichtEl.hidden) aktualisiereUebersicht();
 }
 
 btnZurueck.addEventListener('click', zurueck);
@@ -781,6 +835,7 @@ btnWeiter.addEventListener('click', naechste);
 btnLoesung.addEventListener('click', toggleLoesung);
 btnUebersicht.addEventListener('click', toggleUebersicht);
 btnUebersichtSchliessen.addEventListener('click', () => { uebersichtEl.hidden = true; });
+btnUebersichtSortierung.addEventListener('click', toggleUebersichtSortierung);
 btnVollbild.addEventListener('click', toggleVollbild);
 btnMischen.addEventListener('click', neuMischen);
 btnTausch.addEventListener('click', () => {
@@ -812,6 +867,10 @@ document.addEventListener('keydown', (e) => {
     case 'o':
     case 'O':
       toggleUebersicht(); break;
+    case 's':
+    case 'S':
+      if (!uebersichtEl.hidden) toggleUebersichtSortierung();
+      break;
     case 'Escape':
       if (!uebersichtEl.hidden) uebersichtEl.hidden = true;
       break;

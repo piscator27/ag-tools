@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BINGO klassisch</title>
+<style>
+:root {
+  --bg: #1a1a1a;
+  --panel: #262626;
+  --panel-2: #313131;
+  --text: #f2f2f2;
+  --text-soft: #b5b5b5;
+  --accent: #4da3ff;
+  --ok: #4caf50;
+  --warn: #ffb300;
+  --bad: #ef5350;
+  --logo: #888;
+  --logo-opacity: 0.4;
+  --font-base: 28px;
+
+  --col-b: #4da3ff;
+  --col-i: #ef5350;
+  --col-n: #e0e0e0;
+  --col-g: #4caf50;
+  --col-o: #ffb300;
+  --on-color: #111;
+
+  --paper: #ffffff;
+  --ink: #111111;
+  --ink-soft: #555555;
+  --ink-line: #333333;
+  --sheet-shadow: rgba(0, 0, 0, 0.5);
+  --pcol-b: #1565c0;
+  --pcol-i: #c62828;
+  --pcol-n: #424242;
+  --pcol-g: #2e7d32;
+  --pcol-o: #ef6c00;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: var(--font-base);
+  -webkit-text-size-adjust: 100%;
+}
+button, input, select { font: inherit; color: inherit; }
+button {
+  background: var(--panel-2);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 0.35em 0.8em;
+  cursor: pointer;
+  min-height: 56px;
+  touch-action: manipulation;
+}
+button:hover { border-color: var(--text-soft); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: 0.4; cursor: default; }
+button.primary { background: var(--accent); color: var(--on-color); font-weight: 700; }
+button.danger { color: var(--bad); }
+button.danger.armed { background: var(--bad); color: var(--on-color); }
+input[type=number], input[type=text] {
+  background: var(--panel-2);
+  border: 2px solid var(--text-soft);
+  border-radius: 10px;
+  padding: 0.25em 0.4em;
+  min-height: 56px;
+}
+
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ---------- Kopfzeile ---------- */
+header {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  padding: 12px 20px; background: var(--panel);
+}
+.brand { font-weight: 900; letter-spacing: 0.08em; font-size: 1.2em; margin-right: 12px; }
+.brand span:nth-child(1) { color: var(--col-b); }
+.brand span:nth-child(2) { color: var(--col-i); }
+.brand span:nth-child(3) { color: var(--col-n); }
+.brand span:nth-child(4) { color: var(--col-g); }
+.brand span:nth-child(5) { color: var(--col-o); }
+nav { display: flex; gap: 8px; flex-wrap: wrap; }
+nav button[aria-pressed=true] { background: var(--text); color: var(--bg); font-weight: 700; }
+.spacer { flex: 1; }
+
+main { flex: 1; padding: 20px; }
+.view { display: none; }
+body.v-ziehung .view-ziehung,
+body.v-pruefen .view-pruefen,
+body.v-drucken .view-drucken { display: block; }
+
+/* ---------- Ziehung ---------- */
+.draw-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 34%) 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.ball-panel {
+  background: var(--panel); border-radius: 20px; padding: 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+}
+.goal {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.goal button { font-size: 0.8em; }
+.goal button[aria-pressed=true] { background: var(--warn); color: var(--on-color); font-weight: 700; }
+.ball {
+  width: min(26vw, 38vh, 420px); aspect-ratio: 1; border-radius: 50%;
+  background: var(--panel-2);
+  border: 14px solid var(--text-soft);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  line-height: 1; transition: border-color 0.2s;
+}
+.ball .l { font-size: min(6.5vw, 9vh, 110px); font-weight: 900; }
+.ball .n { font-size: min(12vw, 17vh, 210px); font-weight: 900; font-variant-numeric: tabular-nums; }
+.ball.spin .n, .ball.spin .l { opacity: 0.45; }
+.ball.pop { animation: pop 0.35s ease-out; }
+@keyframes pop { 0% { transform: scale(0.85); } 70% { transform: scale(1.06); } 100% { transform: scale(1); } }
+.count { color: var(--text-soft); }
+.count b { color: var(--text); }
+.history { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; min-height: 64px; }
+.history .chip {
+  border-radius: 999px; padding: 0.1em 0.6em; font-weight: 800;
+  background: var(--panel-2); border: 3px solid var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+.history-label { color: var(--text-soft); font-size: 0.75em; }
+.draw-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
+#btnDraw { font-size: 1.2em; min-height: 84px; flex: 1 1 100%; }
+.hint-keys { color: var(--text-soft); font-size: 0.6em; text-align: center; }
+
+.board {
+  background: var(--panel); border-radius: 20px; padding: 16px;
+  display: grid; grid-template-columns: 1.2fr repeat(15, 1fr); gap: 6px;
+}
+.board .head {
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 1.5em; border-radius: 10px; color: var(--on-color);
+}
+.board .cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-weight: 700; font-size: clamp(16px, 1.9vw, 34px);
+  color: var(--text-soft); background: var(--panel-2); font-variant-numeric: tabular-nums;
+  opacity: 0.55;
+}
+.board .cell.on { opacity: 1; color: var(--on-color); }
+.board .cell.last { outline: 5px solid var(--text); outline-offset: 2px; animation: pop 0.4s ease-out; }
+
+.c-b { --c: var(--col-b); } .c-i { --c: var(--col-i); } .c-n { --c: var(--col-n); }
+.c-g { --c: var(--col-g); } .c-o { --c: var(--col-o); }
+.board .head, .board .cell.on { background: var(--c); }
+.ball.c-b, .ball.c-i, .ball.c-n, .ball.c-g, .ball.c-o { border-color: var(--c); }
+.ball .l { color: var(--c, var(--text-soft)); }
+.history .chip { border-color: var(--c, var(--text-soft)); }
+
+/* ---------- Prüfen ---------- */
+.check-layout { display: grid; grid-template-columns: minmax(300px, 1fr) auto; gap: 28px; align-items: start; }
+.check-controls { background: var(--panel); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+.check-controls .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+#checkNr { width: 4.5em; font-size: 1.4em; text-align: center; font-weight: 800; }
+.verdict {
+  border-radius: 16px; padding: 18px 22px; font-size: 1.25em; font-weight: 800;
+  background: var(--panel-2); border: 4px solid var(--text-soft);
+}
+.verdict small { display: block; font-weight: 500; font-size: 0.65em; color: var(--text-soft); margin-top: 6px; }
+.verdict.yes { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 25%, var(--panel-2)); }
+.verdict.no { border-color: var(--bad); }
+.soft { color: var(--text-soft); font-size: 0.7em; }
+
+.bigcard { background: var(--panel); border-radius: 20px; padding: 16px; }
+.bigcard .grid { display: grid; grid-template-columns: repeat(5, min(12vw, 13vh, 120px)); gap: 8px; }
+.bigcard .h {
+  text-align: center; font-weight: 900; font-size: 1.6em; border-radius: 10px;
+  background: var(--c); color: var(--on-color);
+}
+.bigcard .f {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center; position: relative;
+  border-radius: 14px; background: var(--panel-2); font-weight: 800; font-size: 1.4em;
+  color: var(--text-soft); border: 4px solid transparent; font-variant-numeric: tabular-nums;
+}
+.bigcard .f.hit { background: var(--c); color: var(--on-color); }
+.bigcard .f.hit::after { content: "✓"; position: absolute; top: 2px; right: 8px; font-size: 0.5em; }
+.bigcard .f.line { border-color: var(--text); box-shadow: 0 0 0 3px var(--ok); }
+.bigcard .f.free { font-size: 0.7em; }
+.bigcard .cap { text-align: center; color: var(--text-soft); margin-top: 10px; font-size: 0.7em; }
+
+/* ---------- Drucken ---------- */
+.print-controls {
+  background: var(--panel); border-radius: 20px; padding: 20px 24px;
+  display: flex; flex-direction: column; gap: 16px; font-size: 0.8em;
+}
+.print-controls .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.print-controls input[type=number] { width: 4.5em; text-align: center; }
+.print-controls input[type=text] { width: 8em; }
+.print-controls label.chk { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.print-controls input[type=checkbox] { width: 28px; height: 28px; }
+.print-controls .info { color: var(--text-soft); font-size: 0.85em; line-height: 1.4; }
+.preview-title { margin: 24px 0 10px; color: var(--text-soft); font-size: 0.7em; }
+
+.fi {
+  position: fixed; right: 14px; bottom: 8px;
+  color: var(--logo); opacity: var(--logo-opacity);
+  font-size: 18px; font-weight: 700; font-style: italic; pointer-events: none;
+}
+
+/* ---------- Druckbögen (Bildschirmvorschau + Druck) ---------- */
+#printArea { display: none; padding: 0 20px 60px; overflow-x: auto; }
+body.v-drucken #printArea { display: block; }
+.sheet {
+  width: 210mm; height: 297mm; padding: 10mm; margin: 0 0 12mm;
+  background: var(--paper); color: var(--ink);
+  box-shadow: 0 4px 24px var(--sheet-shadow);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 4mm;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.sheet.cards {
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6mm;
+}
+.pcard {
+  border: 0.7mm solid var(--ink-line); border-radius: 4mm; padding: 4mm;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.pcard .ph, .pcard .pg { display: grid; grid-template-columns: repeat(5, 1fr); }
+.pcard .ph div {
+  text-align: center; font-weight: 900; font-size: 11mm; line-height: 1.1; color: var(--c);
+}
+.pcard .pg { border-top: 0.5mm solid var(--ink-line); border-left: 0.5mm solid var(--ink-line); }
+.pcard .pg div {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center; flex-direction: column;
+  border-right: 0.5mm solid var(--ink-line); border-bottom: 0.5mm solid var(--ink-line);
+  font-weight: 800; font-size: 8mm; font-variant-numeric: tabular-nums;
+}
+.pcard .pg div.free { font-size: 3.2mm; font-weight: 800; letter-spacing: 0.05em; color: var(--ink-soft); }
+.pcard .pg div.free b { font-size: 8mm; line-height: 1; color: var(--pcol-o); }
+.pcard .pf { display: flex; justify-content: space-between; align-items: flex-end; font-size: 3.4mm; color: var(--ink-soft); gap: 4mm; }
+.pcard .pf .name { flex: 1; border-bottom: 0.3mm solid var(--ink-soft); height: 5mm; }
+.pcard .pf .nr { font-weight: 800; color: var(--ink); font-size: 4.2mm; white-space: nowrap; }
+.p-b { --c: var(--pcol-b); } .p-i { --c: var(--pcol-i); } .p-n { --c: var(--pcol-n); }
+.p-g { --c: var(--pcol-g); } .p-o { --c: var(--pcol-o); }
+
+.sheet h2 { margin: 0 0 4mm; font-size: 7mm; }
+.sheet .sub { color: var(--ink-soft); margin: 0 0 5mm; font-size: 3.6mm; }
+.lose { display: grid; grid-template-columns: repeat(6, 1fr); border-top: 0.3mm dashed var(--ink-soft); border-left: 0.3mm dashed var(--ink-soft); }
+.lose div {
+  height: 19.4mm; display: flex; align-items: center; justify-content: center; gap: 2mm;
+  border-right: 0.3mm dashed var(--ink-soft); border-bottom: 0.3mm dashed var(--ink-soft);
+  font-weight: 900; font-size: 9mm;
+}
+.lose div span { color: var(--c); }
+.ktable { border-collapse: collapse; width: 100%; }
+.sheet .kspiel { margin: 5mm 0 2mm; font-size: 4.2mm; white-space: pre; }
+.ktable td {
+  border: 0.4mm solid var(--ink-line); text-align: center; height: 10.5mm;
+  font-weight: 700; font-size: 6mm; width: 6.25%;
+}
+.ktable td.kh { font-weight: 900; font-size: 7mm; color: var(--c); }
+
+@media (max-width: 1000px) {
+  :root { --font-base: 22px; }
+  .draw-layout, .check-layout { grid-template-columns: 1fr; }
+  .ball { width: min(60vw, 40vh); }
+  .ball .l { font-size: min(14vw, 9vh); }
+  .ball .n { font-size: min(26vw, 17vh); }
+  .board { gap: 3px; padding: 8px; }
+  .board .cell { font-size: clamp(11px, 2.6vw, 26px); }
+  .bigcard .grid { grid-template-columns: repeat(5, min(16vw, 90px)); }
+}
+
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  body { background: var(--paper); }
+  .app, .fi { display: none !important; }
+  #printArea { display: block !important; padding: 0; overflow: visible; }
+  .sheet { margin: 0; box-shadow: none; page-break-after: always; break-after: page; }
+  .sheet:last-child { page-break-after: auto; break-after: auto; }
+}
+</style>
+</head>
+<body class="v-ziehung">
+<div class="app">
+  <header>
+    <div class="brand" aria-label="BINGO"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div>
+    <nav>
+      <button data-view="ziehung" aria-pressed="true">🎱 Ziehung</button>
+      <button data-view="pruefen" aria-pressed="false">✔ Karte prüfen</button>
+      <button data-view="drucken" aria-pressed="false">🖨 Karten drucken</button>
+    </nav>
+    <div class="spacer"></div>
+    <button id="btnSpeech" aria-pressed="false" title="Zahlen laut ansagen">🔇 Ansage aus</button>
+    <button id="btnReset" class="danger">↺ Neues Spiel</button>
+  </header>
+
+  <main>
+    <!-- ================= ZIEHUNG ================= -->
+    <section class="view view-ziehung">
+      <div class="draw-layout">
+        <div class="ball-panel">
+          <div class="goal" id="goal">
+            <button data-goal="1">1 Reihe</button>
+            <button data-goal="2">2 Reihen</button>
+            <button data-goal="12">Volle Karte</button>
+          </div>
+          <div class="ball" id="ball"><span class="l" id="ballL">–</span><span class="n" id="ballN">?</span></div>
+          <div class="count"><b id="cnt">0</b> von 75 gezogen</div>
+          <div class="history-label">Davor:</div>
+          <div class="history" id="history"></div>
+          <div class="draw-buttons">
+            <button id="btnDraw" class="primary">Nächste Kugel</button>
+            <button id="btnUndo">↶ Rückgängig</button>
+          </div>
+          <div class="hint-keys">Leertaste / Enter = nächste Kugel · Rücktaste = rückgängig</div>
+        </div>
+        <div class="board" id="board" aria-label="Gezogene Zahlen"></div>
+      </div>
+    </section>
+
+    <!-- ================= PRÜFEN ================= -->
+    <section class="view view-pruefen">
+      <div class="check-layout">
+        <div class="check-controls">
+          <div>Jemand ruft <b>BINGO</b>? Kartennummer eingeben:</div>
+          <div class="row">
+            <button id="nrMinus" aria-label="Nummer minus 1">−</button>
+            <input id="checkNr" type="number" min="1" max="999" value="1" inputmode="numeric">
+            <button id="nrPlus" aria-label="Nummer plus 1">+</button>
+          </div>
+          <div class="verdict" id="verdict"></div>
+          <div class="soft" id="checkSeries"></div>
+        </div>
+        <div class="bigcard">
+          <div class="grid" id="bigcard"></div>
+          <div class="cap" id="bigcap"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= DRUCKEN ================= -->
+    <section class="view view-drucken">
+      <div class="print-controls">
+        <div class="row">
+          <label>Karten Nr. <input id="pFrom" type="number" min="1" max="999" value="1"></label>
+          <label>bis <input id="pTo" type="number" min="1" max="999" value="40"></label>
+          <label>Serie <input id="pSeries" type="text" maxlength="12" value="5D"></label>
+          <button id="btnPrint" class="primary">🖨 Drucken</button>
+        </div>
+        <div class="row">
+          <label class="chk"><input id="pLose" type="checkbox"> 75 Lose zum Ausschneiden (falls kein Gerät da ist)</label>
+          <label class="chk"><input id="pKontroll" type="checkbox"> Kontrollbogen 1–75 zum Abhaken</label>
+        </div>
+        <div class="info">
+          4 Karten pro A4-Seite (Querschnitt: 2 Schnitte). Jede Karte ist über <b>Serie + Nummer</b> eindeutig –
+          dieselbe Datei erzeugt immer dieselben Karten, deshalb kann „Karte prüfen“ jede Karte nachbauen.
+          Serie beim Spielen nicht ändern.<br>
+          Mehrere Runden: pro Runde neue Karten austeilen, z. B. Runde 1 = Nr. 1–40, Runde 2 = Nr. 41–80.
+          Oder Karten in Klarsichthüllen stecken und mit abwischbarem Folienstift markieren.
+          Im Druckdialog „Seitenränder: keine“ bzw. „Skalierung 100 %“ wählen, Kopf-/Fußzeilen aus.
+        </div>
+      </div>
+      <div class="preview-title" id="previewTitle"></div>
+    </section>
+  </main>
+</div>
+
+<div id="printArea"></div>
+<div class="fi" aria-hidden="true">Fi</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var LETTERS = ["B", "I", "N", "G", "O"];
+  var STORE = "fi-bingo-klassisch-v1";
+
+  var state = {
+    drawn: [],
+    goal: "1",
+    speech: false,
+    series: "5D",
+    from: 1,
+    to: 40,
+    lose: false,
+    kontroll: false,
+    checkNr: 1
+  };
+
+  // ---------- Speicher ----------
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(STORE) || "null");
+      if (s && typeof s === "object") {
+        for (var k in state) if (k in s) state[k] = s[k];
+      }
+    } catch (e) { /* ohne Speicher weiter */ }
+    if (!Array.isArray(state.drawn)) state.drawn = [];
+  }
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* egal */ }
+  }
+
+  // ---------- Hilfen ----------
+  function colOf(n) { return Math.floor((n - 1) / 15); }
+  function letterOf(n) { return LETTERS[colOf(n)]; }
+  function cls(prefix, n) { return prefix + LETTERS[colOf(n)].toLowerCase(); }
+  function $(id) { return document.getElementById(id); }
+  function el(tag, className, text) {
+    var e = document.createElement(tag);
+    if (className) e.className = className;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function seriesKey() { return String(state.series || "").trim().toUpperCase() || "X"; }
+
+  // ---------- Reproduzierbare Karten (Serie + Nummer -> immer dieselbe Karte) ----------
+  function hashStr(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 2654435761);
+      h2 = Math.imul(h2 ^ c, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (h1 ^ h2) >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  // Liefert grid[zeile][spalte]; 0 = freies Feld in der Mitte.
+  function makeCard(nr) {
+    var rnd = mulberry32(hashStr("BINGO75|" + seriesKey() + "|" + nr));
+    var cols = [];
+    for (var c = 0; c < 5; c++) {
+      var pool = [];
+      for (var v = c * 15 + 1; v <= c * 15 + 15; v++) pool.push(v);
+      for (var i = pool.length - 1; i > 0; i--) {
+        var j = Math.floor(rnd() * (i + 1));
+        var t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+      }
+      cols.push(pool.slice(0, 5).sort(function (a, b) { return a - b; }));
+    }
+    cols[2][2] = 0;
+    var grid = [];
+    for (var r = 0; r < 5; r++) {
+      grid.push([cols[0][r], cols[1][r], cols[2][r], cols[3][r], cols[4][r]]);
+    }
+    return grid;
+  }
+
+  // Alle 12 Gewinnlinien: 5 Zeilen, 5 Spalten, 2 Diagonalen.
+  var LINES = (function () {
+    var L = [], r, c;
+    for (r = 0; r < 5; r++) { L.push({ name: "Zeile " + (r + 1), cells: [[r,0],[r,1],[r,2],[r,3],[r,4]] }); }
+    for (c = 0; c < 5; c++) { L.push({ name: "Spalte " + LETTERS[c], cells: [[0,c],[1,c],[2,c],[3,c],[4,c]] }); }
+    L.push({ name: "Diagonale ↘", cells: [[0,0],[1,1],[2,2],[3,3],[4,4]] });
+    L.push({ name: "Diagonale ↙", cells: [[0,4],[1,3],[2,2],[3,1],[4,0]] });
+    return L;
+  })();
+
+  // ---------- Ansage ----------
+  function speak(n) {
+    if (!state.speech || !("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(letterOf(n) + " … " + n);
+      u.lang = "de-DE";
+      u.rate = 0.85;
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* keine Sprachausgabe */ }
+  }
+
+  // ---------- Ziehung ----------
+  var spinning = false;
+
+  function buildBoard() {
+    var b = $("board");
+    b.textContent = "";
+    for (var c = 0; c < 5; c++) {
+      var h = el("div", "head c-" + LETTERS[c].toLowerCase(), LETTERS[c]);
+      b.appendChild(h);
+      for (var n = c * 15 + 1; n <= c * 15 + 15; n++) {
+        var cell = el("div", "cell c-" + LETTERS[c].toLowerCase(), String(n));
+        cell.id = "b" + n;
+        b.appendChild(cell);
+      }
+    }
+  }
+
+  function setBall(n, spin) {
+    var ball = $("ball");
+    ball.className = "ball" + (n ? " " + cls("c-", n) : "") + (spin ? " spin" : "");
+    $("ballL").textContent = n ? letterOf(n) : "–";
+    $("ballN").textContent = n ? String(n) : "?";
+  }
+
+  function renderDraw() {
+    var d = state.drawn;
+    var last = d.length ? d[d.length - 1] : 0;
+    for (var n = 1; n <= 75; n++) {
+      var cell = $("b" + n);
+      var on = d.indexOf(n) !== -1;
+      cell.classList.toggle("on", on);
+      cell.classList.toggle("last", n === last);
+    }
+    if (!spinning) setBall(last, false);
+    $("cnt").textContent = String(d.length);
+
+    var hist = $("history");
+    hist.textContent = "";
+    for (var i = d.length - 2; i >= Math.max(0, d.length - 6); i--) {
+      var ch = el("span", "chip " + cls("c-", d[i]), letterOf(d[i]) + " " + d[i]);
+      hist.appendChild(ch);
+    }
+    $("btnDraw").disabled = spinning || d.length >= 75;
+    $("btnDraw").textContent = d.length >= 75 ? "Alle Kugeln gezogen" : "Nächste Kugel";
+    $("btnUndo").disabled = spinning || d.length === 0;
+
+    var gb = document.querySelectorAll("#goal button");
+    for (var k = 0; k < gb.length; k++) {
+      gb[k].setAttribute("aria-pressed", gb[k].getAttribute("data-goal") === state.goal ? "true" : "false");
+    }
+  }
+
+  function randomInt(max) {
+    if (window.crypto && window.crypto.getRandomValues) {
+      var a = new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0] % max;
+    }
+    return Math.floor(Math.random() * max);
+  }
+
+  function draw() {
+    if (spinning || state.drawn.length >= 75) return;
+    var rest = [];
+    for (var n = 1; n <= 75; n++) if (state.drawn.indexOf(n) === -1) rest.push(n);
+    var pick = rest[randomInt(rest.length)];
+
+    spinning = true;
+    renderDraw();
+    var ticks = 0;
+    var timer = setInterval(function () {
+      ticks++;
+      setBall(rest[randomInt(rest.length)], true);
+      if (ticks >= 12) {
+        clearInterval(timer);
+        spinning = false;
+        state.drawn.push(pick);
+        save();
+        setBall(pick, false);
+        var ball = $("ball");
+        ball.classList.remove("pop"); void ball.offsetWidth; ball.classList.add("pop");
+        renderDraw();
+        renderCheck();
+        speak(pick);
+      }
+    }, 55);
+  }
+
+  function undo() {
+    if (spinning || !state.drawn.length) return;
+    state.drawn.pop();
+    save();
+    renderDraw();
+    renderCheck();
+  }
+
+  var resetArmed = null;
+  function resetClick() {
+    var btn = $("btnReset");
+    if (!resetArmed) {
+      btn.classList.add("armed");
+      btn.textContent = "Wirklich? Nochmal tippen";
+      resetArmed = setTimeout(disarm, 3000);
+      return;
+    }
+    disarm();
+    state.drawn = [];
+    save();
+    setBall(0, false);
+    renderDraw();
+    renderCheck();
+  }
+  function disarm() {
+    clearTimeout(resetArmed);
+    resetArmed = null;
+    var btn = $("btnReset");
+    btn.classList.remove("armed");
+    btn.textContent = "↺ Neues Spiel";
+  }
+
+  // ---------- Prüfen ----------
+  function renderCheck() {
+    var nr = parseInt(state.checkNr, 10);
+    if (!(nr >= 1)) nr = 1;
+    var grid = makeCard(nr);
+    var drawnSet = {};
+    state.drawn.forEach(function (n) { drawnSet[n] = true; });
+    function hit(r, c) { var v = grid[r][c]; return v === 0 || !!drawnSet[v]; }
+
+    var full = [];
+    LINES.forEach(function (L) {
+      if (L.cells.every(function (p) { return hit(p[0], p[1]); })) full.push(L);
+    });
+    var inLine = {};
+    full.forEach(function (L) { L.cells.forEach(function (p) { inLine[p[0] + "," + p[1]] = true; }); });
+
+    var hits = 0;
+    var box = $("bigcard");
+    box.textContent = "";
+    for (var c = 0; c < 5; c++) box.appendChild(el("div", "h c-" + LETTERS[c].toLowerCase(), LETTERS[c]));
+    for (var r = 0; r < 5; r++) {
+      for (c = 0; c < 5; c++) {
+        var v = grid[r][c];
+        var f = el("div", "f c-" + LETTERS[c].toLowerCase(), v === 0 ? "★ FREI" : String(v));
+        if (v === 0) f.classList.add("free");
+        if (hit(r, c)) { f.classList.add("hit"); hits++; }
+        if (inLine[r + "," + c]) f.classList.add("line");
+        box.appendChild(f);
+      }
+    }
+    $("bigcap").textContent = "Karte Nr. " + nr + " · Serie " + seriesKey() + " · " + (hits - 1) + " von 24 Zahlen gezogen";
+
+    var need = parseInt(state.goal, 10);
+    var ok = need === 12 ? hits === 25 : full.length >= need;
+    var goalTxt = need === 12 ? "Volle Karte" : need + (need === 1 ? " Reihe" : " Reihen");
+    var v = $("verdict");
+    v.className = "verdict " + (ok ? "yes" : "no");
+    v.textContent = ok ? "✔ BINGO – gültig!" : "✘ Noch kein Bingo";
+    var small = el("small");
+    var lines = full.length ? full.map(function (L) { return L.name; }).join(", ") : "keine";
+    small.textContent = "Gespielt wird: " + goalTxt + " · fertige Reihen (" + full.length + "): " + lines;
+    v.appendChild(small);
+    $("checkSeries").textContent = state.drawn.length + " Kugeln gezogen. Karten gelten nur für Serie „" + seriesKey() + "“ (einstellbar unter „Karten drucken“).";
+  }
+
+  // ---------- Drucken ----------
+  function clampNr(x, def) { x = parseInt(x, 10); return x >= 1 && x <= 999 ? x : def; }
+
+  function renderPrint() {
+    var area = $("printArea");
+    area.textContent = "";
+    var from = clampNr(state.from, 1), to = clampNr(state.to, 40);
+    if (to < from) { var t = from; from = to; to = t; }
+    var count = to - from + 1;
+    var sheet = null;
+    for (var nr = from; nr <= to; nr++) {
+      if ((nr - from) % 4 === 0) { sheet = el("div", "sheet cards"); area.appendChild(sheet); }
+      sheet.appendChild(printCard(nr));
+    }
+    var pages = Math.ceil(count / 4);
+    if (state.lose) { area.appendChild(loseSheet()); pages++; }
+    if (state.kontroll) { area.appendChild(kontrollSheet()); pages++; }
+    $("previewTitle").textContent = "Vorschau: " + count + " Karten (Nr. " + from + "–" + to + "), " + pages + " Seite" + (pages === 1 ? "" : "n") + " A4";
+  }
+
+  function printCard(nr) {
+    var grid = makeCard(nr);
+    var card = el("div", "pcard");
+    var ph = el("div", "ph");
+    for (var c = 0; c < 5; c++) ph.appendChild(el("div", "p-" + LETTERS[c].toLowerCase(), LETTERS[c]));
+    card.appendChild(ph);
+    var pg = el("div", "pg");
+    for (var r = 0; r < 5; r++) {
+      for (c = 0; c < 5; c++) {
+        var v = grid[r][c];
+        if (v === 0) {
+          var f = el("div", "free");
+          f.appendChild(el("b", null, "★"));
+          f.appendChild(el("span", null, "FREI"));
+          pg.appendChild(f);
+        } else {
+          pg.appendChild(el("div", null, String(v)));
+        }
+      }
+    }
+    card.appendChild(pg);
+    var pf = el("div", "pf");
+    pf.appendChild(el("span", null, "Name:"));
+    pf.appendChild(el("span", "name"));
+    pf.appendChild(el("span", "nr", "Nr. " + nr + " · " + seriesKey()));
+    card.appendChild(pf);
+    return card;
+  }
+
+  function loseSheet() {
+    var s = el("div", "sheet");
+    s.appendChild(el("h2", null, "BINGO – Lose 1 bis 75"));
+    s.appendChild(el("p", "sub", "Ausschneiden, gefaltet in einen Beutel, blind ziehen. Gezogene Lose beiseitelegen (zum Prüfen)."));
+    var g = el("div", "lose");
+    for (var n = 1; n <= 75; n++) {
+      var d = el("div", cls("p-", n));
+      d.appendChild(el("span", null, letterOf(n)));
+      d.appendChild(document.createTextNode(String(n)));
+      g.appendChild(d);
+    }
+    for (var k = 75; k < 78; k++) g.appendChild(el("div"));
+    s.appendChild(g);
+    return s;
+  }
+
+  function kontrollSheet() {
+    var s = el("div", "sheet");
+    s.appendChild(el("h2", null, "BINGO – Kontrollbogen"));
+    s.appendChild(el("p", "sub", "Jede gezogene Zahl ankreuzen. Für jedes Spiel eine eigene Tabelle."));
+    for (var spiel = 1; spiel <= 4; spiel++) {
+      s.appendChild(el("h3", "kspiel", "Spiel " + spiel + ":  ☐ 1 Reihe   ☐ 2 Reihen   ☐ Volle Karte"));
+      var tb = el("table", "ktable");
+      for (var c = 0; c < 5; c++) {
+        var tr = el("tr");
+        tr.appendChild(el("td", "kh p-" + LETTERS[c].toLowerCase(), LETTERS[c]));
+        for (var n = c * 15 + 1; n <= c * 15 + 15; n++) tr.appendChild(el("td", null, String(n)));
+        tb.appendChild(tr);
+      }
+      s.appendChild(tb);
+    }
+    return s;
+  }
+
+  // ---------- Ansichten ----------
+  function setView(v) {
+    document.body.className = "v-" + v;
+    var nb = document.querySelectorAll("nav button");
+    for (var i = 0; i < nb.length; i++) nb[i].setAttribute("aria-pressed", nb[i].getAttribute("data-view") === v ? "true" : "false");
+    if (v === "pruefen") renderCheck();
+    if (v === "drucken") renderPrint();
+  }
+  function currentView() { return document.body.className.replace("v-", ""); }
+
+  function renderSpeech() {
+    var b = $("btnSpeech");
+    b.setAttribute("aria-pressed", state.speech ? "true" : "false");
+    b.textContent = state.speech ? "🔊 Ansage an" : "🔇 Ansage aus";
+    if (!("speechSynthesis" in window)) b.style.display = "none";
+  }
+
+  // ---------- Ereignisse ----------
+  function init() {
+    load();
+    buildBoard();
+
+    var nb = document.querySelectorAll("nav button");
+    for (var i = 0; i < nb.length; i++) {
+      nb[i].addEventListener("click", function () { setView(this.getAttribute("data-view")); });
+    }
+    var gb = document.querySelectorAll("#goal button");
+    for (i = 0; i < gb.length; i++) {
+      gb[i].addEventListener("click", function () {
+        state.goal = this.getAttribute("data-goal"); save(); renderDraw(); renderCheck();
+      });
+    }
+    $("btnDraw").addEventListener("click", draw);
+    $("btnUndo").addEventListener("click", undo);
+    $("btnReset").addEventListener("click", resetClick);
+    $("btnSpeech").addEventListener("click", function () {
+      state.speech = !state.speech; save(); renderSpeech();
+    });
+
+    $("checkNr").value = state.checkNr;
+    $("checkNr").addEventListener("input", function () {
+      state.checkNr = clampNr(this.value, 1); save(); renderCheck();
+    });
+    $("nrMinus").addEventListener("click", function () {
+      state.checkNr = Math.max(1, clampNr(state.checkNr, 1) - 1); $("checkNr").value = state.checkNr; save(); renderCheck();
+    });
+    $("nrPlus").addEventListener("click", function () {
+      state.checkNr = Math.min(999, clampNr(state.checkNr, 1) + 1); $("checkNr").value = state.checkNr; save(); renderCheck();
+    });
+
+    $("pFrom").value = state.from;
+    $("pTo").value = state.to;
+    $("pSeries").value = state.series;
+    $("pLose").checked = !!state.lose;
+    $("pKontroll").checked = !!state.kontroll;
+    $("pFrom").addEventListener("input", function () { state.from = clampNr(this.value, 1); save(); renderPrint(); });
+    $("pTo").addEventListener("input", function () { state.to = clampNr(this.value, 40); save(); renderPrint(); });
+    $("pSeries").addEventListener("input", function () { state.series = this.value; save(); renderPrint(); });
+    $("pLose").addEventListener("change", function () { state.lose = this.checked; save(); renderPrint(); });
+    $("pKontroll").addEventListener("change", function () { state.kontroll = this.checked; save(); renderPrint(); });
+    $("btnPrint").addEventListener("click", function () { renderPrint(); window.print(); });
+    window.addEventListener("beforeprint", renderPrint);
+
+    document.addEventListener("keydown", function (e) {
+      var tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+      if (currentView() !== "ziehung") return;
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); draw(); }
+      else if (e.key === "Backspace") { e.preventDefault(); undo(); }
+    });
+
+    renderSpeech();
+    renderDraw();
+    renderCheck();
+    renderPrint();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

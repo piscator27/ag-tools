@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bit-Editor</title>
+<style>
+  :root{
+    --bg:#1a1a1a; --panel:#232323; --line:#3a3a3a; --fg:#f0f0f0; --dim:#9a9a9a;
+    --an:#fccb00; --aus:#5a5a5a; --sel:#3b6ea5; --ok:#7fc97f; --warn:#e06c6c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font-family:"DejaVu Sans",Verdana,Arial,sans-serif;font-size:17px}
+  header{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;
+         padding:12px 20px;border-bottom:2px solid var(--line)}
+  h1{margin:0;font-size:24px;letter-spacing:.5px}
+  .sub{color:var(--dim);font-size:15px}
+  main{display:flex;gap:18px;padding:16px 20px;align-items:flex-start;flex-wrap:wrap}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+  #drop{flex:1 1 620px;min-width:420px}
+  #detail{flex:0 1 400px;min-width:340px}
+  #drop.hover{border-color:var(--an);background:#2a2720}
+  .leer{color:var(--dim);text-align:center;padding:46px 10px;line-height:1.7;font-size:19px}
+  .leer b{color:var(--fg)}
+  button,select,input[type=text]{
+    background:#333;color:var(--fg);border:1px solid var(--line);border-radius:5px;
+    padding:6px 12px;font-size:16px;font-family:inherit;cursor:pointer}
+  button:hover{background:#444;border-color:var(--dim)}
+  button:disabled{opacity:.35;cursor:default}
+  input[type=text]{cursor:text;font-family:"DejaVu Sans Mono",monospace}
+  .leiste{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .leiste .weit{margin-left:auto}
+  table.dump{border-collapse:collapse;font-family:"DejaVu Sans Mono","Courier New",monospace;
+             font-size:17px;line-height:1.35}
+  table.dump td{padding:1px 0}
+  td.off{color:var(--dim);padding-right:14px;user-select:none;font-size:15px}
+  span.b{display:inline-block;width:2.35em;text-align:center;padding:1px 0;border-radius:3px;cursor:pointer}
+  span.b:hover{background:#3a3a3a}
+  span.b.sel{background:var(--sel);color:#fff}
+  span.b.tr{background:#5c4a13}
+  td.txt{padding-left:16px;white-space:pre;letter-spacing:1px}
+  span.c{cursor:pointer;border-radius:2px}
+  span.c:hover{background:#3a3a3a}
+  span.c.sel{background:var(--sel);color:#fff}
+  span.c.np{color:var(--dim)}
+  span.c.hi{color:var(--an)}
+  .bits{display:flex;gap:7px;margin:10px 0 6px 0}
+  .bit{flex:1;text-align:center;border:2px solid var(--line);border-radius:6px;
+       padding:8px 0 6px 0;cursor:pointer;background:#2b2b2b;user-select:none}
+  .bit:hover{border-color:var(--dim)}
+  .bit .w{display:block;font-size:13px;color:var(--dim);margin-bottom:3px}
+  .bit .v{display:block;font-size:30px;font-weight:bold;line-height:1;color:var(--aus)}
+  .bit.on{background:#3a3418;border-color:var(--an)}
+  .bit.on .v{color:var(--an)}
+  .gross{font-size:56px;font-weight:bold;line-height:1.15;
+         font-family:"DejaVu Sans Mono","Courier New",monospace}
+  .zeile{display:flex;justify-content:space-between;border-top:1px solid var(--line);
+         padding:6px 0;font-size:16px}
+  .zeile span:first-child{color:var(--dim)}
+  .mono{font-family:"DejaVu Sans Mono","Courier New",monospace}
+  .hinweis{color:var(--dim);font-size:14px;margin-top:10px;line-height:1.5}
+  .status{padding:4px 20px 0 20px;color:var(--dim);font-size:15px;min-height:22px}
+  .status.ok{color:var(--ok)} .status.warn{color:var(--warn)}
+  #fi{position:fixed;right:12px;bottom:8px;color:var(--dim);opacity:.4;
+      font-size:14px;font-style:italic;pointer-events:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Bit-Editor</h1>
+  <span class="sub">Jede Datei ist eine Folge von Byte. Hier sieht man sie.</span>
+</header>
+
+<div class="status" id="status"></div>
+
+<main>
+  <section class="panel" id="drop">
+    <div class="leiste">
+      <button id="btnDatei">Datei öffnen</button>
+      <input type="file" id="datei" style="display:none">
+      <button id="btnText">Text eintippen</button>
+      <input type="text" id="suche" placeholder="Text suchen" size="14">
+      <button id="btnSuche">Suchen</button>
+      <span class="weit"></span>
+      <button id="btnSpeichern" disabled>Speichern</button>
+    </div>
+    <div class="leiste" id="nav" style="display:none">
+      <button id="btnZur">&#9664;</button>
+      <span class="mono" id="bereich"></span>
+      <button id="btnVor">&#9654;</button>
+      <span class="sub weit mono" id="info"></span>
+    </div>
+    <div id="ansicht"><div class="leer">
+      Zieh eine Datei in dieses Feld.<br>
+      Oder <b>Datei öffnen</b>, oder <b>Text eintippen</b>.
+    </div></div>
+  </section>
+
+  <section class="panel" id="detail">
+    <div class="leer" id="keinByte">Klick ein Byte an.</div>
+    <div id="byteBox" style="display:none">
+      <div class="zeile" style="border:none"><span>Byte Nummer</span><span class="mono" id="dOff">0</span></div>
+      <div class="bits" id="bits"></div>
+      <div style="text-align:center;color:var(--dim);font-size:14px;margin-bottom:12px">
+        Bit anklicken &rarr; umkippen
+      </div>
+      <div class="zeile"><span>Dezimal</span><span class="mono" style="font-size:22px" id="dDez">0</span></div>
+      <div class="zeile"><span>Rechnung</span><span class="mono" id="dSum">0</span></div>
+      <div class="zeile"><span>Zeichen</span><span class="gross" id="dChar">.</span></div>
+      <div class="hinweis" id="dHint"></div>
+      <div class="leiste" style="margin:12px 0 0 0">
+        <button id="btnPrev">&#9664; Byte</button>
+        <button id="btnNext">Byte &#9654;</button>
+        <button id="btnUndo">Zurücksetzen</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="fi">Fi</div>
+
+<script>
+(function(){
+  var daten = null, urspruenglich = null, name = "unbenannt.txt";
+  var sel = -1, seite = 0, PRO = 256, SPALTEN = 16, treffer = [];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var ansicht = $("ansicht"), status = $("status");
+
+  function melde(t, art){ status.textContent = t||""; status.className = "status" + (art?" "+art:""); }
+
+  /* ---------- Zeichen ---------- */
+  function zeichen(b){
+    if(b === 32) return "␣";              /* Leerzeichen sichtbar */
+    if(b === 10) return "↵";              /* Zeilenende */
+    if(b === 13) return "←";
+    if(b === 9)  return "→";
+    if(b >= 33 && b <= 126) return String.fromCharCode(b);
+    if(b >= 160) return String.fromCharCode(b); /* Latin-1, nur zur Anschauung */
+    return "·";
+  }
+  function klasse(b){
+    if(b >= 33 && b <= 126) return "c";
+    if(b >= 160) return "c hi";
+    return "c np";
+  }
+  function name_b(b){
+    if(b === 32) return "Leerzeichen";
+    if(b === 10) return "Zeilenende (Enter)";
+    if(b === 13) return "Wagenrücklauf";
+    if(b === 9)  return "Tabulator";
+    if(b < 32)   return "Steuerzeichen, nicht sichtbar";
+    if(b === 127)return "Steuerzeichen";
+    if(b >= 128) return "Nicht mehr in der ASCII-Tabelle";
+    return "";
+  }
+
+  /* ---------- Laden ---------- */
+  function uebernimm(buf, dateiname){
+    daten = new Uint8Array(buf);
+    urspruenglich = new Uint8Array(buf.slice(0));
+    name = dateiname || "unbenannt.bin";
+    sel = -1; seite = 0; treffer = [];
+    $("btnSpeichern").disabled = false;
+    $("nav").style.display = "flex";
+    zeichne(); waehle(0);
+    melde(name + " — " + daten.length + " Byte geladen", "ok");
+  }
+
+  function ladeDatei(f){
+    if(!f) return;
+    if(f.size > 2000000){ melde("Die Datei ist größer als 2 MB. Nimm eine kleinere.", "warn"); return; }
+    var r = new FileReader();
+    r.onload = function(e){ uebernimm(e.target.result, f.name); };
+    r.readAsArrayBuffer(f);
+  }
+
+  $("btnDatei").onclick = function(){ $("datei").click(); };
+  $("datei").onchange = function(e){ ladeDatei(e.target.files[0]); };
+
+  $("btnText").onclick = function(){
+    var t = window.prompt("Text eintippen:", "Informatik ist toll.");
+    if(t === null) return;
+    var enc = new TextEncoder().encode(t);
+    uebernimm(enc.buffer.slice(0), "eingetippt.txt");
+  };
+
+  var drop = $("drop");
+  ["dragenter","dragover"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("hover"); });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("hover"); });
+  });
+  drop.addEventListener("drop", function(e){
+    if(e.dataTransfer.files.length) ladeDatei(e.dataTransfer.files[0]);
+  });
+
+  /* ---------- Dump zeichnen ---------- */
+  function zeichne(){
+    if(!daten){ return; }
+    var von = seite * PRO, bis = Math.min(von + PRO, daten.length);
+    var h = '<table class="dump">';
+    for(var z = von; z < bis; z += SPALTEN){
+      h += '<tr><td class="off">' + z + '</td><td>';
+      for(var i = z; i < z + SPALTEN; i++){
+        if(i >= bis){ h += '<span class="b">&nbsp;</span>'; continue; }
+        h += '<span class="b' + (i===sel?' sel':'') + (treffer.indexOf(i)>=0?' tr':'') +
+             '" data-i="' + i + '">' + daten[i] + '</span>';
+      }
+      h += '</td><td class="txt">';
+      for(var j = z; j < z + SPALTEN; j++){
+        if(j >= bis){ h += ' '; continue; }
+        h += '<span class="' + klasse(daten[j]) + (j===sel?' sel':'') +
+             '" data-i="' + j + '">' + zeichen(daten[j]) + '</span>';
+      }
+      h += '</td></tr>';
+    }
+    h += '</table>';
+    ansicht.innerHTML = h;
+    $("bereich").textContent = "Byte " + von + " – " + (bis-1);
+    $("info").textContent = name + " · " + daten.length + " Byte";
+    $("btnZur").disabled = seite === 0;
+    $("btnVor").disabled = bis >= daten.length;
+    Array.prototype.forEach.call(ansicht.querySelectorAll("[data-i]"), function(el){
+      el.onclick = function(){ waehle(+el.getAttribute("data-i")); };
+    });
+  }
+
+  $("btnZur").onclick = function(){ if(seite>0){ seite--; zeichne(); } };
+  $("btnVor").onclick = function(){ seite++; zeichne(); };
+
+  /* ---------- Byte-Detail ---------- */
+  function waehle(i){
+    if(!daten || i < 0 || i >= daten.length) return;
+    sel = i;
+    var s = Math.floor(i / PRO);
+    if(s !== seite){ seite = s; }
+    zeichne();
+    zeigeByte();
+  }
+
+  function zeigeByte(){
+    $("keinByte").style.display = "none";
+    $("byteBox").style.display = "block";
+    var b = daten[sel];
+    $("dOff").textContent = sel;
+    var werte = [128,64,32,16,8,4,2,1], h = "", teile = [];
+    for(var k = 0; k < 8; k++){
+      var an = (b & werte[k]) ? 1 : 0;
+      if(an) teile.push(werte[k]);
+      h += '<div class="bit' + (an?' on':'') + '" data-w="' + werte[k] + '">' +
+           '<span class="w">' + werte[k] + '</span><span class="v">' + an + '</span></div>';
+    }
+    $("bits").innerHTML = h;
+    Array.prototype.forEach.call($("bits").children, function(el){
+      el.onclick = function(){
+        daten[sel] = daten[sel] ^ (+el.getAttribute("data-w"));
+        zeichne(); zeigeByte();
+        melde("Byte " + sel + " ist jetzt " + daten[sel] +
+              (daten[sel]!==urspruenglich[sel] ? "  (vorher " + urspruenglich[sel] + ")" : ""));
+      };
+    });
+    $("dDez").textContent = b;
+    $("dSum").textContent = teile.length ? teile.join(" + ") + " = " + b : "0";
+    $("dChar").textContent = zeichen(b);
+    var hin = name_b(b);
+    if(daten[sel] !== urspruenglich[sel]) hin += (hin?"  ·  ":"") + "geändert, vorher " + urspruenglich[sel];
+    $("dHint").textContent = hin;
+  }
+
+  $("btnPrev").onclick = function(){ waehle(sel-1); };
+  $("btnNext").onclick = function(){ waehle(sel+1); };
+  $("btnUndo").onclick = function(){
+    if(!daten) return;
+    daten[sel] = urspruenglich[sel]; zeichne(); zeigeByte();
+    melde("Byte " + sel + " zurückgesetzt.");
+  };
+
+  document.addEventListener("keydown", function(e){
+    if(!daten) return;
+    if(document.activeElement === $("suche")) return;
+    if(e.key === "ArrowRight"){ waehle(sel+1); e.preventDefault(); }
+    if(e.key === "ArrowLeft"){ waehle(sel-1); e.preventDefault(); }
+    if(e.key === "ArrowDown"){ waehle(sel+SPALTEN); e.preventDefault(); }
+    if(e.key === "ArrowUp"){ waehle(sel-SPALTEN); e.preventDefault(); }
+  });
+
+  /* ---------- Suchen ---------- */
+  function suchen(){
+    if(!daten) return;
+    var t = $("suche").value;
+    if(!t){ treffer = []; zeichne(); return; }
+    var muster = new TextEncoder().encode(t);
+    treffer = [];
+    var start = -1;
+    for(var i = 0; i + muster.length <= daten.length; i++){
+      var passt = true;
+      for(var j = 0; j < muster.length; j++){ if(daten[i+j] !== muster[j]){ passt = false; break; } }
+      if(passt){ if(start < 0) start = i; for(var k = 0; k < muster.length; k++) treffer.push(i+k); }
+    }
+    if(start < 0){ melde("„" + t + "“ steht nicht in dieser Datei.", "warn"); zeichne(); }
+    else { melde("Gefunden ab Byte " + start + ".", "ok"); waehle(start); }
+  }
+  $("btnSuche").onclick = suchen;
+  $("suche").addEventListener("keydown", function(e){ if(e.key === "Enter") suchen(); });
+
+  /* ---------- Speichern ---------- */
+  $("btnSpeichern").onclick = function(){
+    if(!daten) return;
+    var blob = new Blob([daten], {type:"application/octet-stream"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name.replace(/(\.[^.]*)?$/, "_geaendert$1");
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    melde("Gespeichert als " + a.download + " (im Download-Ordner).", "ok");
+  };
+})();
+</script>
+</body>
+</html>

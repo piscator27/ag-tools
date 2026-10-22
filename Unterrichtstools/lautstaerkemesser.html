@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Arbeitslautstärke</title>
+<style>
+  :root{
+    --bg:#111214;
+    --panel:#17181b;
+    --line:#2a2c30;
+    --text:#f2f2f0;
+    --sub:#9a9ca1;
+    --green:#5fd97a;
+    --yellow:#f2d94e;
+    --red:#f0553f;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    height:100%;
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .card{
+    width:min(760px,92vw);
+    padding:40px clamp(20px,5vw,56px) 44px;
+    text-align:center;
+  }
+  h1{
+    font-size:clamp(22px,3.2vw,30px);
+    font-weight:600;
+    letter-spacing:.2px;
+    margin:0 0 30px;
+  }
+  .meter-wrap{
+    position:relative;
+    padding-left:34px; /* room for threshold triangle on the left axis */
+  }
+  canvas{
+    width:100%;
+    height:180px;
+    display:block;
+    border-radius:14px;
+    background:linear-gradient(180deg,#0c0d0f,#0a0b0c);
+    border:1px solid var(--line);
+  }
+  .threshold-marker{
+    position:absolute;
+    left:6px;
+    width:0;
+    height:0;
+    border-top:9px solid transparent;
+    border-bottom:9px solid transparent;
+    border-left:12px solid #ffffff;
+    filter:drop-shadow(0 0 3px rgba(255,255,255,.35));
+    transform:translateY(-50%);
+    pointer-events:none;
+    transition:top .12s linear;
+  }
+  .status-row{
+    margin-top:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    min-height:30px;
+  }
+  .count{
+    font-size:16px;
+    color:var(--sub);
+  }
+  .count b{
+    color:var(--text);
+    font-variant-numeric:tabular-nums;
+  }
+  .warning{
+    font-size:14px;
+    color:var(--red);
+    opacity:0;
+    transition:opacity .35s ease;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .warning.show{ opacity:1; }
+  .warning .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 8px var(--red);
+  }
+
+  .controls{
+    margin-top:30px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .slider-label{
+    font-size:13px;
+    color:var(--sub);
+    display:flex;
+    gap:6px;
+  }
+  .slider-label b{ color:var(--text); font-variant-numeric:tabular-nums; }
+  input[type=range]{
+    width:min(420px,80vw);
+    accent-color:#e7e7e5;
+    height:4px;
+  }
+
+  .buttons{
+    margin-top:28px;
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  button{
+    font-family:inherit;
+    font-size:15px;
+    padding:11px 22px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:#1c1d20;
+    color:var(--text);
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:background .15s ease,border-color .15s ease;
+  }
+  button:hover{ background:#232427; border-color:#3a3c41; }
+  button.active{
+    background:#233024;
+    border-color:#3a5a41;
+    color:#8fe3a3;
+  }
+  .hint{
+    margin-top:18px;
+    font-size:12px;
+    color:#5c5e63;
+  }
+  .watermark{
+    position:fixed;
+    right:14px;
+    bottom:10px;
+    font-size:18px;
+    color:#4a4c50;
+    user-select:none;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Arbeitslautstärke</h1>
+
+  <div class="meter-wrap">
+    <div class="threshold-marker" id="thresholdMarker" style="top:30%"></div>
+    <canvas id="meter"></canvas>
+  </div>
+
+  <div class="status-row">
+    <div class="count">Überschreitungen: <b id="countVal">0</b></div>
+    <div class="warning" id="warningEl"><span class="dot"></span><span>Bitte leiser</span></div>
+  </div>
+
+  <div class="controls">
+    <div class="slider-label">Grenze: <b id="thresholdVal">60</b></div>
+    <input type="range" id="thresholdSlider" min="0" max="100" value="60">
+  </div>
+
+  <div class="buttons">
+    <button id="micBtn">🎙️ Mikrofon</button>
+    <button id="resetBtn">↺ Reset</button>
+  </div>
+
+  <div class="hint" id="hint">Mikrofonzugriff erforderlich, um die Lautstärke zu messen.</div>
+</div>
+
+<div class="watermark">Fi</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('meter');
+  const ctx = canvas.getContext('2d');
+  const micBtn = document.getElementById('micBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const thresholdSlider = document.getElementById('thresholdSlider');
+  const thresholdVal = document.getElementById('thresholdVal');
+  const thresholdMarker = document.getElementById('thresholdMarker');
+  const countVal = document.getElementById('countVal');
+  const warningEl = document.getElementById('warningEl');
+  const hint = document.getElementById('hint');
+
+  let audioCtx, analyser, source, stream, dataArray;
+  let running = false;
+  let rafId = null;
+
+  let threshold = parseInt(thresholdSlider.value, 10);
+  let count = 0;
+
+  // rolling history of levels (0-100)
+  const HISTORY_LEN = 40;
+  let history = new Array(HISTORY_LEN).fill(0);
+
+  // how often (ms) a new point is added to the history / redrawn.
+  // Higher = calmer, slower-moving display.
+  const UPDATE_INTERVAL = 270;
+  let lastUpdate = 0;
+
+  // smoothing applied to the raw microphone reading before it is used
+  // (both for the threshold check and the display), so short spikes
+  // don't cause jittery motion.
+  const SMOOTHING = 0.15; // lower = smoother/calmer, higher = more responsive
+  let smoothedLevel = 0;
+
+  // threshold-exceeded timing state
+  let exceedingSince = null;
+  let warnedThisPeriod = false;
+  let warningHideTimer = null;
+
+  function resizeCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  function updateThresholdUI(){
+    thresholdVal.textContent = threshold;
+    // marker vertical position: 0 at bottom, 100 at top
+    const pct = 100 - threshold; // css top is from the top of the box
+    thresholdMarker.style.top = pct + '%';
+  }
+  thresholdSlider.addEventListener('input', ()=>{
+    threshold = parseInt(thresholdSlider.value, 10);
+    updateThresholdUI();
+  });
+
+  function levelColor(pct){
+    // pct 0-100 -> green -> yellow -> red
+    if(pct < 50){
+      return lerpColor([95,217,122], [242,217,78], pct/50);
+    } else {
+      return lerpColor([242,217,78], [240,85,63], (pct-50)/50);
+    }
+  }
+  function lerpColor(a,b,t){
+    const r = Math.round(a[0]+(b[0]-a[0])*t);
+    const g = Math.round(a[1]+(b[1]-a[1])*t);
+    const bch = Math.round(a[2]+(b[2]-a[2])*t);
+    return `rgb(${r},${g},${bch})`;
+  }
+
+  function draw(){
+    const rect = canvas.getBoundingClientRect();
+    const w = rect.width, h = rect.height;
+    ctx.clearRect(0,0,w,h);
+
+    const step = w / (HISTORY_LEN - 1);
+    const points = history.map((v,i)=>({
+      x: i*step,
+      y: h - (v/100)*h*0.92 - 2 // leave a little headroom at top
+    }));
+
+    // build smooth wave path (top edge) using quadratic mid-point smoothing
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    ctx.lineTo(points[0].x, points[0].y);
+    for(let i=0;i<points.length-1;i++){
+      const midX = (points[i].x+points[i+1].x)/2;
+      const midY = (points[i].y+points[i+1].y)/2;
+      ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
+    }
+    ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
+    ctx.lineTo(w, h);
+    ctx.closePath();
+
+    // gradient fill based on overall current loudness
+    const currentPct = history[history.length-1];
+    const grad = ctx.createLinearGradient(0,h,0,0);
+    grad.addColorStop(0, '#3fae5c');
+    grad.addColorStop(0.55, '#e3c93f');
+    grad.addColorStop(1, '#e3543d');
+    ctx.fillStyle = grad;
+    ctx.globalAlpha = 0.85;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // top outline stroke
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for(let i=0;i<points.length-1;i++){
+      const midX = (points[i].x+points[i+1].x)/2;
+      const midY = (points[i].y+points[i+1].y)/2;
+      ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
+    }
+    ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
+    ctx.strokeStyle = levelColor(currentPct);
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function levelFromAnalyser(){
+    analyser.getByteTimeDomainData(dataArray);
+    let sumSquares = 0;
+    for(let i=0;i<dataArray.length;i++){
+      const v = (dataArray[i]-128)/128;
+      sumSquares += v*v;
+    }
+    const rms = Math.sqrt(sumSquares/dataArray.length);
+    // convert to dB, map roughly -55dB..-5dB to 0..100
+    const db = 20*Math.log10(rms || 0.0001);
+    let pct = (db + 55) / 50 * 100;
+    pct = Math.max(0, Math.min(100, pct));
+    return pct;
+  }
+
+  function showWarning(){
+    warningEl.classList.add('show');
+    clearTimeout(warningHideTimer);
+    warningHideTimer = setTimeout(()=>{
+      warningEl.classList.remove('show');
+    }, 1800);
+  }
+
+  function tick(now){
+    if(!running) return;
+
+    const rawPct = levelFromAnalyser();
+    // exponential smoothing so brief spikes don't cause jumpy motion
+    smoothedLevel += (rawPct - smoothedLevel) * SMOOTHING;
+
+    // threshold logic runs continuously on the smoothed value, so timing
+    // stays accurate even though the display itself updates more slowly
+    if(smoothedLevel > threshold){
+      if(exceedingSince === null) exceedingSince = now;
+      if(!warnedThisPeriod && now - exceedingSince >= 1000){
+        warnedThisPeriod = true;
+        count++;
+        countVal.textContent = count;
+        showWarning();
+      }
+    } else {
+      exceedingSince = null;
+      warnedThisPeriod = false;
+    }
+
+    if(now - lastUpdate >= UPDATE_INTERVAL){
+      lastUpdate = now;
+      history.push(smoothedLevel);
+      history.shift();
+      draw();
+    }
+
+    rafId = requestAnimationFrame(tick);
+  }
+
+  async function startMic(){
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      dataArray = new Uint8Array(analyser.fftSize);
+      source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      running = true;
+      micBtn.classList.add('active');
+      micBtn.textContent = '🎙️ Mikrofon an';
+      hint.style.display = 'none';
+      lastUpdate = 0;
+      smoothedLevel = 0;
+      rafId = requestAnimationFrame(tick);
+    }catch(err){
+      hint.textContent = 'Mikrofonzugriff wurde verweigert oder ist nicht verfügbar.';
+    }
+  }
+
+  function stopMic(){
+    running = false;
+    if(rafId) cancelAnimationFrame(rafId);
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    if(audioCtx) audioCtx.close();
+    micBtn.classList.remove('active');
+    micBtn.textContent = '🎙️ Mikrofon';
+    hint.style.display = '';
+    hint.textContent = 'Mikrofonzugriff erforderlich, um die Lautstärke zu messen.';
+    history = new Array(HISTORY_LEN).fill(0);
+    draw();
+  }
+
+  micBtn.addEventListener('click', ()=>{
+    if(running) stopMic(); else startMic();
+  });
+
+  resetBtn.addEventListener('click', ()=>{
+    count = 0;
+    countVal.textContent = 0;
+    exceedingSince = null;
+    warnedThisPeriod = false;
+    warningEl.classList.remove('show');
+  });
+
+  // init
+  resizeCanvas();
+  updateThresholdUI();
+  draw();
+})();
+</script>
+
+</body>
+</html>

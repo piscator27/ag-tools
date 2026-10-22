@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Minutenplaner</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    max-width:700px;
+    margin:40px auto;
+    font-size:28px;
+}
+
+h1{
+    text-align:center;
+}
+
+input{
+    font-size:30px;
+    width:120px;
+    padding:8px;
+}
+
+button{
+    font-size:28px;
+    padding:8px 18px;
+    margin-left:10px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:30px;
+}
+
+th,td{
+    border-bottom:1px solid #ccc;
+    padding:12px;
+    text-align:center;
+}
+
+.rest{
+    font-weight:bold;
+}
+
+.negativ{
+    color:red;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Minutenplaner</h1>
+
+<p>
+Abschnitt:
+<input id="eingabe" type="number" autofocus>
+<button onclick="hinzufuegen()">Hinzufügen</button>
+<button onclick="rueckgaengig()">Rückgängig</button>
+</p>
+
+<table id="tabelle">
+<tr>
+<th>#</th>
+<th>Minuten</th>
+<th>Summe</th>
+<th>Rest</th>
+</tr>
+</table>
+
+<script>
+
+let daten=[];
+
+function zeichnen(){
+
+    const table=document.getElementById("tabelle");
+
+    table.innerHTML=
+    `<tr>
+        <th>#</th>
+        <th>Minuten</th>
+        <th>Summe</th>
+        <th>Rest</th>
+    </tr>`;
+
+    let summe=0;
+
+    daten.forEach((m,index)=>{
+
+        summe+=m;
+        let rest=45-summe;
+
+        table.innerHTML+=`
+        <tr>
+            <td>${index+1}</td>
+            <td>${m}</td>
+            <td>${summe}</td>
+            <td class="${rest<0?'negativ':'rest'}">${rest}</td>
+        </tr>`;
+    });
+
+}
+
+function hinzufuegen(){
+
+    const feld=document.getElementById("eingabe");
+
+    const wert=parseInt(feld.value);
+
+    if(isNaN(wert)) return;
+
+    daten.push(wert);
+
+    feld.value="";
+    feld.focus();
+
+    zeichnen();
+
+}
+
+function rueckgaengig(){
+
+    daten.pop();
+    zeichnen();
+
+}
+
+document.getElementById("eingabe").addEventListener("keydown",function(e){
+
+    if(e.key==="Enter")
+        hinzufuegen();
+
+});
+
+zeichnen();
+
+</script>
+
+</body>
+</html>

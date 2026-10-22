@@ -377,11 +377,19 @@ def _schriftgroesse_befehl(text: str) -> str:
         return r"\Huge"
     if n <= 4:
         return r"\huge"
-    if n <= 7:
+    if n <= 5:
         return r"\LARGE"
-    if n <= 12:
+    if n <= 7:
         return r"\Large"
-    return r"\large"
+    if n <= 9:
+        return r"\large"
+    if n <= 11:
+        return r"\normalsize"
+    if n <= 14:
+        return r"\small"
+    if n <= 18:
+        return r"\footnotesize"
+    return r"\scriptsize"
 
 
 def schoene_schrittweite(spanne: float, ziel_anzahl: float = 5) -> float:

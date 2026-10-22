@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Stundenraster V8.1</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:1150px;margin:20px auto;padding:0 10px}
+.toolbar,.entry{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+input,select,button{font-size:16px;padding:6px}
+#titelzeile{display:flex;align-items:center;gap:8px;width:100%}
+#titel{flex:1 1 auto;min-width:0}
+#eintrag{flex:2 1 300px;min-width:0}
+#dauer{width:70px;flex:0 0 auto}
+#bem{flex:3 1 260px;min-width:0}
+.entry{background:#f4f7fb;border:1px solid #d8e0ea;border-radius:5px;padding:8px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{border:1px solid #aaa;padding:4px 5px;vertical-align:top;
+      overflow-wrap:break-word;word-break:normal}
+th{background:#eee;text-align:left}
+.pause{background:#fff2b8}
+.pause td{color:#7a6a2a}
+
+/* Spaltenbreiten (table-layout:fixed -> Text bricht um statt zu drängeln) */
+.uhr{width:118px;white-space:nowrap}
+.ein{width:26%}
+.min{width:58px}
+.r{width:48px;text-align:right;color:#666}
+.act{width:112px;white-space:nowrap}
+
+/* Inline-Eingabefelder: sehen aus wie Text, bis man drauf zeigt */
+td input,td textarea{width:100%;box-sizing:border-box;font:inherit;color:inherit;
+         padding:3px 4px;line-height:1.35;
+         border:1px solid transparent;background:transparent;border-radius:3px}
+td textarea{display:block;resize:none;overflow:hidden;min-height:calc(1.35em + 8px)}
+td input:hover,td textarea:hover{border-color:#ccd;background:#fff}
+td input:focus,td textarea:focus{border-color:#4a90d9;background:#fff;outline:none;
+         box-shadow:0 0 0 2px #d6e6f7}
+td input.d{text-align:right}
+
+/* Nur für den Druck: echter Text statt Eingabefeld – nie abgeschnitten */
+td .pr{display:none;white-space:pre-wrap;padding:3px 4px;line-height:1.35}
+
+/* Bemerkung: gerendertes HTML lesen, per Klick auf den Quelltext umschalten */
+td .view{padding:3px 4px;line-height:1.35;border:1px solid transparent;border-radius:3px;
+         cursor:text;min-height:calc(1.35em + 8px)}
+td .view:hover{border-color:#ccd;background:#fff}
+td .view:empty::before{content:"–";color:#aaa}
+.bemzelle>textarea[data-f="bem"]{display:none}
+.bemzelle.edit>textarea[data-f="bem"]{display:block}
+.bemzelle.edit>.view{display:none}
+td pre{margin:4px 0;font-family:Consolas,"DejaVu Sans Mono",monospace;
+       font-size:.85em;line-height:1.25;white-space:pre-wrap}
+td code{font-family:Consolas,"DejaVu Sans Mono",monospace;font-size:.9em;
+        background:#f1f3f5;border-radius:2px;padding:0 2px}
+
+/* Notizzeilen (dauer 0): volle Breite, ohne Uhrzeit */
+tr.notiz td{background:#eef4ff}
+tr.notiz .uhr input{width:66px}
+tr.notiz textarea.nt,tr.notiz .pr.nt{font-weight:bold;letter-spacing:1px}
+
+/* Fortsetzungszeilen (nicht editierbar) */
+tr.forts td{color:#555;background:#fafafa}
+
+/* Schultag zu Ende + was nicht mehr hineinpasst */
+tr.schluss td{background:#efefef;color:#444;font-size:13px;border-top:2px solid #999}
+tr.ueber td{background:#fdeaea;color:#8a2b2b}
+tr.ueber .tag{border-color:#e0b4b4;color:#a44}
+tr.ueber .uhr{text-align:center;color:#b98a8a}
+.tag{font-size:11px;color:#888;border:1px solid #ccc;border-radius:8px;padding:0 6px;white-space:nowrap}
+
+/* Zeilen-Buttons */
+.act button{padding:2px 6px;font-size:14px;line-height:1.2;border:1px solid #bbb;
+            background:#f7f7f7;border-radius:3px;cursor:pointer}
+.act button:hover{background:#e8eef6;border-color:#7aa5d2}
+tr:hover .act button{background:#fff}
+
+#hint{font-size:12px;color:#777;margin:8px 0 14px}
+#hint kbd{font-family:inherit;background:#eee;border:1px solid #ccc;border-radius:3px;padding:0 4px}
+#info{color:#555;font-size:14px}
+button:disabled{opacity:.4;cursor:default}
+
+@page{size:A4;margin:10mm}
+
+@media print{
+ h2,.toolbar,.entry,#hint,.act{display:none!important}
+ body{margin:0;max-width:none;padding:0}
+ table{font-size:9pt}
+ th,td{padding:2px 5px}
+ .uhr{width:11%}
+ .ein{width:22%}
+ .min{width:6%}
+ .r{width:6%}
+ td input{border-color:transparent!important;background:none!important}
+ td input::placeholder{color:transparent}   /* leeres Min-Feld der Notizzeilen */
+ td textarea{display:none!important}
+ td .pr{display:block}
+ td .view{border-color:transparent!important;background:none!important;min-height:0}
+ td .view:empty::before{content:""}
+ .tag{border:none;color:#666}
+ tr.forts td{background:none}
+ tr.ueber td{background:none}
+ tr.notiz td{background:none}
+ tr.schluss td{background:none;border-top:2px solid #333}
+ tr{break-inside:avoid;page-break-inside:avoid}
+ thead{display:table-header-group}
+}
+</style>
+</head>
+<body>
+<h2>Stundenraster V8.1</h2>
+
+<div class="toolbar"><label id="titelzeile">Titel: <input id="titel" placeholder="optional"></label></div>
+
+<div class="toolbar">
+<label>Startstunde:
+<select id="start"></select>
+</label>
+<button id="undo" title="Rückgängig (Strg+Z)">↶ Undo</button>
+<button id="redo" title="Wiederholen (Strg+Y)">↷ Redo</button>
+<button id="txt">TXT</button>
+<button id="json">JSON</button>
+<button id="load">Laden</button>
+<input id="file" type="file" hidden accept=".json">
+<button onclick="window.print()">Drucken</button>
+<button id="neu" title="Alles leeren (mit Strg+Z rückgängig zu machen)">Neu</button>
+<span id="info"></span>
+</div>
+
+<div class="entry">
+<input id="eintrag" placeholder="Eintrag">
+<input id="dauer" type="number" placeholder="Min" title="leer lassen = Notizzeile ohne Uhrzeit">
+<input id="bem" placeholder="Bem. (HTML erlaubt)">
+<button id="add">Hinzufügen</button>
+</div>
+
+<table>
+<thead><tr>
+<th class="uhr">Uhrzeit</th><th class="ein">Eintrag</th><th class="min">Min</th>
+<th>Bemerkung</th><th class="r">Rest</th><th class="act">Aktion</th>
+</tr></thead>
+<tbody id="tb"></tbody>
+</table>
+
+<div id="hint">
+In der Tabelle direkt editieren ·
+<kbd>Enter</kbd> nächste Zeile ·
+<kbd>Shift</kbd>+<kbd>Enter</kbd> Zeile darunter einfügen ·
+<kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> verschieben ·
+<kbd>Esc</kbd> Änderung verwerfen ·
+<kbd>Strg</kbd>+<kbd>Z</kbd>/<kbd>Y</kbd> Undo/Redo ·
+Min leer = Notizzeile ·
+Bemerkung versteht HTML (Klick zeigt den Quelltext) ·
+Stand wird automatisch im Browser gesichert
+</div>
+
+<script>
+const CFG=[
+{st:470,d:45,p:5},{st:520,d:45,p:15},{st:580,d:45,p:5},{st:630,d:45,p:15},
+{st:690,d:45,p:5},{st:740,d:40,p:30},{st:810,d:45,p:5},{st:860,d:40,p:0}
+];
+const KEY="stundenraster.v8";
+const $=id=>document.getElementById(id);
+const tb=$("tb"), titel=$("titel"), start=$("start"), info=$("info"),
+      eintragIn=$("eintrag"), dauerIn=$("dauer"), bemIn=$("bem");
+
+const LETZTE=CFG.length-1;                         // Index der letzten Lektion
+
+const daten=[];
+for(let i=1;i<=CFG.length;i++) start.add(new Option(i,i));
+start.value=1;
+
+const fmt=m=>Math.floor(m/60)+":"+String(m%60).padStart(2,"0");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num=v=>Math.max(0,parseInt(v,10)||0);
+
+/* ---------- Rendern ---------- */
+
+/* Textfelder wachsen mit dem Inhalt: Zeile bricht um, bleibt aber eine Zelle */
+function wachse(el){
+ if(!el||el.offsetParent===null) return;           // ausgeblendet -> keine Höhe messbar
+ el.style.height="auto";
+ el.style.height=el.scrollHeight+"px";
+}
+const wachseAlle=()=>tb.querySelectorAll("textarea").forEach(wachse);
+
+/* Bemerkung: gerendertes HTML (Lesefassung) + Quelltext-Feld zum Bearbeiten */
+const bemFelder=(i,x)=>
+ `<div class="view">${x.bem||""}</div>`+
+ `<textarea rows="1" data-i="${i}" data-f="bem" placeholder="Bemerkung">${esc(x.bem)}</textarea>`;
+
+const aktionen=i=>
+ `<td class="act">`+
+   `<button data-act="up" data-i="${i}" title="Nach oben (Alt+↑)">↑</button>`+
+   `<button data-act="down" data-i="${i}" title="Nach unten (Alt+↓)">↓</button>`+
+   `<button data-act="ins" data-i="${i}" title="Zeile davor einfügen">✚</button>`+
+   `<button data-act="del" data-i="${i}" title="Zeile löschen">✕</button>`+
+ `</td>`;
+
+const minFeld=(i,x,klasse="min")=>
+ `<td class="${klasse}"><input class="d" data-i="${i}" data-f="dauer" inputmode="numeric" `+
+ `value="${x.dauer?esc(x.dauer):""}" placeholder="Min" title="leer = Notizzeile"></td>`;
+
+/* uhr: fertiger Text für die Zeitspalte · klasse/tag: nur für Überhang-Zeilen */
+function zeile(uhrText,i,teil,rest,x,klasse,tag){
+ const tr=document.createElement("tr");
+ tr.dataset.i=i;
+ if(klasse) tr.className=klasse;
+ const uhr=`<td class="uhr">${uhrText}</td>`;
+ const tagHtml=tag?` <span class="tag">${tag}</span>`:"";
+ if(teil===0){
+  tr.innerHTML=uhr+
+   `<td class="ein"><textarea rows="1" data-i="${i}" data-f="eintrag" placeholder="Eintrag">${esc(x.eintrag)}</textarea><span class="pr">${esc(x.eintrag)}</span>${tagHtml}</td>`+
+   minFeld(i,x)+
+   `<td class="bemzelle">${bemFelder(i,x)}</td>`+
+   `<td class="r">${rest}</td>`+
+   aktionen(i);
+ }else{
+  tr.className=(klasse?klasse+" ":"")+"forts";
+  tr.innerHTML=uhr+
+   `<td class="ein"><span class="f-eintrag">${esc(x.eintrag)}</span> <span class="tag">${tag||"Fortsetzung"}</span></td>`+
+   `<td class="min"></td>`+
+   `<td></td>`+                                    // Bemerkung steht schon in der ersten Zeile
+   `<td class="r">${rest}</td><td class="act"></td>`;
+ }
+ tb.appendChild(tr);
+}
+
+/* dauer 0: Notizzeile über die volle Breite, ohne Uhrzeit.
+   Das Minutenfeld steht in der Zeitspalte – eine Zahl macht wieder eine Zeitzeile daraus. */
+function notizZeile(i,x){
+ const tr=document.createElement("tr");
+ tr.dataset.i=i;
+ tr.className="notiz";
+ tr.innerHTML=minFeld(i,x,"uhr")+
+  `<td class="bemzelle" colspan="4">`+
+    `<textarea class="nt" rows="1" data-i="${i}" data-f="eintrag" placeholder="ÜBERSCHRIFT">${esc(x.eintrag)}</textarea>`+
+    `<span class="pr nt">${esc(x.eintrag)}</span>`+
+    bemFelder(i,x)+
+  `</td>`+
+  aktionen(i);
+ tb.appendChild(tr);
+}
+
+function pauseZeile(a,b){
+ const tr=document.createElement("tr");
+ tr.className="pause";
+ tr.innerHTML=`<td class="uhr">${fmt(a)} - ${fmt(b)}</td><td class="ein">Pause</td>`+
+              `<td class="min">${b-a}</td><td></td><td class="r"></td><td class="act"></td>`;
+ tb.appendChild(tr);
+}
+
+/* Trennzeile: ab hier ist der Stundenplan zu Ende. Gibt die Textzelle zurück,
+   die Minutenzahl steht erst fest, wenn alle Einträge gezählt sind. */
+function schlussZeile(zeit){
+ const tr=document.createElement("tr");
+ tr.className="schluss";
+ tr.innerHTML=`<td class="uhr">${fmt(zeit)}</td><td class="ein" colspan="4"></td><td class="act"></td>`;
+ tb.appendChild(tr);
+ return tr.cells[1];
+}
+
+/* Eintrag (oder sein Rest), der nicht mehr in den Schultag passt */
+const ueberZeile=(i,teil,min,x)=>
+ zeile("–",i,teil,min?`+${min}`:"",x,"ueber",teil?"Rest passt nicht mehr":"passt nicht mehr");
+
+function berechne(){
+ const fs=merkeFokus();
+ tb.innerHTML="";
+ let idx=Math.min(LETZTE,Math.max(0,+start.value-1));
+ let zeit=CFG[idx].st, rest=CFG[idx].d;
+ let ueber=0, schluss=null, notizen=0;             // Minuten nach Schulschluss
+
+ daten.forEach((x,i)=>{
+  let d=num(x.dauer), teil=0;
+  if(d===0){ notizen++; notizZeile(i,x); return; } // Notiz: kostet keine Zeit
+  if(schluss){ ueber+=d; ueberZeile(i,0,d,x); return; }   // Schultag schon vorbei
+  while(d>0){
+   if(rest<=0){                                   // Lektion voll -> Pause, nächste Lektion
+    if(idx>=LETZTE){                              // ...es gibt keine nächste mehr
+     schluss=schlussZeile(zeit);
+     ueber+=d; ueberZeile(i,teil,d,x);
+     return;
+    }
+    if(CFG[idx].p>0) pauseZeile(zeit,zeit+CFG[idx].p);
+    zeit+=CFG[idx].p;
+    idx++;
+    rest=CFG[idx].d;
+   }
+   const nimm=Math.min(d,rest), ende=zeit+nimm;
+   zeile(`${fmt(zeit)} - ${fmt(ende)}`,i,teil,rest-nimm,x);
+   zeit=ende; rest-=nimm; d-=nimm; teil++;
+  }
+ });
+
+ if(schluss) schluss.textContent=`Schultag zu Ende – ${ueber} Min passen nicht mehr ins Raster`;
+ const summe=daten.reduce((s,x)=>s+num(x.dauer),0);
+ info.textContent=`${daten.length-notizen} Einträge · ${summe} Min`+
+                  (notizen?` · ${notizen} Notizen`:"")+
+                  (ueber?` · ${ueber} Min zu viel`:"");
+ wachseAlle();
+ setzeFokus(fs);
+}
+
+/* ---------- Bemerkung: Lesefassung <-> Quelltext ---------- */
+
+const bemFeld=td=>td?td.querySelector('textarea[data-f="bem"]'):null;
+
+function editAn(td){
+ const ta=bemFeld(td);
+ if(!ta) return null;
+ if(!td.classList.contains("edit")){
+  td.classList.add("edit");
+  wachse(ta);
+ }
+ return ta;
+}
+function editAus(td){
+ if(!td||!td.classList.contains("edit")) return;
+ const ta=bemFeld(td), v=td.querySelector(".view");
+ td.classList.remove("edit");
+ if(!ta) return;
+ if(v) v.innerHTML=ta.value;                       // Lesefassung nachziehen
+}
+
+tb.addEventListener("mousedown",ev=>{
+ const v=ev.target.closest("td.bemzelle > .view");
+ if(!v) return;
+ const ta=editAn(v.parentNode);
+ if(!ta) return;
+ ev.preventDefault();                              // sonst landet der Fokus im <div>
+ ta.focus();
+ ta.setSelectionRange(ta.value.length,ta.value.length);
+});
+tb.addEventListener("focusout",ev=>{
+ if(ev.target.dataset&&ev.target.dataset.f==="bem") editAus(ev.target.parentNode);
+});
+
+/* Fokus + Cursorposition über das Neu-Rendern retten */
+function merkeFokus(){
+ const el=document.activeElement;
+ if(!el||!el.dataset||el.dataset.f===undefined||!tb.contains(el)) return null;
+ return {i:el.dataset.i,f:el.dataset.f,s:el.selectionStart,e:el.selectionEnd};
+}
+function setzeFokus(fs){
+ if(!fs) return;
+ const el=feld(fs.i,fs.f);
+ if(!el) return;
+ if(fs.f==="bem") editAn(el.parentNode);
+ el.focus();
+ wachse(el);
+ try{ el.setSelectionRange(fs.s,fs.e); }catch(_){}
+}
+const feld=(i,f)=>tb.querySelector(`input[data-i="${i}"][data-f="${f}"],textarea[data-i="${i}"][data-f="${f}"]`);
+function fokussiere(i,f="eintrag"){
+ const el=feld(i,f);
+ if(!el) return false;
+ if(f==="bem") editAn(el.parentNode);
+ el.focus(); el.select(); wachse(el);
+ return true;
+}
+
+/* ---------- Verlauf (Undo/Redo) ---------- */
+
+let hist=[], hp=-1, pend=null;
+const snap=()=>JSON.stringify({t:titel.value,s:start.value,d:daten});
+
+function commit(){
+ if(pend){ clearTimeout(pend); pend=null; }
+ const s=snap();
+ if(hist[hp]===s) return;
+ hist=hist.slice(0,hp+1);
+ hist.push(s);
+ if(hist.length>200) hist.shift();
+ hp=hist.length-1;
+ knoepfe();
+}
+function commitSpaeter(){                          // beim Tippen: erst nach kurzer Pause
+ if(pend) clearTimeout(pend);
+ pend=setTimeout(()=>{pend=null;commit();},500);
+}
+function uebernimm(s){
+ const o=JSON.parse(s);
+ titel.value=o.t; start.value=o.s;
+ daten.length=0; o.d.forEach(x=>daten.push(x));
+ berechne(); sichere();
+}
+function undo(){
+ if(pend) commit();                                // laufende Tipp-Änderung erst festhalten
+ if(hp>0){ hp--; uebernimm(hist[hp]); knoepfe(); }
+}
+function redo(){
+ if(hp<hist.length-1){ hp++; uebernimm(hist[hp]); knoepfe(); }
+}
+function knoepfe(){
+ $("undo").disabled = hp<=0;
+ $("redo").disabled = hp>=hist.length-1;
+}
+$("undo").onclick=undo;
+$("redo").onclick=redo;
+
+/* ---------- Autosave ---------- */
+
+let sTo=null;
+function sichere(){
+ if(sTo) clearTimeout(sTo);
+ sTo=setTimeout(()=>{ try{ localStorage.setItem(KEY,snap()); }catch(_){} },300);
+}
+function lade(){
+ try{
+  const s=localStorage.getItem(KEY);
+  if(s) uebernimm(s);
+ }catch(_){}
+}
+
+/* ---------- Änderungen an den Einträgen ---------- */
+
+function aendere(fn){ fn(); commit(); berechne(); sichere(); }
+
+const verschiebe=(i,dir)=>{
+ const j=i+dir;
+ if(j<0||j>=daten.length) return;
+ aendere(()=>{ [daten[i],daten[j]]=[daten[j],daten[i]]; });
+ fokussiere(j);
+};
+const einfuegen=at=>{
+ at=Math.max(0,Math.min(daten.length,at));
+ aendere(()=>daten.splice(at,0,{eintrag:"",dauer:5,bem:""}));
+ fokussiere(at);
+};
+const loesche=i=>{
+ aendere(()=>daten.splice(i,1));
+ if(daten.length) fokussiere(Math.min(i,daten.length-1));
+ else eintragIn.focus();
+};
+
+tb.addEventListener("click",ev=>{
+ const b=ev.target.closest("button[data-act]");
+ if(!b) return;
+ const i=+b.dataset.i;
+ ({up:()=>verschiebe(i,-1),down:()=>verschiebe(i,1),
+   ins:()=>einfuegen(i),del:()=>loesche(i)})[b.dataset.act]();
+});
+
+tb.addEventListener("input",ev=>{
+ const el=ev.target;
+ if(!el.dataset||el.dataset.f===undefined) return;
+ const i=+el.dataset.i, f=el.dataset.f;
+ if(!daten[i]) return;
+ if(f==="dauer"){
+  daten[i].dauer=num(el.value);
+  berechne();                                      // Zeiten verschieben sich -> neu rechnen
+ }else{
+  daten[i][f]=el.value;                            // Text ändert die Zeiten nicht
+  wachse(el);                                      // Feld an neue Zeilenzahl anpassen
+  if(f==="eintrag"){
+   const pr=el.parentNode.querySelector(".pr");
+   if(pr) pr.textContent=el.value;                 // Druckfassung mitführen
+   tb.querySelectorAll(`tr[data-i="${i}"].forts .f-eintrag`)
+     .forEach(n=>n.textContent=el.value);
+  }
+ }
+ commitSpaeter(); sichere();
+});
+
+function hinzufuegen(){
+ const e=eintragIn.value.trim();
+ const d=num(dauerIn.value);                       // 0 = Notizzeile
+ if(!e) return;
+ aendere(()=>daten.push({eintrag:e,dauer:d,bem:bemIn.value.trim()}));
+ eintragIn.value=""; dauerIn.value=""; bemIn.value="";
+ eintragIn.focus();
+}
+$("add").onclick=hinzufuegen;
+
+start.onchange=()=>{ commit(); berechne(); sichere(); };
+titel.oninput=()=>{ commitSpaeter(); sichere(); };
+
+$("neu").onclick=()=>{
+ aendere(()=>{ daten.length=0; titel.value=""; });
+ eintragIn.focus();
+};
+
+/* ---------- Tastatur ---------- */
+
+document.addEventListener("keydown",ev=>{
+ const k=ev.key.toLowerCase();
+ if((ev.ctrlKey||ev.metaKey)&&k==="z"&&!ev.shiftKey){ ev.preventDefault(); undo(); return; }
+ if((ev.ctrlKey||ev.metaKey)&&(k==="y"||(k==="z"&&ev.shiftKey))){ ev.preventDefault(); redo(); return; }
+
+ const el=ev.target;
+ const imRaster=el.dataset&&el.dataset.f!==undefined&&tb.contains(el);
+
+ if(imRaster&&ev.altKey&&(k==="arrowup"||k==="arrowdown")){
+  ev.preventDefault(); verschiebe(+el.dataset.i,k==="arrowup"?-1:1); return;
+ }
+ if(imRaster&&ev.key==="Escape"){
+  ev.preventDefault();
+  if(pend) undo();                                 // angefangene Änderung verwerfen
+  else el.blur();
+  return;
+ }
+ if(ev.key==="Enter"){
+  if(el===eintragIn||el===dauerIn||el===bemIn){ ev.preventDefault(); hinzufuegen(); return; }
+  if(el===titel){ ev.preventDefault(); eintragIn.focus(); return; }
+  if(imRaster){
+   ev.preventDefault();
+   const i=+el.dataset.i;
+   if(ev.shiftKey) einfuegen(i+1);
+   else if(!fokussiere(i+1,el.dataset.f)) eintragIn.focus();
+  }
+ }
+});
+
+/* ---------- Export / Import ---------- */
+
+function dl(name,data,type){
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([data],{type}));
+ a.download=name;
+ a.click();
+}
+
+/* Für TXT die Lesefassung nehmen (kein HTML-Quelltext, keine Eingabefelder) */
+function zellText(c){
+ const teile=[...c.querySelectorAll(".pr,.view")].map(n=>n.textContent.trim()).filter(Boolean);
+ if(teile.length) return teile.join(" — ");
+ const inp=c.querySelector("input,textarea");
+ return inp?inp.value:c.textContent;
+}
+$("txt").onclick=()=>{
+ let out="";
+ if(titel.value.trim()) out+=titel.value.trim()+"\n\n";
+ [...tb.rows].forEach(r=>{
+  out+=[...r.cells].filter(c=>!c.classList.contains("act"))
+        .map(c=>zellText(c).replace(/\s+/g," ").trim())
+        .join(" | ")+"\n";
+ });
+ dl("stundenraster.txt",out,"text/plain");
+};
+$("json").onclick=()=>{
+ dl("stundenraster.json",
+  JSON.stringify({titel:titel.value,startstunde:+start.value,
+   eintraege:daten.map(x=>({eintrag:x.eintrag,dauer:num(x.dauer),bem:x.bem||""}))},null,2),
+  "application/json");
+};
+$("load").onclick=()=>$("file").click();
+$("file").onchange=e=>{
+ const fr=new FileReader();
+ fr.onload=()=>{
+  try{
+   const obj=JSON.parse(fr.result);
+   aendere(()=>{
+    daten.length=0;
+    (obj.eintraege||[]).forEach(x=>daten.push({eintrag:x.eintrag||"",dauer:num(x.dauer),bem:x.bem||""}));
+    titel.value=obj.titel||"";
+    start.value=obj.startstunde||1;
+   });
+   eintragIn.focus();
+  }catch(err){ info.textContent="Datei konnte nicht gelesen werden"; }
+ };
+ fr.readAsText(e.target.files[0]);
+ e.target.value="";
+};
+
+/* ---------- Druck-Titel ---------- */
+
+window.addEventListener("beforeprint",()=>{
+ document.querySelectorAll("td.bemzelle.edit").forEach(editAus);   // Lesefassung drucken
+ let h=$("printtitel");
+ if(!h){ h=document.createElement("h3"); h.id="printtitel"; document.querySelector("table").before(h); }
+ h.textContent=titel.value.trim();
+ h.style.display=titel.value.trim()?"block":"none";
+});
+window.addEventListener("afterprint",()=>{ const h=$("printtitel"); if(h) h.remove(); });
+
+/* Fenster schmaler/breiter -> anderer Zeilenumbruch -> andere Feldhöhe */
+let rTo=null;
+window.addEventListener("resize",()=>{
+ if(rTo) clearTimeout(rTo);
+ rTo=setTimeout(wachseAlle,120);
+});
+
+/* ---------- Start ---------- */
+
+lade();
+berechne();
+commit();
+knoepfe();
+eintragIn.focus();
+</script>
+</body>
+</html>

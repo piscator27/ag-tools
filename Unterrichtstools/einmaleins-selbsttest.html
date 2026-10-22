@@ -1,27 +1,72 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" translate="no">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Einmaleins-Selbsttest – Version 0.1</title>
+<title>Einmaleins-Selbsttest – Version 0.2</title>
 <style>
-body{font-family:Arial,Helvetica,sans-serif;background:#f8f8f8;margin:30px}
-.card{background:#fff;max-width:700px;margin:auto;padding:20px;border-radius:8px;
-box-shadow:0 0 8px rgba(0,0,0,.15)}
-h1{margin-top:0}
-label{display:inline-block;margin:6px 10px 6px 0}
-input[type=number]{width:70px;font-size:18px;text-align:center}
-.answer{font-size:24px;width:100px;text-align:center}
-button{font-size:18px;padding:8px 18px;margin-top:18px}
-#task{font-size:36px;margin:25px 0}
+:root{
+ --hintergrund:#eef3f8;
+ --karte:#ffffff;
+ --text:#1f2a37;
+ --leise:#5b6b7f;
+ --blau:#2563a8;
+ --blau-hell:#e3eefa;
+ --orange:#c2571a;
+ --orange-hell:#fdeee3;
+ --gruen:#1f8a5b;
+ --gruen-hell:#e2f4ea;
+ --rot:#b42318;
+ --rot-hell:#fdecea;
+ --rand:#d5dee8;
+ --phase:var(--blau);
+ --phase-hell:var(--blau-hell);
+}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--hintergrund);color:var(--text);
+margin:0;padding:24px 16px 50px}
+.card{background:var(--karte);max-width:700px;margin:auto;border-radius:12px;overflow:hidden;
+border:1px solid var(--rand);box-shadow:0 2px 6px rgba(31,42,55,.06)}
+.kopf{background:var(--phase);color:#fff;padding:16px 22px}
+.kopf h1{margin:0;font-size:28px}
+.kopf p{margin:4px 0 0;opacity:.9}
+.inhalt{padding:20px 22px 24px}
+.card.rueck{--phase:var(--orange);--phase-hell:var(--orange-hell)}
+.card.ergebnis{--phase:var(--gruen);--phase-hell:var(--gruen-hell)}
+label{display:inline-block;margin:6px 20px 6px 0;font-weight:bold;color:var(--leise)}
+input[type=number]{width:70px;font-size:18px;text-align:center;padding:6px;margin-left:6px;
+border:2px solid var(--rand);border-radius:8px;color:var(--text)}
+input:focus{outline:none;border-color:var(--phase)}
+.answer{font-size:26px;width:110px}
+button{font-size:18px;padding:10px 22px;margin-top:20px;border:none;border-radius:8px;
+background:var(--gruen);color:#fff;font-weight:bold;cursor:pointer}
+button:hover{filter:brightness(.9)}
+#task{font-size:40px;font-weight:bold;margin:20px 0;padding:22px;text-align:center;
+background:var(--phase-hell);color:var(--phase);border-radius:10px}
+#forwardBox,#backwardBox{text-align:center;font-size:26px}
+#quiz{text-align:center}
 .hidden{display:none}
-#info{font-size:20px;color:#444}
+#info{font-size:18px;color:var(--leise);font-weight:bold}
+.fortschritt{height:8px;background:var(--rand);border-radius:4px;margin-top:8px;overflow:hidden}
+#balken{height:100%;width:0;background:var(--phase);transition:width .3s}
+.punkte{font-size:26px;font-weight:bold;padding:16px;border-radius:10px;text-align:center;
+background:var(--gruen-hell);color:var(--gruen);margin:0 0 18px}
+.punkte.mittel{background:var(--orange-hell);color:var(--orange)}
+.punkte.wenig{background:var(--rot-hell);color:var(--rot)}
+.fehler h3{margin:18px 0 8px;color:var(--leise)}
+.fehler-eintrag{border-left:5px solid var(--rot);background:var(--rot-hell);border-radius:6px;
+padding:8px 12px;margin-bottom:8px;font-size:18px}
+.fehler-eintrag .richtig{color:var(--gruen);font-weight:bold}
+.copyright{position:fixed;bottom:10px;right:15px;color:#8a97a8;font-size:12px}
 </style>
 </head>
 <body>
 <div class="card">
-<h1>Einmaleins‑Selbsttest</h1>
-<p>Überprüfe, wie sicher du das Einmaleins bereits beherrschst.</p>
+<div class="kopf">
+<h1 id="titel">Einmaleins‑Selbsttest</h1>
+<p id="untertitel">Überprüfe, wie sicher du das Einmaleins bereits beherrschst.</p>
+</div>
+<div class="inhalt">
 
 <div id="setup">
 <label>Kleinste Reihe <input id="von" type="number" min="2" max="20" value="8"></label>
@@ -31,6 +76,7 @@ button{font-size:18px;padding:8px 18px;margin-top:18px}
 
 <div id="quiz" class="hidden">
 <div id="info"></div>
+<div class="fortschritt"><div id="balken"></div></div>
 <div id="task"></div>
 <div id="forwardBox">
 <input id="ans1" class="answer" type="number" autocomplete="off">
@@ -42,17 +88,119 @@ button{font-size:18px;padding:8px 18px;margin-top:18px}
 <button id="nextBtn" onclick="nextTask()">Weiter</button>
 </div>
 </div>
+</div>
 
 <script>
+/* =================================================================
+   SCORM 1.2 — nur aktiv, wenn die Seite in einem LMS (itsLearning)
+   läuft. Sonst fällt alles lautlos auf localStorage zurück, damit
+   dieselbe Datei weiterhin per Doppelklick funktioniert.
+   ================================================================= */
+const Lms = (function () {
+  let api = null, bereit = false, fertig = false;
+  function suche(w) {
+    let n = 0;
+    while (w && n < 12) {
+      if (w.API) return w.API;
+      if (!w.parent || w.parent === w) break;
+      w = w.parent; n++;
+    }
+    return null;
+  }
+  function start() {
+    try { api = suche(window) || (window.opener ? suche(window.opener) : null); } catch (e) { api = null; }
+    if (!api) return false;
+    try {
+      api.LMSInitialize("");
+      bereit = true;
+      fertig = api.LMSGetValue("cmi.core.lesson_status") === "completed";
+    } catch (e) { bereit = false; }
+    return bereit;
+  }
+  return {
+    get aktiv() { return bereit; },
+    start,
+    lese() {
+      if (!bereit) return null;
+      try { return api.LMSGetValue("cmi.suspend_data") || null; } catch (e) { return null; }
+    },
+    schreibe(s, prozent, komplett) {
+      if (!bereit) return;
+      try {
+        api.LMSSetValue("cmi.suspend_data", s);
+        api.LMSSetValue("cmi.core.score.min", "0");
+        api.LMSSetValue("cmi.core.score.max", "100");
+        api.LMSSetValue("cmi.core.score.raw", String(prozent));
+        /* ein einmal erreichtes "completed" nie wieder herunterstufen */
+        if (komplett) fertig = true;
+        api.LMSSetValue("cmi.core.lesson_status", fertig ? "completed" : "incomplete");
+        api.LMSCommit("");
+      } catch (e) {}
+    },
+    schliessen() {
+      if (!bereit) return;
+      try { api.LMSCommit(""); api.LMSFinish(""); } catch (e) {}
+      bereit = false;
+    }
+  };
+})();
+
+/* ---------------- Speicher ----------------
+   Gemerkt werden nur der zuletzt gewählte Reihenbereich, die Zahl der
+   Durchgänge, das beste Ergebnis und die letzten Ergebnisse (kurz halten:
+   cmi.suspend_data erlaubt nur 4096 Zeichen). */
+const STORE = "fi_einmaleins_selbsttest_v1";
+const IM_LMS = Lms.start();
+
+function loadState() {
+  try {
+    const s = JSON.parse(IM_LMS ? Lms.lese() : localStorage.getItem(STORE));
+    if (s && typeof s.tests === "number") return s;
+  } catch (e) {}
+  return { von: 8, bis: 14, tests: 0, best: 0, letzte: [] };
+}
+function saveState() {
+  if (!IM_LMS) {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+    return;
+  }
+  // Punktwert für itsLearning: bestes Ergebnis in Prozent; abgeschlossen nach dem ersten vollständigen Test
+  Lms.schreibe(JSON.stringify(state), state.best * 5, state.tests > 0);
+}
+if (IM_LMS) {
+  window.addEventListener("pagehide", () => { saveState(); Lms.schliessen(); });
+  window.addEventListener("beforeunload", () => { saveState(); Lms.schliessen(); });
+}
+let state = loadState();
+
+// Startbild merken, damit "Neuer Selbsttest" ohne Neuladen geht
+// (ein Neuladen würde die Verbindung zu itsLearning beenden)
+const START_HTML = document.querySelector(".card").innerHTML;
+function zeigeStart() {
+  const karte = document.querySelector(".card");
+  karte.className = "card";
+  karte.innerHTML = START_HTML;
+  document.getElementById("von").value = state.von;
+  document.getElementById("bis").value = state.bis;
+  if (state.tests > 0) {
+    document.getElementById("untertitel").textContent =
+      "Bisher " + state.tests + (state.tests === 1 ? " Test" : " Tests") +
+      " · bestes Ergebnis: " + state.best + " von 20";
+  }
+}
+
 let pool=[],forward=[],backward=[];
 let index=0,phase="forward";
 let answers=[];
+// Anteil, mit dem 10er- und 11er-Aufgaben sowie Aufgaben mit Faktor 10 gegenüber den anderen Reihen gezogen werden
+const GEWICHT_10_11=0.2;
 
 function weightedChoice(list){
  while(true){
    let a=list[Math.floor(Math.random()*list.length)];
    let row=a.b;
-   if((row===10||row===11)&&Math.random()<0.5) continue;
+   if((row===10||row===11)&&Math.random()>=GEWICHT_10_11) continue;
+   if(a.a===10&&Math.random()>=GEWICHT_10_11) continue;
    return a;
  }
 }
@@ -83,6 +231,7 @@ function startTest(){
  let von=+document.getElementById("von").value;
  let bis=+document.getElementById("bis").value;
  if(von>bis){alert("Ungültiger Reihenbereich.");return;}
+ state.von=von; state.bis=bis;
  buildPool(von,bis);
  createSets();
  document.getElementById("setup").classList.add("hidden");
@@ -93,6 +242,10 @@ function startTest(){
 
 function showTask(){
  if(phase==="forward"){
+   document.querySelector(".card").classList.remove("rueck");
+   document.getElementById("titel").textContent="Vorwärts";
+   document.getElementById("untertitel").textContent="Rechne die Aufgabe aus.";
+   document.getElementById("balken").style.width=(index*5)+"%";
    document.getElementById("info").textContent="Vorwärts – Aufgabe "+(index+1)+" von 10";
    let t=forward[index];
    document.getElementById("task").textContent=t.a+" · "+t.b+" = ?";
@@ -101,6 +254,10 @@ function showTask(){
    document.getElementById("ans1").value="";
    document.getElementById("ans1").focus();
  }else{
+   document.querySelector(".card").classList.add("rueck");
+   document.getElementById("titel").textContent="Rückwärts";
+   document.getElementById("untertitel").textContent="Finde eine passende Malaufgabe.";
+   document.getElementById("balken").style.width=(50+index*5)+"%";
    document.getElementById("info").textContent="Rückwärts – Aufgabe "+(index+1)+" von 10";
    let t=backward[index];
    document.getElementById("task").textContent=t.prod+" = ?";
@@ -115,6 +272,7 @@ function auswerten(){
 
     let richtig = 0;
     let fehler = "";
+    let titelVor = false;
 
     // ---------- Vorwärts ----------
 
@@ -129,15 +287,19 @@ function auswerten(){
 
         }else{
 
-            fehler += "<h3>Vorwärts</h3>";
+            if(!titelVor){
+                fehler += "<h3>Vorwärts</h3>";
+                titelVor = true;
+            }
 
             fehler +=
+                "<div class='fehler-eintrag'>"+
                 aufgabe.a+" · "+aufgabe.b+
                 " = "+
                 (answers[i].eingabe==="" ? "—" : answers[i].eingabe)+
-                "<br>Richtig: "+
+                "<br>Richtig: <span class='richtig'>"+
                 aufgabe.prod+
-                "<br><br>";
+                "</span></div>";
 
         }
 
@@ -165,31 +327,47 @@ function auswerten(){
             }
 
             fehler +=
+                "<div class='fehler-eintrag'>"+
                 aufgabe.prod+
                 " = "+
                 (antwort.a==="" ? "—" : antwort.a)+
                 " · "+
                 (antwort.b==="" ? "—" : antwort.b)+
-                "<br>Richtig: "+
+                "<br>Richtig zum Beispiel: <span class='richtig'>"+
                 aufgabe.a+" · "+aufgabe.b+
-                " oder "+
-                aufgabe.b+" · "+aufgabe.a+
-                "<br><br>";
+                "</span></div>";
 
         }
 
     }
 
-    document.querySelector(".card").innerHTML = `
-        <h1>Auswertung</h1>
+    let karte = document.querySelector(".card");
+    karte.classList.remove("rueck");
+    karte.classList.add("ergebnis");
 
-        <h2>${richtig} von 20 Aufgaben richtig.</h2>
+    state.tests++;
+    state.best = Math.max(state.best, richtig);
+    state.letzte = state.letzte.concat([state.von+"-"+state.bis+": "+richtig]).slice(-20);
+    saveState();
 
-        ${fehler==="" ? "<p>Keine Fehler.</p>" : fehler}
+    let stufe = richtig>=17 ? "" : (richtig>=10 ? "mittel" : "wenig");
 
-        <button onclick="location.reload()">
+    karte.innerHTML = `
+        <div class="kopf">
+            <h1>Auswertung</h1>
+        </div>
+        <div class="inhalt">
+
+        <div class="punkte ${stufe}">${richtig} von 20 Aufgaben richtig.</div>
+
+        <div class="fehler">
+        ${fehler==="" ? "<p>Keine Fehler – super!</p>" : fehler}
+        </div>
+
+        <button onclick="zeigeStart()">
             Neuer Selbsttest
         </button>
+        </div>
     `;
 
 }
@@ -217,9 +395,24 @@ b: fac2.value.trim()
    showTask();
  }
 }
+
+zeigeStart();
+
+// ---------- Enter-Taste ----------
+// Start: Test beginnen · Vorwärts: weiter · Rückwärts: erst ins zweite Feld, dann weiter
+document.addEventListener("keydown",e=>{
+ // nach der Auswertung gibt es kein Setup mehr: Enter bleibt dann normal
+ if(e.key!=="Enter"||!document.getElementById("setup")) return;
+ e.preventDefault();
+ if(!document.getElementById("setup").classList.contains("hidden")){
+   startTest();
+ }else if(phase==="backward"&&document.activeElement===fac1){
+   fac2.focus();
+ }else{
+   nextTask();
+ }
+});
 </script>
-<div style="position:fixed; bottom:10px; right:15px; color:#999; font-size:12px; font-family:Arial,Helvetica,sans-serif;">
-    © Fi
-</div>
+<div class="copyright">© Fi</div>
 </body>
 </html>

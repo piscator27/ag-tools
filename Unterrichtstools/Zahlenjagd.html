@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zahlenjagd &amp; Primzahl-Bau</title>
+<style>
+  :root{
+    --bg:#1a1a1a; --fg:#f2f2f2; --dim:#9a9a9a; --line:#333;
+    --acc:#ffb340; --acc2:#4fc3f7; --ok:#66bb6a; --bad:#ef5350;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  /* ---------- Navigation ---------- */
+  nav{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--line);align-items:center;flex:0 0 auto}
+  nav button{
+    background:#242424;color:var(--dim);border:1px solid var(--line);
+    border-radius:8px;padding:8px 16px;font-size:17px;cursor:pointer;
+  }
+  nav button:hover{color:var(--fg)}
+  nav button.on{background:var(--acc);color:#1a1a1a;border-color:var(--acc);font-weight:bold}
+  nav .sp{flex:1}
+  nav .hint{color:#666;font-size:14px}
+  /* ---------- Layout ---------- */
+  main{flex:1 1 auto;overflow:hidden;position:relative}
+  section{display:none;height:100%;padding:18px 26px;flex-direction:column}
+  section.on{display:flex}
+  /* ---------- Zielzahl ---------- */
+  .zielbox{text-align:center;margin-bottom:6px}
+  .ziellabel{color:var(--dim);font-size:20px;letter-spacing:3px;text-transform:uppercase}
+  .zielzahl{font-size:clamp(70px,15vh,150px);font-weight:bold;color:var(--acc);line-height:1.05}
+  .karten{display:flex;justify-content:center;gap:clamp(8px,1.4vw,20px);flex-wrap:wrap;margin:10px 0}
+  .zkarte{
+    background:#262626;border:2px solid var(--line);border-radius:14px;
+    width:clamp(80px,10vw,140px);height:clamp(90px,12vh,150px);
+    display:flex;align-items:center;justify-content:center;
+    font-size:clamp(38px,6vh,66px);font-weight:bold;
+  }
+  .zkarte.gross{border-color:var(--acc2);color:var(--acc2)}
+  .loesung{
+    text-align:center;font-size:clamp(20px,3.2vh,34px);color:var(--ok);
+    min-height:1.6em;margin-top:4px;
+  }
+  .loesung.leer{color:#555}
+  /* ---------- Primzahl-Bau ---------- */
+  .pbzahl{font-size:clamp(90px,22vh,220px);font-weight:bold;color:var(--acc);line-height:1}
+  .pbinfo{font-size:clamp(22px,3.6vh,40px);color:var(--ok);min-height:1.4em;margin-top:10px}
+  .pbinfo.unmoeglich{color:var(--bad)}
+  .pool{color:var(--dim);font-size:17px;margin-top:14px;letter-spacing:1px}
+  .runde{color:#666;font-size:16px;letter-spacing:2px;text-transform:uppercase}
+  /* ---------- Timer + Steuerung ---------- */
+  .mitte{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .steuer{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;padding:10px 0;flex:0 0 auto}
+  .steuer button, .steuer select, .steuer input{
+    background:#262626;color:var(--fg);border:1px solid var(--line);
+    border-radius:8px;padding:10px 18px;font-size:17px;cursor:pointer;
+  }
+  .steuer button:hover{background:#333}
+  .steuer button.prim{background:var(--acc);color:#1a1a1a;font-weight:bold;border-color:var(--acc)}
+  .timer{
+    font-size:clamp(34px,6vh,58px);font-weight:bold;font-variant-numeric:tabular-nums;
+    min-width:2.6em;text-align:center;
+  }
+  .timer.warn{color:var(--acc)}
+  .timer.aus{color:var(--bad)}
+  /* ---------- Punktetafel ---------- */
+  .tafel{display:flex;gap:6px;justify-content:center;padding:8px 0 4px;flex:0 0 auto;flex-wrap:wrap}
+  .team{background:#222;border:1px solid var(--line);border-radius:10px;padding:6px 8px;text-align:center;min-width:96px}
+  .team input{
+    background:transparent;border:none;color:var(--dim);font-size:14px;
+    text-align:center;width:92px;font-family:inherit;
+  }
+  .team input:focus{outline:none;color:var(--fg)}
+  .pkt{font-size:30px;font-weight:bold;color:var(--acc2);line-height:1.1}
+  .team .pm{display:flex;gap:4px;justify-content:center;margin-top:2px}
+  .team .pm button{
+    background:#2e2e2e;border:1px solid var(--line);color:var(--fg);
+    border-radius:6px;width:30px;height:26px;font-size:15px;cursor:pointer;padding:0;
+  }
+  /* ---------- Heftarbeit ---------- */
+  .aufg{max-width:1050px;margin:0 auto;width:100%}
+  .aufg h2{font-size:clamp(24px,3.6vh,34px);color:var(--acc);margin-bottom:14px}
+  .aufg ol{font-size:clamp(19px,2.9vh,28px);line-height:1.75;padding-left:1.4em}
+  .aufg li{margin-bottom:6px}
+  .zusatz{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+  .zusatz h3{color:var(--acc2);font-size:clamp(18px,2.4vh,24px);margin-bottom:8px}
+  .loes{color:var(--ok)}
+  .versteckt{visibility:hidden}
+  /* ---------- Karten drucken ---------- */
+  .druckhinweis{max-width:800px;margin:0 auto;font-size:18px;line-height:1.6;color:var(--dim)}
+  .druckhinweis b{color:var(--fg)}
+  .blaetter{display:none}
+  .kseite{
+    width:190mm;height:277mm;
+    display:grid;grid-template-columns:95mm 95mm;grid-template-rows:92.3mm 92.3mm 92.3mm;
+    page-break-after:always;
+  }
+  .kseite:last-child{page-break-after:auto}
+  .pkarte{
+    border:1px dashed #999;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    page-break-inside:avoid;
+  }
+  .pkarte .z{font-size:48mm;line-height:1;font-weight:bold;color:#000}
+  .pkarte .u{font-size:3.2mm;color:#666;letter-spacing:1.2mm;margin-top:9mm}
+  /* ---------- Fi-Logo ---------- */
+  .fi{position:fixed;right:12px;bottom:8px;color:#888;opacity:.4;font-size:14px;letter-spacing:1px}
+  /* ---------- Druck ---------- */
+  @media print{
+    body{background:#fff;color:#000;overflow:visible;display:block}
+    nav,.fi,.druckhinweis,.steuer,section:not(#s-karten){display:none !important}
+    #s-karten{display:block !important;padding:0;height:auto}
+    main{overflow:visible;height:auto}
+    .blaetter{display:block}
+    @page{size:A4 portrait;margin:8mm}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <button id="t-ziel" class="on" onclick="tab('ziel')">Zielzahl-Jagd</button>
+  <button id="t-prim" onclick="tab('prim')">Primzahl-Bau</button>
+  <button id="t-heft" onclick="tab('heft')">Heftarbeit</button>
+  <button id="t-karten" onclick="tab('karten')">Karten drucken</button>
+  <span class="sp"></span>
+  <span class="hint">Leertaste = Timer &nbsp;·&nbsp; N = neue Runde &nbsp;·&nbsp; L = Lösung</span>
+</nav>
+
+<main>
+
+<!-- ================= ZIELZAHL-JAGD ================= -->
+<section id="s-ziel" class="on">
+  <div class="mitte">
+    <div class="zielbox">
+      <div class="ziellabel">Zielzahl</div>
+      <div class="zielzahl" id="zz">—</div>
+    </div>
+    <div class="karten" id="zkarten"></div>
+    <div class="loesung leer" id="zloesung">Ein möglicher Weg wird hier gezeigt</div>
+  </div>
+  <div class="steuer">
+    <button class="prim" onclick="neueZielrunde()">Neue Runde (N)</button>
+    <span class="timer" id="ztimer">3:00</span>
+    <button onclick="timerToggle('z')" id="zstart">Start</button>
+    <button onclick="timerReset('z')">Reset</button>
+    <select id="zdauer" onchange="timerReset('z')">
+      <option value="120">2 Minuten</option>
+      <option value="180" selected>3 Minuten</option>
+      <option value="240">4 Minuten</option>
+    </select>
+    <select id="zbereich">
+      <option value="300">Ziel 100–300 (leichter)</option>
+      <option value="500" selected>Ziel 100–500</option>
+    </select>
+    <button onclick="zeigeLoesung()">Lösung (L)</button>
+  </div>
+  <div class="tafel" id="tafel-z"></div>
+</section>
+
+<!-- ================= PRIMZAHL-BAU ================= -->
+<section id="s-prim">
+  <div class="mitte">
+    <div class="runde" id="pbrunde">Runde 0 von 20</div>
+    <div class="pbzahl" id="pbz">—</div>
+    <div class="pbinfo" id="pbinfo"></div>
+    <div class="pool">Kartensatz: zehn&nbsp;·&nbsp;<b>2</b> &nbsp; sieben&nbsp;·&nbsp;<b>3</b> &nbsp; fünf&nbsp;·&nbsp;<b>5</b> &nbsp; drei&nbsp;·&nbsp;<b>7</b> &nbsp; zwei&nbsp;·&nbsp;<b>11</b> &nbsp; eine&nbsp;·&nbsp;<b>13</b></div>
+  </div>
+  <div class="steuer">
+    <button class="prim" onclick="naechstePB()">Nächste Zahl (N)</button>
+    <span class="timer" id="ptimer">1:00</span>
+    <button onclick="timerToggle('p')" id="pstart">Start</button>
+    <button onclick="timerReset('p')">Reset</button>
+    <select id="pdauer" onchange="timerReset('p')">
+      <option value="45">45 Sekunden</option>
+      <option value="60" selected>60 Sekunden</option>
+      <option value="90">90 Sekunden</option>
+    </select>
+    <button onclick="aufloesenPB()">Auflösen (L)</button>
+    <input id="pfrei" type="number" placeholder="eigene Zahl" style="width:150px" onkeydown="if(event.key==='Enter'){eigeneZahl();event.preventDefault();}">
+    <button onclick="eigeneZahl()">setzen</button>
+  </div>
+  <div class="tafel" id="tafel-p"></div>
+</section>
+
+<!-- ================= HEFTARBEIT ================= -->
+<section id="s-heft">
+  <div class="mitte" style="justify-content:flex-start;padding-top:6px">
+    <div class="aufg">
+      <h2>Ins Heft: Primfaktorzerlegung</h2>
+      <ol>
+        <li>Zerlege in Primfaktoren und schreibe das Ergebnis als Potenz:
+          <b>84</b> &nbsp; <b>150</b> &nbsp; <b>208</b>
+          <span class="loes versteckt" id="l1"><br>84 = 2<sup>2</sup>·3·7 &nbsp;|&nbsp; 150 = 2·3·5<sup>2</sup> &nbsp;|&nbsp; 208 = 2<sup>4</sup>·13</span></li>
+        <li>Zerlege <b>360</b>. Wie viele Primzahlkarten bräuchte diese Zahl?
+          <span class="loes versteckt" id="l2"><br>360 = 2<sup>3</sup>·3<sup>2</sup>·5 → 6 Karten</span></li>
+        <li>Rückwärts: Welche Zahlen sind das?
+          &nbsp;a) 2<sup>2</sup>·5·7 &nbsp; b) 3·5·11 &nbsp; c) 2<sup>5</sup>·3
+          <span class="loes versteckt" id="l3"><br>a) 140 &nbsp; b) 165 &nbsp; c) 96</span></li>
+        <li>Warum lässt sich <b>34</b> mit unserem Kartensatz nicht bauen? Begründe.
+          <span class="loes versteckt" id="l4"><br>34 = 2·17 — die 17 ist eine Primzahl, kommt aber im Kartensatz nicht vor.</span></li>
+      </ol>
+      <div class="zusatz">
+        <h3>Für Schnelle</h3>
+        <ol start="5">
+          <li>Finde alle Zahlen von 1 bis 100, die <b>genau drei</b> Teiler haben. Was fällt auf?
+            <span class="loes versteckt" id="l5"><br>4, 9, 25, 49 — es sind genau die Quadrate von Primzahlen.</span></li>
+          <li>Zerlege <b>1001</b>. Das Ergebnis ist überraschend hübsch.
+            <span class="loes versteckt" id="l6"><br>1001 = 7·11·13 — drei aufeinanderfolgende Primzahlen.</span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="steuer">
+    <button class="prim" onclick="loesungenToggle()" id="lbtn">Lösungen zeigen (L)</button>
+  </div>
+</section>
+
+<!-- ================= KARTEN DRUCKEN ================= -->
+<section id="s-karten">
+  <div class="mitte" style="justify-content:flex-start;padding-top:20px">
+    <div class="druckhinweis">
+      <p style="font-size:24px;color:#f2f2f2;margin-bottom:14px"><b>28 Primzahlkarten</b></p>
+      <p>Ein Satz für 28 Kinder: <b>zehnmal die 2</b>, <b>siebenmal die 3</b>, <b>fünfmal die 5</b>,
+         <b>dreimal die 7</b>, <b>zweimal die 11</b>, <b>einmal die 13</b>.</p>
+      <p style="margin-top:10px">Der Druck erzeugt <b>6 Karten pro A4-Seite</b> (5 Blatt) mit gestrichelten
+         Schnittlinien — einmal längs, zweimal quer schneiden.</p>
+      <p style="margin-top:10px;color:#777">Kein Drucker zur Hand? Dann schreiben die Kinder ihre Zahl selbst
+         groß auf ein Blatt — die Verteilung oben laut vorlesen und durchzählen lassen.</p>
+      <div class="steuer" style="justify-content:flex-start;margin-top:20px">
+        <button class="prim" onclick="window.print()">Karten drucken</button>
+      </div>
+    </div>
+  </div>
+  <div class="blaetter" id="blaetter"></div>
+</section>
+
+</main>
+
+<div class="fi">Fi</div>
+
+<script>
+/* =========================================================
+   Zahlenjagd & Primzahl-Bau — offline, eine Datei
+   ========================================================= */
+
+/* ---------- Tabs ---------- */
+let aktiv = 'ziel';
+function tab(name){
+  aktiv = name;
+  ['ziel','prim','heft','karten'].forEach(function(n){
+    document.getElementById('s-'+n).classList.toggle('on', n===name);
+    document.getElementById('t-'+n).classList.toggle('on', n===name);
+  });
+  zeichneTafel();
+}
+
+/* ---------- Punktetafel (7 Teams à 4 Kinder = 28) ---------- */
+var TEAMS = 7;
+var teams = ladeTeams();
+function ladeTeams(){
+  try{
+    var s = localStorage.getItem('zj_teams');
+    if(s){ var t = JSON.parse(s); if(t && t.length===TEAMS) return t; }
+  }catch(e){}
+  var t = [];
+  for(var i=0;i<TEAMS;i++) t.push({name:'Team '+(i+1), pkt:0});
+  return t;
+}
+function speichereTeams(){
+  try{ localStorage.setItem('zj_teams', JSON.stringify(teams)); }catch(e){}
+}
+function zeichneTafel(){
+  ['z','p'].forEach(function(k){
+    var el = document.getElementById('tafel-'+k);
+    if(!el) return;
+    var h = '';
+    for(var i=0;i<TEAMS;i++){
+      h += '<div class="team">'
+        +  '<input value="'+teams[i].name.replace(/"/g,'&quot;')+'" oninput="teamName('+i+',this.value)">'
+        +  '<div class="pkt">'+teams[i].pkt+'</div>'
+        +  '<div class="pm"><button onclick="punkt('+i+',-1)">−</button>'
+        +  '<button onclick="punkt('+i+',1)">+</button></div></div>';
+    }
+    h += '<div class="team" style="border-style:dashed"><div style="color:#666;font-size:14px;padding-top:6px">alle</div>'
+      +  '<div class="pkt" style="color:#555">0</div>'
+      +  '<div class="pm"><button onclick="alleZuruecksetzen()" title="alle Punkte auf 0">↺</button></div></div>';
+    el.innerHTML = h;
+  });
+}
+function teamName(i,v){ teams[i].name = v; speichereTeams(); }
+function punkt(i,d){ teams[i].pkt = Math.max(0, teams[i].pkt + d); speichereTeams(); zeichneTafel(); }
+function alleZuruecksetzen(){
+  if(!confirm('Alle Punkte auf 0 setzen?')) return;
+  for(var i=0;i<TEAMS;i++) teams[i].pkt = 0;
+  speichereTeams(); zeichneTafel();
+}
+
+/* ---------- Timer ---------- */
+var timers = {
+  z:{rest:180, laeuft:false, id:null, feld:'ztimer', btn:'zstart', sel:'zdauer'},
+  p:{rest:60,  laeuft:false, id:null, feld:'ptimer', btn:'pstart', sel:'pdauer'}
+};
+function zeigeTimer(k){
+  var t = timers[k];
+  var m = Math.floor(t.rest/60), s = t.rest%60;
+  var el = document.getElementById(t.feld);
+  el.textContent = m + ':' + (s<10?'0':'') + s;
+  el.className = 'timer' + (t.rest===0 ? ' aus' : (t.rest<=10 ? ' warn' : ''));
+}
+function timerToggle(k){
+  var t = timers[k];
+  if(t.laeuft){
+    clearInterval(t.id); t.laeuft = false;
+    document.getElementById(t.btn).textContent = 'Start';
+  } else {
+    if(t.rest===0) timerReset(k);
+    t.laeuft = true;
+    document.getElementById(t.btn).textContent = 'Pause';
+    t.id = setInterval(function(){
+      t.rest--;
+      if(t.rest<=0){
+        t.rest = 0; clearInterval(t.id); t.laeuft = false;
+        document.getElementById(t.btn).textContent = 'Start';
+        piep();
+      }
+      zeigeTimer(k);
+    },1000);
+  }
+}
+function timerReset(k){
+  var t = timers[k];
+  clearInterval(t.id); t.laeuft = false;
+  t.rest = parseInt(document.getElementById(t.sel).value,10);
+  document.getElementById(t.btn).textContent = 'Start';
+  zeigeTimer(k);
+}
+function piep(){
+  try{
+    var ctx = new (window.AudioContext||window.webkitAudioContext)();
+    [0,0.22,0.44].forEach(function(d){
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type='sine'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.18, ctx.currentTime+d);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+d+0.18);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(ctx.currentTime+d); o.stop(ctx.currentTime+d+0.2);
+    });
+  }catch(e){}
+}
+
+/* ---------- Zielzahl-Jagd: Solver ---------- */
+function exactSolve(nums, target){
+  var found = null;
+  function rec(list){
+    for(var i=0;i<list.length;i++){
+      if(list[i].v === target){ found = list[i].e; return true; }
+    }
+    for(var i=0;i<list.length;i++){
+      for(var j=i+1;j<list.length;j++){
+        var a = list[i], b = list[j], rest = [];
+        for(var k=0;k<list.length;k++) if(k!==i && k!==j) rest.push(list[k]);
+        var c = [];
+        c.push({v:a.v+b.v, e:'('+a.e+' + '+b.e+')'});
+        if(a.v!==1 && b.v!==1) c.push({v:a.v*b.v, e:'('+a.e+' · '+b.e+')'});
+        var hi = a.v>=b.v?a:b, lo = a.v>=b.v?b:a;
+        if(hi.v-lo.v > 0) c.push({v:hi.v-lo.v, e:'('+hi.e+' − '+lo.e+')'});
+        if(lo.v>1 && hi.v % lo.v === 0) c.push({v:hi.v/lo.v, e:'('+hi.e+' : '+lo.e+')'});
+        for(var m=0;m<c.length;m++){ if(rec(rest.concat([c[m]]))) return true; }
+      }
+    }
+    return false;
+  }
+  rec(nums.map(function(n){ return {v:n, e:String(n)}; }));
+  return found;
+}
+/* einfachste Lösung: erst mit wenigen Zahlen versuchen */
+function einfachsteLoesung(nums, target){
+  var n = nums.length;
+  for(var size=2; size<=n; size++){
+    var gesehen = {};
+    var treffer = (function comb(start, arr){
+      if(arr.length === size){
+        var werte = arr.map(function(i){ return nums[i]; });
+        var key = werte.slice().sort(function(x,y){return x-y;}).join(',');
+        if(gesehen[key]) return null;
+        gesehen[key] = 1;
+        return exactSolve(werte, target);
+      }
+      for(var i=start;i<n;i++){
+        arr.push(i);
+        var r = comb(i+1, arr);
+        arr.pop();
+        if(r) return r;
+      }
+      return null;
+    })(0, []);
+    if(treffer) return treffer;
+  }
+  return null;
+}
+function huebsch(e){
+  if(!e) return null;
+  if(e.charAt(0)==='(' && e.charAt(e.length-1)===')'){
+    var tiefe = 0, ok = true;
+    for(var i=0;i<e.length;i++){
+      if(e.charAt(i)==='(') tiefe++;
+      else if(e.charAt(i)===')'){ tiefe--; if(tiefe===0 && i<e.length-1) ok = false; }
+    }
+    if(ok) return e.substring(1, e.length-1);
+  }
+  return e;
+}
+
+/* ---------- Zielzahl-Jagd: Runde ---------- */
+var zLoesung = null;
+function ziehe(){
+  var klein = [];
+  for(var n=1;n<=10;n++){ klein.push(n); klein.push(n); }
+  var gross = [25,50,75,100];
+  var nums = [];
+  for(var k=0;k<5;k++){
+    var i = Math.floor(Math.random()*klein.length);
+    nums.push(klein.splice(i,1)[0]);
+  }
+  nums.push(gross[Math.floor(Math.random()*gross.length)]);
+  return nums;
+}
+function neueZielrunde(){
+  var max = parseInt(document.getElementById('zbereich').value,10);
+  var nums, ziel, loes = null;
+  for(var versuch=0; versuch<25; versuch++){
+    nums = ziehe();
+    ziel = 100 + Math.floor(Math.random()*(max-99));
+    loes = einfachsteLoesung(nums, ziel);
+    if(loes) break;
+  }
+  zLoesung = huebsch(loes);
+  document.getElementById('zz').textContent = ziel;
+  var h = '';
+  for(var i=0;i<nums.length;i++){
+    h += '<div class="zkarte'+(nums[i]>=25?' gross':'')+'">'+nums[i]+'</div>';
+  }
+  document.getElementById('zkarten').innerHTML = h;
+  var lz = document.getElementById('zloesung');
+  lz.className = 'loesung leer';
+  lz.textContent = 'Ein möglicher Weg wird hier gezeigt';
+  timerReset('z');
+}
+function zeigeLoesung(){
+  var lz = document.getElementById('zloesung');
+  if(!zLoesung){ lz.className='loesung leer'; lz.textContent = 'Erst eine Runde starten'; return; }
+  lz.className = 'loesung';
+  lz.textContent = 'z. B. ' + zLoesung;
+}
+
+/* ---------- Primzahl-Bau ---------- */
+var POOL = {2:10, 3:7, 5:5, 7:3, 11:2, 13:1};
+var PB = [
+  {n:12}, {n:20}, {n:45}, {n:30},
+  {n:60}, {n:84}, {n:90}, {n:100},
+  {n:34}, {n:72}, {n:126}, {n:200},
+  {n:165}, {n:51}, {n:96}, {n:154},
+  {n:275}, {n:273}, {n:1001}, {n:2310}
+];
+var pbIdx = -1;
+function zerlege(n){
+  var f = [], m = n, p = 2;
+  while(p*p <= m){
+    while(m % p === 0){ f.push(p); m /= p; }
+    p += (p===2 ? 1 : 2);
+  }
+  if(m > 1) f.push(m);
+  return f;
+}
+function potenzText(f){
+  var out = [], i = 0;
+  while(i < f.length){
+    var p = f[i], c = 0;
+    while(i < f.length && f[i] === p){ c++; i++; }
+    out.push(c > 1 ? p + '<sup>' + c + '</sup>' : String(p));
+  }
+  return out.join(' · ');
+}
+function baubar(f){
+  var z = {};
+  for(var i=0;i<f.length;i++){ z[f[i]] = (z[f[i]]||0) + 1; }
+  for(var p in z){
+    if(!POOL[p] || z[p] > POOL[p]) return false;
+  }
+  return true;
+}
+function zeigePB(n, rundeText){
+  document.getElementById('pbz').textContent = n;
+  document.getElementById('pbrunde').textContent = rundeText;
+  var info = document.getElementById('pbinfo');
+  info.className = 'pbinfo';
+  info.innerHTML = '';
+  timerReset('p');
+}
+function naechstePB(){
+  pbIdx++;
+  if(pbIdx >= PB.length) pbIdx = 0;
+  zeigePB(PB[pbIdx].n, 'Runde ' + (pbIdx+1) + ' von ' + PB.length);
+}
+function aufloesenPB(){
+  var txt = document.getElementById('pbz').textContent;
+  var n = parseInt(txt, 10);
+  var info = document.getElementById('pbinfo');
+  if(!n || n < 2){ info.className='pbinfo'; info.innerHTML = 'Erst eine Zahl aufrufen'; return; }
+  var f = zerlege(n);
+  if(f.length === 1){
+    info.className = 'pbinfo unmoeglich';
+    info.innerHTML = n + ' ist selbst eine Primzahl';
+    return;
+  }
+  if(!baubar(f)){
+    info.className = 'pbinfo unmoeglich';
+    info.innerHTML = n + ' = ' + potenzText(f) + ' &nbsp;→&nbsp; mit diesem Kartensatz <b>nicht baubar</b>';
+    return;
+  }
+  info.className = 'pbinfo';
+  info.innerHTML = n + ' = ' + potenzText(f) + ' &nbsp;→&nbsp; <b>' + f.length + ' Kinder</b>';
+}
+function eigeneZahl(){
+  var el = document.getElementById('pfrei');
+  var n = parseInt(el.value, 10);
+  if(!n || n < 2){ return; }
+  zeigePB(n, 'eigene Zahl');
+  el.value = '';
+  el.blur();
+}
+
+/* ---------- Heftarbeit ---------- */
+var loesAn = false;
+function loesungenToggle(){
+  loesAn = !loesAn;
+  for(var i=1;i<=6;i++){
+    var el = document.getElementById('l'+i);
+    if(el) el.classList.toggle('versteckt', !loesAn);
+  }
+  document.getElementById('lbtn').textContent = loesAn ? 'Lösungen verbergen (L)' : 'Lösungen zeigen (L)';
+}
+
+/* ---------- Karten ---------- */
+function baueKarten(){
+  var liste = [];
+  for(var p in POOL){
+    for(var i=0;i<POOL[p];i++) liste.push(parseInt(p,10));
+  }
+  liste.sort(function(a,b){ return a-b; });
+  var h = '', proSeite = 6;
+  for(var k=0;k<liste.length;k++){
+    if(k % proSeite === 0) h += '<div class="kseite">';
+    h += '<div class="pkarte"><div class="z">'+liste[k]+'</div>'
+      +  '<div class="u">PRIMZAHL-BAU</div></div>';
+    if(k % proSeite === proSeite-1 || k === liste.length-1) h += '</div>';
+  }
+  document.getElementById('blaetter').innerHTML = h;
+}
+
+/* ---------- Tastatur ---------- */
+document.addEventListener('keydown', function(e){
+  var tag = (e.target.tagName || '').toLowerCase();
+  if(tag === 'input' || tag === 'select') return;
+  if(e.code === 'Space'){
+    e.preventDefault();
+    if(aktiv === 'ziel') timerToggle('z');
+    else if(aktiv === 'prim') timerToggle('p');
+  } else if(e.key === 'n' || e.key === 'N'){
+    if(aktiv === 'ziel') neueZielrunde();
+    else if(aktiv === 'prim') naechstePB();
+  } else if(e.key === 'l' || e.key === 'L'){
+    if(aktiv === 'ziel') zeigeLoesung();
+    else if(aktiv === 'prim') aufloesenPB();
+    else if(aktiv === 'heft') loesungenToggle();
+  }
+});
+
+/* ---------- Start ---------- */
+zeichneTafel();
+zeigeTimer('z');
+zeigeTimer('p');
+baueKarten();
+neueZielrunde();
+</script>
+</body>
+</html>

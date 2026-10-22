@@ -1,0 +1,1959 @@
+{
+  "meta": {
+    "titel": "Römische Zahlen 1-2000 (Zufallsauswahl)",
+    "version": 1,
+    "kartenfeld": "antwort"
+  },
+  "eintraege": [
+    {
+      "id": 1,
+      "frage": {
+        "typ": "text",
+        "text": "14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "XIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 1
+    },
+    {
+      "id": 2,
+      "frage": {
+        "typ": "text",
+        "text": "52"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "LII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 3,
+      "frage": {
+        "typ": "text",
+        "text": "55"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "LV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 4,
+      "frage": {
+        "typ": "text",
+        "text": "62"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "LXII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 5,
+      "frage": {
+        "typ": "text",
+        "text": "66"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "LXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 6,
+      "frage": {
+        "typ": "text",
+        "text": "89"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "LXXXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 7,
+      "frage": {
+        "typ": "text",
+        "text": "94"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "XCIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 8,
+      "frage": {
+        "typ": "text",
+        "text": "115"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CXV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 9,
+      "frage": {
+        "typ": "text",
+        "text": "136"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CXXXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 10,
+      "frage": {
+        "typ": "text",
+        "text": "143"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CXLIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 11,
+      "frage": {
+        "typ": "text",
+        "text": "147"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CXLVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 12,
+      "frage": {
+        "typ": "text",
+        "text": "162"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CLXII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 13,
+      "frage": {
+        "typ": "text",
+        "text": "164"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CLXIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 14,
+      "frage": {
+        "typ": "text",
+        "text": "179"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CLXXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 15,
+      "frage": {
+        "typ": "text",
+        "text": "190"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CXC"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 16,
+      "frage": {
+        "typ": "text",
+        "text": "192"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CXCII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 17,
+      "frage": {
+        "typ": "text",
+        "text": "199"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CXCIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 18,
+      "frage": {
+        "typ": "text",
+        "text": "207"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 19,
+      "frage": {
+        "typ": "text",
+        "text": "210"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 20,
+      "frage": {
+        "typ": "text",
+        "text": "229"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCXXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 21,
+      "frage": {
+        "typ": "text",
+        "text": "256"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCLVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 22,
+      "frage": {
+        "typ": "text",
+        "text": "286"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCLXXXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 23,
+      "frage": {
+        "typ": "text",
+        "text": "293"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCXCIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 2
+    },
+    {
+      "id": 24,
+      "frage": {
+        "typ": "text",
+        "text": "319"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCCXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 25,
+      "frage": {
+        "typ": "text",
+        "text": "327"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCCXXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 26,
+      "frage": {
+        "typ": "text",
+        "text": "334"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCCXXXIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 27,
+      "frage": {
+        "typ": "text",
+        "text": "335"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCCXXXV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 28,
+      "frage": {
+        "typ": "text",
+        "text": "351"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCCLI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 29,
+      "frage": {
+        "typ": "text",
+        "text": "394"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CCCXCIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 30,
+      "frage": {
+        "typ": "text",
+        "text": "408"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 31,
+      "frage": {
+        "typ": "text",
+        "text": "430"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDXXX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 32,
+      "frage": {
+        "typ": "text",
+        "text": "433"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDXXXIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 33,
+      "frage": {
+        "typ": "text",
+        "text": "436"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDXXXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 34,
+      "frage": {
+        "typ": "text",
+        "text": "441"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDXLI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 35,
+      "frage": {
+        "typ": "text",
+        "text": "448"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDXLVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 36,
+      "frage": {
+        "typ": "text",
+        "text": "450"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDL"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 37,
+      "frage": {
+        "typ": "text",
+        "text": "452"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDLII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 38,
+      "frage": {
+        "typ": "text",
+        "text": "458"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDLVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 39,
+      "frage": {
+        "typ": "text",
+        "text": "467"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDLXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 40,
+      "frage": {
+        "typ": "text",
+        "text": "470"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDLXX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 41,
+      "frage": {
+        "typ": "text",
+        "text": "477"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CDLXXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 42,
+      "frage": {
+        "typ": "text",
+        "text": "502"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 43,
+      "frage": {
+        "typ": "text",
+        "text": "506"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 44,
+      "frage": {
+        "typ": "text",
+        "text": "542"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DXLII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 45,
+      "frage": {
+        "typ": "text",
+        "text": "543"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DXLIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 46,
+      "frage": {
+        "typ": "text",
+        "text": "547"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DXLVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 47,
+      "frage": {
+        "typ": "text",
+        "text": "549"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DXLIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 48,
+      "frage": {
+        "typ": "text",
+        "text": "553"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DLIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 49,
+      "frage": {
+        "typ": "text",
+        "text": "564"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DLXIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 50,
+      "frage": {
+        "typ": "text",
+        "text": "570"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DLXX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 51,
+      "frage": {
+        "typ": "text",
+        "text": "593"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DXCIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 52,
+      "frage": {
+        "typ": "text",
+        "text": "601"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 53,
+      "frage": {
+        "typ": "text",
+        "text": "645"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCXLV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 54,
+      "frage": {
+        "typ": "text",
+        "text": "647"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCXLVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 55,
+      "frage": {
+        "typ": "text",
+        "text": "665"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCLXV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 56,
+      "frage": {
+        "typ": "text",
+        "text": "690"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCXC"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 57,
+      "frage": {
+        "typ": "text",
+        "text": "697"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCXCVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 58,
+      "frage": {
+        "typ": "text",
+        "text": "705"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 59,
+      "frage": {
+        "typ": "text",
+        "text": "728"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCXXVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 60,
+      "frage": {
+        "typ": "text",
+        "text": "736"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCXXXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 61,
+      "frage": {
+        "typ": "text",
+        "text": "741"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCXLI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 62,
+      "frage": {
+        "typ": "text",
+        "text": "748"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCXLVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 63,
+      "frage": {
+        "typ": "text",
+        "text": "759"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCLIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 64,
+      "frage": {
+        "typ": "text",
+        "text": "776"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCLXXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 65,
+      "frage": {
+        "typ": "text",
+        "text": "778"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCLXXVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 66,
+      "frage": {
+        "typ": "text",
+        "text": "779"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCLXXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 67,
+      "frage": {
+        "typ": "text",
+        "text": "811"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCCXI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 68,
+      "frage": {
+        "typ": "text",
+        "text": "822"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCCXXII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 69,
+      "frage": {
+        "typ": "text",
+        "text": "860"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCCLX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 70,
+      "frage": {
+        "typ": "text",
+        "text": "865"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCCLXV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 71,
+      "frage": {
+        "typ": "text",
+        "text": "866"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "DCCCLXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 72,
+      "frage": {
+        "typ": "text",
+        "text": "920"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CMXX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 73,
+      "frage": {
+        "typ": "text",
+        "text": "929"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CMXXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 74,
+      "frage": {
+        "typ": "text",
+        "text": "940"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CMXL"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 75,
+      "frage": {
+        "typ": "text",
+        "text": "941"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CMXLI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 76,
+      "frage": {
+        "typ": "text",
+        "text": "947"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "CMXLVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 77,
+      "frage": {
+        "typ": "text",
+        "text": "1023"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MXXIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 78,
+      "frage": {
+        "typ": "text",
+        "text": "1035"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MXXXV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 79,
+      "frage": {
+        "typ": "text",
+        "text": "1094"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MXCIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 80,
+      "frage": {
+        "typ": "text",
+        "text": "1099"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MXCIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 81,
+      "frage": {
+        "typ": "text",
+        "text": "1104"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 82,
+      "frage": {
+        "typ": "text",
+        "text": "1117"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 83,
+      "frage": {
+        "typ": "text",
+        "text": "1131"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCXXXI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 84,
+      "frage": {
+        "typ": "text",
+        "text": "1141"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCXLI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 85,
+      "frage": {
+        "typ": "text",
+        "text": "1150"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCL"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 86,
+      "frage": {
+        "typ": "text",
+        "text": "1162"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCLXII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 87,
+      "frage": {
+        "typ": "text",
+        "text": "1183"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCLXXXIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 88,
+      "frage": {
+        "typ": "text",
+        "text": "1207"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 89,
+      "frage": {
+        "typ": "text",
+        "text": "1210"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 90,
+      "frage": {
+        "typ": "text",
+        "text": "1233"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCXXXIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 91,
+      "frage": {
+        "typ": "text",
+        "text": "1237"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCXXXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 92,
+      "frage": {
+        "typ": "text",
+        "text": "1248"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCXLVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 93,
+      "frage": {
+        "typ": "text",
+        "text": "1267"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCLXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 94,
+      "frage": {
+        "typ": "text",
+        "text": "1288"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCLXXXVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 95,
+      "frage": {
+        "typ": "text",
+        "text": "1301"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 96,
+      "frage": {
+        "typ": "text",
+        "text": "1302"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 97,
+      "frage": {
+        "typ": "text",
+        "text": "1310"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 98,
+      "frage": {
+        "typ": "text",
+        "text": "1311"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCXI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 99,
+      "frage": {
+        "typ": "text",
+        "text": "1317"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 100,
+      "frage": {
+        "typ": "text",
+        "text": "1328"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCXXVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 101,
+      "frage": {
+        "typ": "text",
+        "text": "1331"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCXXXI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 102,
+      "frage": {
+        "typ": "text",
+        "text": "1343"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCXLIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 103,
+      "frage": {
+        "typ": "text",
+        "text": "1355"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCLV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 104,
+      "frage": {
+        "typ": "text",
+        "text": "1373"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCLXXIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 105,
+      "frage": {
+        "typ": "text",
+        "text": "1386"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCCCLXXXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 106,
+      "frage": {
+        "typ": "text",
+        "text": "1400"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCD"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 107,
+      "frage": {
+        "typ": "text",
+        "text": "1403"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 108,
+      "frage": {
+        "typ": "text",
+        "text": "1410"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 109,
+      "frage": {
+        "typ": "text",
+        "text": "1430"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDXXX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 110,
+      "frage": {
+        "typ": "text",
+        "text": "1437"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDXXXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 111,
+      "frage": {
+        "typ": "text",
+        "text": "1438"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDXXXVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 112,
+      "frage": {
+        "typ": "text",
+        "text": "1443"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDXLIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 113,
+      "frage": {
+        "typ": "text",
+        "text": "1467"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDLXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 114,
+      "frage": {
+        "typ": "text",
+        "text": "1471"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDLXXI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 115,
+      "frage": {
+        "typ": "text",
+        "text": "1494"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDXCIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 116,
+      "frage": {
+        "typ": "text",
+        "text": "1495"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCDXCV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 117,
+      "frage": {
+        "typ": "text",
+        "text": "1509"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 118,
+      "frage": {
+        "typ": "text",
+        "text": "1517"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 119,
+      "frage": {
+        "typ": "text",
+        "text": "1519"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 120,
+      "frage": {
+        "typ": "text",
+        "text": "1526"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDXXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 121,
+      "frage": {
+        "typ": "text",
+        "text": "1555"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDLV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 122,
+      "frage": {
+        "typ": "text",
+        "text": "1564"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDLXIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 123,
+      "frage": {
+        "typ": "text",
+        "text": "1574"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDLXXIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 124,
+      "frage": {
+        "typ": "text",
+        "text": "1584"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDLXXXIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 125,
+      "frage": {
+        "typ": "text",
+        "text": "1590"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDXC"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 126,
+      "frage": {
+        "typ": "text",
+        "text": "1649"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCXLIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 127,
+      "frage": {
+        "typ": "text",
+        "text": "1651"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCLI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 128,
+      "frage": {
+        "typ": "text",
+        "text": "1653"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCLIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 129,
+      "frage": {
+        "typ": "text",
+        "text": "1658"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCLVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 130,
+      "frage": {
+        "typ": "text",
+        "text": "1684"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCLXXXIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 131,
+      "frage": {
+        "typ": "text",
+        "text": "1699"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCXCIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 132,
+      "frage": {
+        "typ": "text",
+        "text": "1709"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 133,
+      "frage": {
+        "typ": "text",
+        "text": "1727"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCXXVII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 134,
+      "frage": {
+        "typ": "text",
+        "text": "1736"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCXXXVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 135,
+      "frage": {
+        "typ": "text",
+        "text": "1752"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCLII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 136,
+      "frage": {
+        "typ": "text",
+        "text": "1765"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCLXV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 137,
+      "frage": {
+        "typ": "text",
+        "text": "1775"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCLXXV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 138,
+      "frage": {
+        "typ": "text",
+        "text": "1781"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCLXXXI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 139,
+      "frage": {
+        "typ": "text",
+        "text": "1795"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCXCV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 140,
+      "frage": {
+        "typ": "text",
+        "text": "1812"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCCXII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 141,
+      "frage": {
+        "typ": "text",
+        "text": "1814"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCCXIV"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 142,
+      "frage": {
+        "typ": "text",
+        "text": "1828"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCCXXVIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 143,
+      "frage": {
+        "typ": "text",
+        "text": "1871"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCCLXXI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 144,
+      "frage": {
+        "typ": "text",
+        "text": "1873"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCCLXXIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 145,
+      "frage": {
+        "typ": "text",
+        "text": "1889"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCCLXXXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 146,
+      "frage": {
+        "typ": "text",
+        "text": "1896"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MDCCCXCVI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 147,
+      "frage": {
+        "typ": "text",
+        "text": "1919"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCMXIX"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 148,
+      "frage": {
+        "typ": "text",
+        "text": "1932"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCMXXXII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 149,
+      "frage": {
+        "typ": "text",
+        "text": "1961"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCMLXI"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    },
+    {
+      "id": 150,
+      "frage": {
+        "typ": "text",
+        "text": "1993"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "MCMXCIII"
+      },
+      "thema": "Römische Zahlen",
+      "niveau": 3
+    }
+  ]
+}

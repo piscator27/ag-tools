@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Winkel in der analytischen Geometrie</title>
+<style>
+:root{
+  --bg:#1a1a1a;
+  --panel:#232323;
+  --panel2:#2b2b2b;
+  --line:#3a3a3a;
+  --fg:#f2f2f2;
+  --dim:#a8a8a8;
+  --accent:#4ea3ff;
+  --accent2:#ffc24b;
+  --ok:#5fd68a;
+  --warn:#ff8b6b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  font-size:20px;
+  line-height:1.45;
+  padding:18px 22px 90px;
+}
+h1{
+  font-size:1.5em;
+  margin:0 0 4px;
+  font-weight:600;
+  letter-spacing:.5px;
+}
+.sub{color:var(--dim);font-size:.8em;margin-bottom:16px}
+
+/* ---------- Tabs ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.tab{
+  background:var(--panel);
+  border:2px solid var(--line);
+  color:var(--dim);
+  font-size:.9em;
+  font-family:inherit;
+  padding:12px 20px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:.15s;
+}
+.tab:hover{border-color:var(--accent);color:var(--fg)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#10243a;font-weight:700}
+.tab b{font-weight:700;margin-right:8px}
+
+/* ---------- Layout ---------- */
+.grid{display:grid;grid-template-columns:minmax(420px,0.9fr) 1.1fr;gap:22px;align-items:start}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px 22px;
+}
+.card h2{font-size:1em;margin:0 0 14px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase}
+
+/* ---------- Vektor-Eingabe ---------- */
+.vecin{display:inline-flex;align-items:stretch;gap:2px;vertical-align:middle}
+.brk{width:12px;border:3px solid var(--dim);}
+.brk.l{border-right:none;border-radius:7px 0 0 7px}
+.brk.r{border-left:none;border-radius:0 7px 7px 0}
+.comps{display:flex;flex-direction:column;gap:5px;padding:5px 4px}
+.comps input{
+  width:82px;
+  background:var(--panel2);
+  border:2px solid var(--line);
+  border-radius:8px;
+  color:var(--fg);
+  font-family:inherit;
+  font-size:.95em;
+  text-align:center;
+  padding:7px 4px;
+}
+.comps input:focus{outline:none;border-color:var(--accent);background:#1f2b38}
+.eqrow{display:flex;align-items:center;flex-wrap:wrap;gap:12px;font-size:1.05em;margin:10px 0 4px}
+.eqrow .lbl{font-style:italic;color:var(--accent2);min-width:34px}
+.op{color:var(--dim);font-size:1.2em}
+.par{color:var(--accent2);font-style:italic}
+.hint{color:var(--dim);font-size:.72em;margin-top:14px;line-height:1.5}
+.field{margin:6px 0 2px}
+.field label{display:block;color:var(--dim);font-size:.75em;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
+
+/* Ebenen-Eingabe */
+.plane{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:1.05em}
+.plane input{
+  width:72px;background:var(--panel2);border:2px solid var(--line);border-radius:8px;
+  color:var(--fg);font-family:inherit;font-size:.95em;text-align:center;padding:7px 4px;
+}
+.plane input:focus{outline:none;border-color:var(--accent);background:#1f2b38}
+.plane .x{font-style:italic;color:var(--accent2)}
+.plane .x sub{font-size:.65em}
+
+/* ---------- Buttons ---------- */
+.btnrow{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+button.act{
+  font-family:inherit;font-size:.85em;padding:12px 22px;border-radius:11px;cursor:pointer;
+  border:2px solid var(--accent);background:var(--accent);color:#10243a;font-weight:700;transition:.15s;
+}
+button.act:hover{filter:brightness(1.12)}
+button.ghost{background:transparent;color:var(--dim);border-color:var(--line)}
+button.ghost:hover{color:var(--fg);border-color:var(--dim)}
+
+/* ---------- Lösungsweg ---------- */
+.step{border-left:4px solid var(--line);padding:2px 0 2px 16px;margin:0 0 20px}
+.step .t{color:var(--accent);font-size:.75em;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.step .t span{color:var(--dim);margin-right:8px}
+.math{font-size:1.05em;line-height:2.1;overflow-x:auto;padding-bottom:2px}
+.math i{color:var(--accent2);font-style:italic}
+.result{
+  background:linear-gradient(135deg,#1f3a2a,#22402f);
+  border:2px solid var(--ok);border-radius:14px;padding:16px 22px;margin-top:6px;
+}
+.result .lab{color:var(--ok);font-size:.72em;text-transform:uppercase;letter-spacing:1px}
+.result .val{font-size:2.1em;font-weight:700;margin-top:2px}
+.note{background:var(--panel2);border-left:4px solid var(--accent2);border-radius:0 10px 10px 0;
+  padding:12px 16px;margin-top:16px;font-size:.8em;color:#e8ddc4}
+.err{background:#3a2020;border:2px solid var(--warn);color:#ffcdbe;border-radius:12px;padding:14px 18px;font-size:.85em}
+.placeholder{color:var(--dim);font-size:.85em;font-style:italic}
+
+/* Brüche & Wurzeln */
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 6px}
+.frac .num{padding:0 8px;line-height:1.35}
+.frac .den{padding:3px 8px 0;border-top:2px solid var(--fg);line-height:1.35}
+.sqrt{display:inline-flex;align-items:flex-start;white-space:nowrap}
+.sqrt .rad{font-size:1.12em;line-height:1}
+.sqrt .rand{border-top:2px solid var(--fg);padding:2px 4px 0 2px;margin-top:1px}
+.vecm{display:inline-flex;align-items:stretch;vertical-align:middle;margin:0 3px;font-size:.8em}
+.vecm .b{width:7px;border:2px solid var(--dim)}
+.vecm .b.l{border-right:none;border-radius:5px 0 0 5px}
+.vecm .b.r{border-left:none;border-radius:0 5px 5px 0}
+.vecm .c{display:flex;flex-direction:column;padding:3px 7px;line-height:1.3;text-align:center}
+
+/* Vektorpfeil: font-unabhaengig gezeichnet (Beamer-/Schulrechner-tauglich) */
+.v{position:relative;display:inline-block;line-height:1;padding-top:.46em;white-space:nowrap}
+.v::before{content:"";position:absolute;left:.03em;right:.15em;top:.15em;height:0;
+  border-top:.095em solid currentColor}
+.v::after{content:"";position:absolute;right:0;top:.195em;width:0;height:0;
+  transform:translateY(-50%);
+  border-top:.16em solid transparent;border-bottom:.16em solid transparent;
+  border-left:.21em solid currentColor}
+
+/* Logo */
+.logo{position:fixed;right:16px;bottom:12px;color:#888;opacity:.4;font-size:15px;
+  font-family:Georgia,serif;letter-spacing:1px;pointer-events:none}
+.hidden{display:none}
+label.chk{display:inline-flex;align-items:center;gap:9px;color:var(--dim);font-size:.75em;cursor:pointer;margin-top:14px}
+label.chk input{width:19px;height:19px;accent-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<h1>Winkel in der analytischen Geometrie</h1>
+<div class="sub">Vektoren &middot; Geraden &middot; Ebenen &middot; Gerade und Ebene &nbsp;—&nbsp; mit vollständigem Lösungsweg</div>
+
+<div class="tabs">
+  <button class="tab active" data-m="vek"><b>a)</b>Vektoren</button>
+  <button class="tab" data-m="ger"><b>b)</b>Geraden</button>
+  <button class="tab" data-m="ebe"><b>c)</b>Ebenen</button>
+  <button class="tab" data-m="ge"><b>d)</b>Gerade &amp; Ebene</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2 id="inTitle">Eingabe</h2>
+
+    <!-- a) Vektoren -->
+    <div id="in-vek">
+      <div class="eqrow"><span class="lbl"><span class="v">a</span> =</span><span id="v_a"></span></div>
+      <div class="eqrow"><span class="lbl"><span class="v">b</span> =</span><span id="v_b"></span></div>
+      <label class="chk"><input type="checkbox" id="vAbs"> nur spitzen Winkel berechnen (Betrag im Zähler)</label>
+      <div class="hint">Ohne Betrag ergibt sich der Winkel zwischen 0° und 180°: bei negativem Skalarprodukt ist er stumpf.</div>
+    </div>
+
+    <!-- b) Geraden -->
+    <div id="in-ger" class="hidden">
+      <div class="field"><label>Gerade g</label>
+        <div class="eqrow"><span class="lbl">g:</span><span><span class="v">x</span> =</span><span id="g1_p"></span>
+          <span class="op">+</span><span class="par">r</span><span class="op">&middot;</span><span id="g1_u"></span></div>
+      </div>
+      <div class="field" style="margin-top:16px"><label>Gerade h</label>
+        <div class="eqrow"><span class="lbl">h:</span><span><span class="v">x</span> =</span><span id="g2_p"></span>
+          <span class="op">+</span><span class="par">s</span><span class="op">&middot;</span><span id="g2_u"></span></div>
+      </div>
+      <div class="hint">Für den Schnittwinkel zählen nur die Richtungsvektoren – die Stützvektoren dürfen beliebig bleiben.</div>
+    </div>
+
+    <!-- c) Ebenen -->
+    <div id="in-ebe" class="hidden">
+      <div class="field"><label>Ebene E</label>
+        <div class="plane"><span class="lbl" style="font-style:italic;color:var(--accent2)">E:</span>
+          <input id="e1a"><span class="x">x<sub>1</sub></span><span class="op">+</span>
+          <input id="e1b"><span class="x">x<sub>2</sub></span><span class="op">+</span>
+          <input id="e1c"><span class="x">x<sub>3</sub></span><span class="op">=</span>
+          <input id="e1d"></div>
+      </div>
+      <div class="field" style="margin-top:18px"><label>Ebene F</label>
+        <div class="plane"><span class="lbl" style="font-style:italic;color:var(--accent2)">F:</span>
+          <input id="e2a"><span class="x">x<sub>1</sub></span><span class="op">+</span>
+          <input id="e2b"><span class="x">x<sub>2</sub></span><span class="op">+</span>
+          <input id="e2c"><span class="x">x<sub>3</sub></span><span class="op">=</span>
+          <input id="e2d"></div>
+      </div>
+      <div class="hint">Negative Koeffizienten einfach mit Minuszeichen eintragen, z.&nbsp;B. <b>-2</b>. Die rechte Seite <i>d</i> hat auf den Winkel keinen Einfluss.</div>
+    </div>
+
+    <!-- d) Gerade & Ebene -->
+    <div id="in-ge" class="hidden">
+      <div class="field"><label>Gerade g</label>
+        <div class="eqrow"><span class="lbl">g:</span><span><span class="v">x</span> =</span><span id="ge_p"></span>
+          <span class="op">+</span><span class="par">r</span><span class="op">&middot;</span><span id="ge_u"></span></div>
+      </div>
+      <div class="field" style="margin-top:18px"><label>Ebene E</label>
+        <div class="plane"><span class="lbl" style="font-style:italic;color:var(--accent2)">E:</span>
+          <input id="ge_a"><span class="x">x<sub>1</sub></span><span class="op">+</span>
+          <input id="ge_b"><span class="x">x<sub>2</sub></span><span class="op">+</span>
+          <input id="ge_c"><span class="x">x<sub>3</sub></span><span class="op">=</span>
+          <input id="ge_d"></div>
+      </div>
+      <div class="hint">Hier wird mit dem <b>Sinus</b> gerechnet, weil der Normalenvektor senkrecht auf der Ebene steht.</div>
+    </div>
+
+    <div class="btnrow">
+      <button class="act" id="calc">Winkel berechnen</button>
+      <button class="act ghost" id="rand">Zufallsaufgabe</button>
+      <button class="act ghost" id="clr">Leeren</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Lösungsweg</h2>
+    <div id="out"><div class="placeholder">Werte eintragen und auf „Winkel berechnen“ klicken.</div></div>
+  </div>
+</div>
+
+<div class="logo">Fi</div>
+
+<script>
+/* ============ Hilfsfunktionen ============ */
+const $ = id => document.getElementById(id);
+
+function parseNum(s){
+  if(s==null) return NaN;
+  s = String(s).trim().replace(/\s/g,'').replace(',', '.');
+  if(s==='') return 0;
+  const m = s.match(/^(-?\d*\.?\d+)\/(-?\d*\.?\d+)$/);
+  if(m){ const d=parseFloat(m[2]); return d===0?NaN:parseFloat(m[1])/d; }
+  return /^-?\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN;
+}
+function fmt(x, dec=4){
+  if(!isFinite(x)) return '—';
+  if(Math.abs(x-Math.round(x))<1e-10) x=Math.round(x);
+  let s = (Math.abs(x)<1e-12?0:x).toFixed(Number.isInteger(x)?0:dec);
+  if(s.includes('.')) s=s.replace(/0+$/,'').replace(/\.$/,'');
+  return s.replace('.',',');
+}
+function sig(x){ return x<0 ? '&minus;'+fmt(-x) : fmt(x); }
+/* Term "k·y" hübsch: Vorzeichen als Operator */
+function sumTerms(parts){           // parts: [{sign:+1/-1, txt:'2·4'}]
+  return parts.map((p,i)=> (i===0 ? (p.sign<0?'&minus;':'') : (p.sign<0?' &minus; ':' + ')) + p.txt).join('');
+}
+function frac(n,d){ return '<span class="frac"><span class="num">'+n+'</span><span class="den">'+d+'</span></span>'; }
+function rt(inner){ return '<span class="sqrt"><span class="rad">&radic;</span><span class="rand">'+inner+'</span></span>'; }
+/* exakte Wurzel, wenn Radikand ganzzahlig */
+function rtOf(n){ return rt(Math.abs(n-Math.round(n))<1e-9 ? fmt(Math.round(n)) : fmt(n)); }
+/* Quadratzahl? -> ganzzahlige Wurzel, sonst null */
+function isSq(n){ if(n<0) return null; const r=Math.round(Math.sqrt(n)); return Math.abs(n-r*r)<1e-9 ? r : null; }
+/* Betrag als Term: 3 statt Wurzel(9), sonst Wurzel(n) */
+function lenTerm(s){ const r=isSq(s); return r!==null ? fmt(r) : rtOf(s); }
+/* Einsetz-Schritt: im Nenner die vorher ausgerechneten Betraege verwenden */
+function insertBody(lhs, zaehler, sa, sb, val){
+  const ra=isSq(sa), rb=isSq(sb);
+  let h = lhs+' = '+frac(zaehler, lenTerm(sa)+' &middot; '+lenTerm(sb));
+  if(ra!==null && rb!==null)      h += ' = '+frac(zaehler, fmt(ra*rb));      /* 3 &middot; 2 = 6 */
+  else if(ra===null && rb===null) h += ' = '+frac(zaehler, rtOf(sa*sb));     /* beide irrational: unter eine Wurzel */
+  return h+' &asymp; '+fmt(val,4);
+}
+function vecM(v){
+  return '<span class="vecm"><span class="b l"></span><span class="c">'+
+         v.map(x=>'<span>'+sig(x)+'</span>').join('')+'</span><span class="b r"></span></span>';
+}
+const dot = (a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const len = a=>Math.sqrt(dot(a,a));
+const isZero = a=>a.every(x=>Math.abs(x)<1e-12);
+const deg = r=>r*180/Math.PI;
+
+/* ============ Vektor-Eingabefelder erzeugen ============ */
+function makeVec(host, id, def){
+  host.innerHTML = '<span class="vecin"><span class="brk l"></span><span class="comps">'+
+    [0,1,2].map(i=>'<input id="'+id+i+'" inputmode="text" value="'+(def?def[i]:'')+'">').join('')+
+    '</span><span class="brk r"></span></span>';
+}
+function readVec(id){ return [0,1,2].map(i=>parseNum($(id+i).value)); }
+function writeVec(id,v){ [0,1,2].forEach(i=>$(id+i).value = v[i]); }
+
+makeVec($('v_a'),'va',[1,2,2]);
+makeVec($('v_b'),'vb',[3,0,4]);
+makeVec($('g1_p'),'g1p',[1,0,2]);  makeVec($('g1_u'),'g1u',[2,1,-2]);
+makeVec($('g2_p'),'g2p',[0,3,1]);  makeVec($('g2_u'),'g2u',[1,2,2]);
+makeVec($('ge_p'),'gep',[1,1,0]);  makeVec($('ge_u'),'geu',[2,-1,2]);
+['e1a','e1b','e1c','e1d'].forEach((k,i)=>$(k).value=[2,-1,2,6][i]);
+['e2a','e2b','e2c','e2d'].forEach((k,i)=>$(k).value=[1,2,-2,3][i]);
+['ge_a','ge_b','ge_c','ge_d'].forEach((k,i)=>$(k).value=[1,2,2,5][i]);
+
+/* ============ Tabs ============ */
+let mode='vek';
+const panels={vek:'in-vek',ger:'in-ger',ebe:'in-ebe',ge:'in-ge'};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active'); mode=t.dataset.m;
+  Object.entries(panels).forEach(([k,v])=>$(v).classList.toggle('hidden',k!==mode));
+  $('out').innerHTML='<div class="placeholder">Werte eintragen und auf „Winkel berechnen“ klicken.</div>';
+  save();
+});
+
+/* ============ Bausteine des Lösungswegs ============ */
+function step(n,title,body){
+  return '<div class="step"><div class="t"><span>Schritt '+n+'</span>'+title+'</div><div class="math">'+body+'</div></div>';
+}
+/* Skalarprodukt ausführlich */
+function dotStep(n, na, nb, a, b, withBars){
+  const prods = a.map((x,i)=>({sign: (x*b[i])<0?-1:1, txt: Math.abs(x*b[i])===0 ? '0' : fmt(Math.abs(x*b[i]))}));
+  const line1 = a.map((x,i)=>'('+sig(x)+') &middot; ('+sig(b[i])+')').join(' + ');
+  const d = dot(a,b);
+  let body = na+' &#8728; '+nb+' = '+vecM(a)+' &#8728; '+vecM(b)+' = '+line1+
+             ' = '+sumTerms(prods)+' = <b>'+sig(d)+'</b>';
+  if(withBars) body += '<br>&rArr; |'+na+' &#8728; '+nb+'| = <b>'+fmt(Math.abs(d))+'</b>';
+  return step(n,'Skalarprodukt', body);
+}
+/* Beträge */
+function lenStep(n, na, nb, a, b){
+  const sa=dot(a,a), sb=dot(b,b);
+  const f = (nm,v,s)=> '|'+nm+'| = '+rt(v.map(x=>'('+sig(x)+')<sup>2</sup>').join(' + '))+
+        ' = '+rt(v.map(x=>fmt(x*x)).join(' + '))+' = '+rtOf(s)+
+        (isSq(s)!==null ? ' = <b>'+fmt(isSq(s))+'</b>' : ' &asymp; '+fmt(Math.sqrt(s),4));
+  return step(n,'Beträge der Vektoren', f(na,a,sa)+'<br>'+f(nb,b,sb));
+}
+/* Ergebnisbox */
+function resultBox(phi, extra){
+  let h = '<div class="result"><div class="lab">Ergebnis</div><div class="val">&phi; &asymp; '+
+          fmt(phi,2)+'&deg;</div></div>';
+  if(extra) h += '<div class="note">'+extra+'</div>';
+  return h;
+}
+function errBox(msg){ return '<div class="err">'+msg+'</div>'; }
+
+/* ============ Berechnungen ============ */
+function calcVek(){
+  const a=readVec('va'), b=readVec('vb');
+  if([...a,...b].some(isNaN)) return errBox('Bitte alle sechs Felder mit Zahlen füllen (Dezimalkomma und Brüche wie <b>1/2</b> sind erlaubt).');
+  if(isZero(a)||isZero(b)) return errBox('Der Nullvektor hat keine Richtung – für ihn ist kein Winkel definiert.');
+  const useAbs = $('vAbs').checked;
+  const d=dot(a,b), sa=dot(a,a), sb=dot(b,b), la=Math.sqrt(sa), lb=Math.sqrt(sb);
+  const zaehler = useAbs ? Math.abs(d) : d;
+  const cos = zaehler/(la*lb);
+  const phi = deg(Math.acos(Math.max(-1,Math.min(1,cos))));
+
+  let h='';
+  h+=step(1,'Formel',
+      'cos&thinsp;&phi; = '+frac((useAbs?'|<span class="v">a</span> &#8728; <span class="v">b</span>|':'<span class="v">a</span> &#8728; <span class="v">b</span>'),'|<span class="v">a</span>| &middot; |<span class="v">b</span>|')+
+      '<br><span style="font-size:.8em;color:var(--dim)">'+
+      (useAbs?'Mit Betrag im Zähler erhält man stets den spitzen Winkel (0° … 90°).'
+             :'Ohne Betrag liegt der Winkel zwischen 0° und 180°.')+'</span>');
+  h+=dotStep(2,'<span class="v">a</span>','<span class="v">b</span>',a,b,useAbs);
+  h+=lenStep(3,'<span class="v">a</span>','<span class="v">b</span>',a,b);
+  h+=step(4,'Einsetzen', insertBody('cos&thinsp;&phi;', sig(zaehler), sa, sb, cos));
+  h+=step(5,'Umkehrfunktion (Taschenrechner im Gradmodus)',
+      '&phi; = cos<sup>&minus;1</sup>('+fmt(cos,4)+') &asymp; <b>'+fmt(phi,2)+'&deg;</b>');
+
+  let note='';
+  if(Math.abs(d)<1e-10) note='Das Skalarprodukt ist <b>0</b> – die Vektoren stehen <b>senkrecht</b> aufeinander (orthogonal).';
+  else if(Math.abs(Math.abs(cos)-1)<1e-9) note = cos>0
+      ? 'cos&thinsp;&phi; = 1: die Vektoren sind <b>parallel und gleich orientiert</b>.'
+      : 'cos&thinsp;&phi; = &minus;1: die Vektoren sind <b>parallel, aber entgegengesetzt</b> orientiert.';
+  else if(!useAbs && d<0) note='Das Skalarprodukt ist negativ, deshalb ist der Winkel <b>stumpf</b> (größer als 90°).';
+  return h+resultBox(phi,note);
+}
+
+function calcGer(){
+  const u=readVec('g1u'), v=readVec('g2u');
+  if([...u,...v].some(isNaN)) return errBox('Bitte die Richtungsvektoren vollständig mit Zahlen füllen.');
+  if(isZero(u)||isZero(v)) return errBox('Ein Richtungsvektor darf nicht der Nullvektor sein.');
+  const d=dot(u,v), su=dot(u,u), sv=dot(v,v);
+  const cos = Math.abs(d)/(Math.sqrt(su)*Math.sqrt(sv));
+  const phi = deg(Math.acos(Math.min(1,cos)));
+
+  let h='';
+  h+=step(1,'Richtungsvektoren ablesen',
+      'g: <span class="v">x</span> = '+vecM(readVec('g1p'))+' + r &middot; '+vecM(u)+' &nbsp;&rArr;&nbsp; <span class="v">u</span> = '+vecM(u)+'<br>'+
+      'h: <span class="v">x</span> = '+vecM(readVec('g2p'))+' + s &middot; '+vecM(v)+' &nbsp;&rArr;&nbsp; <span class="v">v</span> = '+vecM(v)+
+      '<br><span style="font-size:.8em;color:var(--dim)">Die Stützvektoren spielen für den Winkel keine Rolle.</span>');
+  h+=step(2,'Formel','cos&thinsp;&phi; = '+frac('|<span class="v">u</span> &#8728; <span class="v">v</span>|','|<span class="v">u</span>| &middot; |<span class="v">v</span>|')+
+      '<br><span style="font-size:.8em;color:var(--dim)">Der Betrag sorgt dafür, dass immer der spitze Schnittwinkel (0° … 90°) herauskommt.</span>');
+  h+=dotStep(3,'<span class="v">u</span>','<span class="v">v</span>',u,v,true);
+  h+=lenStep(4,'<span class="v">u</span>','<span class="v">v</span>',u,v);
+  h+=step(5,'Einsetzen', insertBody('cos&thinsp;&phi;', fmt(Math.abs(d)), su, sv, cos));
+  h+=step(6,'Umkehrfunktion','&phi; = cos<sup>&minus;1</sup>('+fmt(cos,4)+') &asymp; <b>'+fmt(phi,2)+'&deg;</b>');
+
+  let note='';
+  if(Math.abs(d)<1e-10) note='<span class="v">u</span> &#8728; <span class="v">v</span> = 0: die Geraden stehen <b>senkrecht</b> zueinander (sie schneiden sich orthogonal oder sind windschief-orthogonal).';
+  else if(Math.abs(cos-1)<1e-9) note='cos&thinsp;&phi; = 1: die Richtungsvektoren sind <b>parallel</b>, die Geraden also parallel oder identisch. Der Schnittwinkel ist 0°.';
+  return h+resultBox(phi,note);
+}
+
+function calcEbe(){
+  const n1=[parseNum($('e1a').value),parseNum($('e1b').value),parseNum($('e1c').value)];
+  const n2=[parseNum($('e2a').value),parseNum($('e2b').value),parseNum($('e2c').value)];
+  const d1=parseNum($('e1d').value), d2=parseNum($('e2d').value);
+  if([...n1,...n2,d1,d2].some(isNaN)) return errBox('Bitte alle Koeffizienten mit Zahlen füllen.');
+  if(isZero(n1)||isZero(n2)) return errBox('Mindestens ein Koeffizient von x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub> muss ungleich 0 sein – sonst ist es keine Ebene.');
+  const d=dot(n1,n2), s1=dot(n1,n1), s2=dot(n2,n2);
+  const cos=Math.abs(d)/(Math.sqrt(s1)*Math.sqrt(s2));
+  const phi=deg(Math.acos(Math.min(1,cos)));
+  const eq=(n,dd)=> sumTerms(n.map((k,i)=>({sign:k<0?-1:1, txt:fmt(Math.abs(k))+'x<sub>'+(i+1)+'</sub>'})))+' = '+sig(dd);
+
+  let h='';
+  h+=step(1,'Normalenvektoren ablesen',
+      'E: '+eq(n1,d1)+' &nbsp;&rArr;&nbsp; <span class="v">n</span><sub>1</sub> = '+vecM(n1)+'<br>'+
+      'F: '+eq(n2,d2)+' &nbsp;&rArr;&nbsp; <span class="v">n</span><sub>2</sub> = '+vecM(n2)+
+      '<br><span style="font-size:.8em;color:var(--dim)">In der Koordinatenform stehen die Koeffizienten von x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub> genau für den Normalenvektor.</span>');
+  h+=step(2,'Formel','cos&thinsp;&phi; = '+frac('|<span class="v">n</span><sub>1</sub> &#8728; <span class="v">n</span><sub>2</sub>|','|<span class="v">n</span><sub>1</sub>| &middot; |<span class="v">n</span><sub>2</sub>|')+
+      '<br><span style="font-size:.8em;color:var(--dim)">Der Winkel zwischen den Normalen ist gleich dem Schnittwinkel der Ebenen.</span>');
+  h+=dotStep(3,'<span class="v">n</span><sub>1</sub>','<span class="v">n</span><sub>2</sub>',n1,n2,true);
+  h+=lenStep(4,'<span class="v">n</span><sub>1</sub>','<span class="v">n</span><sub>2</sub>',n1,n2);
+  h+=step(5,'Einsetzen', insertBody('cos&thinsp;&phi;', fmt(Math.abs(d)), s1, s2, cos));
+  h+=step(6,'Umkehrfunktion','&phi; = cos<sup>&minus;1</sup>('+fmt(cos,4)+') &asymp; <b>'+fmt(phi,2)+'&deg;</b>');
+
+  let note='';
+  if(Math.abs(d)<1e-10) note='Die Normalenvektoren sind orthogonal: die beiden Ebenen stehen <b>senkrecht</b> aufeinander.';
+  else if(Math.abs(cos-1)<1e-9) note='cos&thinsp;&phi; = 1: die Normalenvektoren sind <b>parallel</b>, die Ebenen also parallel oder identisch (Schnittwinkel 0°).';
+  return h+resultBox(phi,note);
+}
+
+function calcGE(){
+  const u=readVec('geu');
+  const n=[parseNum($('ge_a').value),parseNum($('ge_b').value),parseNum($('ge_c').value)];
+  const dd=parseNum($('ge_d').value);
+  if([...u,...n,dd].some(isNaN)) return errBox('Bitte alle Felder mit Zahlen füllen.');
+  if(isZero(u)) return errBox('Der Richtungsvektor darf nicht der Nullvektor sein.');
+  if(isZero(n)) return errBox('Mindestens ein Koeffizient von x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub> muss ungleich 0 sein.');
+  const d=dot(u,n), su=dot(u,u), sn=dot(n,n);
+  const sinv=Math.abs(d)/(Math.sqrt(su)*Math.sqrt(sn));
+  const phi=deg(Math.asin(Math.min(1,sinv)));
+  const eq= sumTerms(n.map((k,i)=>({sign:k<0?-1:1, txt:fmt(Math.abs(k))+'x<sub>'+(i+1)+'</sub>'})))+' = '+sig(dd);
+
+  let h='';
+  h+=step(1,'Vektoren ablesen',
+      'g: <span class="v">x</span> = '+vecM(readVec('gep'))+' + r &middot; '+vecM(u)+' &nbsp;&rArr;&nbsp; Richtungsvektor <span class="v">u</span> = '+vecM(u)+'<br>'+
+      'E: '+eq+' &nbsp;&rArr;&nbsp; Normalenvektor <span class="v">n</span> = '+vecM(n));
+  h+=step(2,'Formel','sin&thinsp;&phi; = '+frac('|<span class="v">u</span> &#8728; <span class="v">n</span>|','|<span class="v">u</span>| &middot; |<span class="v">n</span>|')+
+      '<br><span style="font-size:.8em;color:var(--dim)"><span class="v">n</span> steht senkrecht auf E. Zwischen <span class="v">u</span> und <span class="v">n</span> liegt daher der Winkel 90° &minus; &phi;; '+
+      'wegen cos(90° &minus; &phi;) = sin&thinsp;&phi; rechnet man hier mit dem <b>Sinus</b>.</span>');
+  h+=dotStep(3,'<span class="v">u</span>','<span class="v">n</span>',u,n,true);
+  h+=lenStep(4,'<span class="v">u</span>','<span class="v">n</span>',u,n);
+  h+=step(5,'Einsetzen', insertBody('sin&thinsp;&phi;', fmt(Math.abs(d)), su, sn, sinv));
+  h+=step(6,'Umkehrfunktion','&phi; = sin<sup>&minus;1</sup>('+fmt(sinv,4)+') &asymp; <b>'+fmt(phi,2)+'&deg;</b>');
+
+  let note='';
+  if(Math.abs(d)<1e-10){
+    const p=readVec('gep');
+    const inPlane = Math.abs(dot(p,n)-dd)<1e-9;
+    note='<span class="v">u</span> &#8728; <span class="v">n</span> = 0: die Gerade ist <b>parallel zur Ebene</b> (Schnittwinkel 0°). '+
+         (inPlane?'Der Stützpunkt erfüllt die Ebenengleichung – die Gerade <b>liegt in E</b>.'
+                 :'Der Stützpunkt erfüllt die Ebenengleichung nicht – die Gerade liegt <b>echt parallel</b> zu E.');
+  } else if(Math.abs(sinv-1)<1e-9) note='sin&thinsp;&phi; = 1: <span class="v">u</span> ist parallel zu <span class="v">n</span>, die Gerade steht also <b>senkrecht</b> auf der Ebene.';
+  return h+resultBox(phi,note);
+}
+
+/* ============ Steuerung ============ */
+$('calc').onclick = ()=>{
+  const f={vek:calcVek,ger:calcGer,ebe:calcEbe,ge:calcGE}[mode];
+  $('out').innerHTML = f();
+  save();
+};
+$('clr').onclick = ()=>{
+  document.querySelectorAll('#'+panels[mode]+' input[type=text],#'+panels[mode]+' input:not([type])')
+    .forEach(i=>i.value='');
+  $('out').innerHTML='<div class="placeholder">Werte eintragen und auf „Winkel berechnen“ klicken.</div>';
+};
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rv=()=>{ let v; do{ v=[ri(-4,4),ri(-4,4),ri(-4,4)]; }while(v.every(x=>x===0)); return v; };
+$('rand').onclick = ()=>{
+  if(mode==='vek'){ writeVec('va',rv()); writeVec('vb',rv()); }
+  if(mode==='ger'){ writeVec('g1p',rv()); writeVec('g1u',rv()); writeVec('g2p',rv()); writeVec('g2u',rv()); }
+  if(mode==='ebe'){ const a=rv(),b=rv();
+    ['e1a','e1b','e1c'].forEach((k,i)=>$(k).value=a[i]); $('e1d').value=ri(-6,6);
+    ['e2a','e2b','e2c'].forEach((k,i)=>$(k).value=b[i]); $('e2d').value=ri(-6,6); }
+  if(mode==='ge'){ writeVec('gep',rv()); writeVec('geu',rv()); const n=rv();
+    ['ge_a','ge_b','ge_c'].forEach((k,i)=>$(k).value=n[i]); $('ge_d').value=ri(-6,6); }
+  $('out').innerHTML='<div class="placeholder">Neue Aufgabe – erst selbst rechnen, dann auf „Winkel berechnen“ klicken.</div>';
+};
+
+/* Enter berechnet */
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') $('calc').click(); });
+
+/* ============ localStorage ============ */
+const KEY='winkel-ag-v1';
+function allInputs(){ return Array.from(document.querySelectorAll('input')).filter(i=>i.id); }
+function save(){
+  try{
+    const o={mode, abs:$('vAbs').checked, v:{}};
+    allInputs().forEach(i=>{ if(i.type!=='checkbox') o.v[i.id]=i.value; });
+    localStorage.setItem(KEY, JSON.stringify(o));
+  }catch(e){}
+}
+function load(){
+  try{
+    const o=JSON.parse(localStorage.getItem(KEY)||'null'); if(!o) return;
+    Object.entries(o.v||{}).forEach(([k,val])=>{ const el=$(k); if(el) el.value=val; });
+    $('vAbs').checked=!!o.abs;
+    const t=document.querySelector('.tab[data-m="'+o.mode+'"]'); if(t) t.click();
+  }catch(e){}
+}
+document.addEventListener('input', save);
+load();
+</script>
+</body>
+</html>
