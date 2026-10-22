@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hangman – FischerTools</title>
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #141414;
+    color: #eee;
+    font-family: system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    overflow-y: auto;
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 22px 20px 10px;
+    min-height: calc(100% - 50px);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  header.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #bbb;
+    text-transform: uppercase;
+  }
+
+  .stats {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .stat-pill {
+    background: #1c1c1c;
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 1rem;
+    color: #bbb;
+    white-space: nowrap;
+  }
+
+  .stat-pill b {
+    color: #fff;
+    font-size: 1.1rem;
+  }
+
+  .stage {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 30px 50px;
+  }
+
+  #hangman {
+    width: min(42vmin, 300px);
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    flex: 0 0 auto;
+  }
+
+  .word-wrap {
+    flex: 1 1 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .word-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 14px;
+    font-family: "Courier New", ui-monospace, monospace;
+    font-size: clamp(1.9rem, 4.4vw, 3.6rem);
+    font-weight: 700;
+    min-height: 1.4em;
+  }
+
+  .letter-box {
+    min-width: 0.85em;
+    text-align: center;
+    border-bottom: 5px solid #7a7a7a;
+    padding-bottom: 6px;
+    color: #f4f4f0;
+  }
+
+  .letter-box.gap {
+    border-bottom: none;
+    min-width: 0.55em;
+  }
+
+  .word-wrap.state-solved .letter-box { color: #8fe39a; border-color: #4f8f5c; }
+  .word-wrap.state-failed .letter-box,
+  .word-wrap.state-shown  .letter-box { color: #e3a08f; border-color: #8f584f; }
+
+  .wrong-list {
+    font-size: 1.05rem;
+    color: #c99;
+    letter-spacing: 2px;
+    min-height: 1.4em;
+    text-align: center;
+  }
+
+  .keyboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .keyboard-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  button.key {
+    min-width: 54px;
+    min-height: 54px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid #3a3a3a;
+    background: #232323;
+    color: #eee;
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+
+  button.key.correct { background: #2f5d38; border-color: #3c7a48; color: #dcffe2; }
+  button.key.wrong   { background: #5c2b2b; border-color: #7a3c3c; color: #ffd9d9; opacity: 0.55; }
+  button.key:disabled { cursor: default; }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 6px 0 4px;
+  }
+
+  button.action {
+    min-height: 56px;
+    padding: 0 26px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 1px solid #3a3a3a;
+    background: #232323;
+    color: #eee;
+    cursor: pointer;
+    touch-action: manipulation;
+    letter-spacing: 1px;
+  }
+
+  button.action:active { background: #2c2c2c; }
+
+  footer {
+    text-align: center;
+    padding: 14px 10px 40px;
+    color: #555;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .logo {
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    color: #8a8a8a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    opacity: 0.7;
+    border: 1px solid #3a3a3a;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="title">Hangman</div>
+    <div class="stats">
+      <div class="stat-pill">Gelöste Begriffe: <b id="solvedCount">0</b></div>
+      <div class="stat-pill">Fehler: <b id="errorCount">0 / 6</b></div>
+    </div>
+  </header>
+
+  <div class="stage">
+    <svg id="hangman" viewBox="0 0 260 300">
+      <defs>
+        <filter id="chalk" x="-30%" y="-30%" width="160%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="7" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="4"/>
+        </filter>
+      </defs>
+      <g filter="url(#chalk)" fill="none" stroke="#e9e9e2" stroke-width="6" stroke-linecap="round">
+        <!-- Galgen -->
+        <line x1="20" y1="280" x2="140" y2="280"/>
+        <line x1="60" y1="280" x2="60" y2="30"/>
+        <line x1="60" y1="30" x2="180" y2="30"/>
+        <line x1="180" y1="30" x2="180" y2="58"/>
+        <!-- Strichmännchen -->
+        <circle id="part-head" cx="180" cy="86" r="28" opacity="0"/>
+        <line   id="part-torso" x1="180" y1="114" x2="180" y2="190" opacity="0"/>
+        <line   id="part-arm-l" x1="180" y1="135" x2="150" y2="168" opacity="0"/>
+        <line   id="part-arm-r" x1="180" y1="135" x2="210" y2="168" opacity="0"/>
+        <line   id="part-leg-l" x1="180" y1="190" x2="155" y2="232" opacity="0"/>
+        <line   id="part-leg-r" x1="180" y1="190" x2="205" y2="232" opacity="0"/>
+      </g>
+    </svg>
+
+    <div class="word-wrap" id="wordWrap">
+      <div class="word-display" id="wordDisplay"></div>
+      <div class="wrong-list" id="wrongList">Falsche Buchstaben: —</div>
+    </div>
+  </div>
+
+  <div class="keyboard" id="keyboard"></div>
+
+  <div class="controls">
+    <button class="action" id="btnNew">Neuer Begriff</button>
+    <button class="action" id="btnSolve">Lösung zeigen</button>
+    <button class="action" id="btnSolvedPlus">✓ Gelöst</button>
+  </div>
+
+</div>
+
+<footer>FischerTools</footer>
+<div class="logo">Fi</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ------------------------------------------------------------
+  // Begriffe: hier können beliebig Wörter ergänzt oder ersetzt werden.
+  // Leerzeichen und Umlaute (Ä, Ö, Ü) sind erlaubt.
+  // ------------------------------------------------------------
+  const WORDS = [
+    "Drehmoment",
+    "Dübel",
+    "Bohrmaschine",
+    "Wasserwaage",
+    "Schraubenschlüssel",
+    "Baustelle",
+    "Werkstoffkunde",
+    "Betonmischer",
+    "Gerüst",
+    "Stromkreis",
+    "Härteprüfung",
+    "Toleranzbereich",
+    "Fräsmaschine",
+    "Kegelradgetriebe",
+    "Hydraulikzylinder",
+    "Kühlmittel",
+    "Sicherheitsschuh",
+    "Lötkolben",
+    "Federkraft",
+    "Reibungskoeffizient",
+    "Zugfestigkeit",
+    "Öldruck",
+    "Antriebswelle",
+    "Präzisionswerkzeug",
+    "Montageplan",
+    "Qualitätskontrolle",
+    "Isolierband",
+    "Technisches Zeichnen",
+    "Numerische Steuerung",
+    "Elektrische Sicherheit",
+    "Meterstab"
+  ];
+
+  const MAX_ERRORS = 6;
+  const BODY_PART_IDS = ["part-head", "part-torso", "part-arm-l", "part-arm-r", "part-leg-l", "part-leg-r"];
+  const LETTER_REGEX = /[A-ZÄÖÜ]/;
+
+  const KEY_ROWS = [
+    ["Q","W","E","R","T","Z","U","I","O","P","Ü"],
+    ["A","S","D","F","G","H","J","K","L","Ö","Ä"],
+    ["Y","X","C","V","B","N","M"]
+  ];
+
+  // ------------------------------------------------------------
+  // DOM-Referenzen
+  // ------------------------------------------------------------
+  const wordWrapEl = document.getElementById("wordWrap");
+  const wordDisplayEl = document.getElementById("wordDisplay");
+  const wrongListEl = document.getElementById("wrongList");
+  const keyboardEl = document.getElementById("keyboard");
+  const solvedCountEl = document.getElementById("solvedCount");
+  const errorCountEl = document.getElementById("errorCount");
+  const btnNew = document.getElementById("btnNew");
+  const btnSolve = document.getElementById("btnSolve");
+  const btnSolvedPlus = document.getElementById("btnSolvedPlus");
+
+  // ------------------------------------------------------------
+  // Zustand
+  // ------------------------------------------------------------
+  let bag = [];
+  let currentWord = "";
+  let currentWordUpper = "";
+  let revealed = new Set();
+  let guessed = new Set();
+  let wrongLettersArr = [];
+  let wrongCount = 0;
+  let solvedCount = 0;
+  let roundActive = true;
+  let forceRevealAll = false;
+  let pendingTimer = null;
+
+  // ------------------------------------------------------------
+  // Wortauswahl ohne Wiederholung, bis alle Begriffe verwendet wurden
+  // ------------------------------------------------------------
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function refillBag() {
+    bag = shuffleArray(WORDS.map((_, i) => i));
+  }
+
+  function nextWord() {
+    if (bag.length === 0) refillBag();
+    const idx = bag.pop();
+    return WORDS[idx];
+  }
+
+  // ------------------------------------------------------------
+  // Galgenmännchen
+  // ------------------------------------------------------------
+  function resetHangman() {
+    BODY_PART_IDS.forEach((id) => {
+      document.getElementById(id).style.opacity = 0;
+    });
+  }
+
+  function updateHangman(count) {
+    BODY_PART_IDS.forEach((id, i) => {
+      document.getElementById(id).style.opacity = i < count ? 1 : 0;
+    });
+  }
+
+  // ------------------------------------------------------------
+  // Wortanzeige
+  // ------------------------------------------------------------
+  function renderWord() {
+    wordDisplayEl.innerHTML = "";
+    for (const ch of currentWordUpper) {
+      const span = document.createElement("span");
+      if (ch === " ") {
+        span.className = "letter-box gap";
+      } else if (LETTER_REGEX.test(ch)) {
+        span.className = "letter-box";
+        span.textContent = (forceRevealAll || revealed.has(ch)) ? ch : "";
+      } else {
+        span.className = "letter-box";
+        span.textContent = ch;
+      }
+      wordDisplayEl.appendChild(span);
+    }
+  }
+
+  function isWordFullyRevealed() {
+    for (const ch of currentWordUpper) {
+      if (LETTER_REGEX.test(ch) && !revealed.has(ch)) return false;
+    }
+    return true;
+  }
+
+  function updateWrongList() {
+    wrongListEl.textContent = wrongLettersArr.length
+      ? "Falsche Buchstaben: " + wrongLettersArr.join(", ")
+      : "Falsche Buchstaben: —";
+  }
+
+  function updateStats() {
+    solvedCountEl.textContent = solvedCount;
+    errorCountEl.textContent = wrongCount + " / " + MAX_ERRORS;
+  }
+
+  // ------------------------------------------------------------
+  // Tastatur
+  // ------------------------------------------------------------
+  function buildKeyboard() {
+    KEY_ROWS.forEach((row) => {
+      const rowEl = document.createElement("div");
+      rowEl.className = "keyboard-row";
+      row.forEach((letter) => {
+        const btn = document.createElement("button");
+        btn.className = "key";
+        btn.type = "button";
+        btn.textContent = letter;
+        btn.dataset.letter = letter;
+        rowEl.appendChild(btn);
+      });
+      keyboardEl.appendChild(rowEl);
+    });
+  }
+
+  function resetKeyboard() {
+    keyboardEl.querySelectorAll("button.key").forEach((btn) => {
+      btn.disabled = false;
+      btn.classList.remove("correct", "wrong");
+    });
+  }
+
+  function disableAllKeys() {
+    keyboardEl.querySelectorAll("button.key").forEach((btn) => {
+      btn.disabled = true;
+    });
+  }
+
+  function keyByLetter(letter) {
+    return keyboardEl.querySelector('button[data-letter="' + letter + '"]');
+  }
+
+  keyboardEl.addEventListener("click", (e) => {
+    const btn = e.target.closest("button.key");
+    if (!btn || btn.disabled) return;
+    guessLetter(btn.dataset.letter);
+  });
+
+  // ------------------------------------------------------------
+  // Spiellogik
+  // ------------------------------------------------------------
+  function startNewWord() {
+    clearTimeout(pendingTimer);
+    currentWord = nextWord();
+    currentWordUpper = currentWord.toUpperCase();
+    revealed = new Set();
+    guessed = new Set();
+    wrongLettersArr = [];
+    wrongCount = 0;
+    roundActive = true;
+    forceRevealAll = false;
+
+    wordWrapEl.classList.remove("state-solved", "state-failed", "state-shown");
+    resetHangman();
+    resetKeyboard();
+    renderWord();
+    updateWrongList();
+    updateStats();
+  }
+
+  function guessLetter(rawLetter) {
+    if (!roundActive) return;
+    const letter = rawLetter.toUpperCase();
+    if (guessed.has(letter)) return;
+    guessed.add(letter);
+
+    const btn = keyByLetter(letter);
+
+    if (currentWordUpper.includes(letter)) {
+      revealed.add(letter);
+      if (btn) { btn.classList.add("correct"); btn.disabled = true; }
+      renderWord();
+      if (isWordFullyRevealed()) {
+        endRound("solved");
+      }
+    } else {
+      wrongCount++;
+      wrongLettersArr.push(letter);
+      if (btn) { btn.classList.add("wrong"); btn.disabled = true; }
+      updateWrongList();
+      updateHangman(wrongCount);
+      updateStats();
+      if (wrongCount >= MAX_ERRORS) {
+        endRound("failed");
+      }
+    }
+  }
+
+  function endRound(type) {
+    roundActive = false;
+    disableAllKeys();
+    clearTimeout(pendingTimer);
+
+    if (type === "solved") {
+      solvedCount++;
+      wordWrapEl.classList.add("state-solved");
+      updateStats();
+      pendingTimer = setTimeout(startNewWord, 4000);
+    } else if (type === "failed") {
+      forceRevealAll = true;
+      renderWord();
+      wordWrapEl.classList.add("state-failed");
+      pendingTimer = setTimeout(startNewWord, 4000);
+    } else if (type === "shown") {
+      forceRevealAll = true;
+      renderWord();
+      wordWrapEl.classList.add("state-shown");
+      pendingTimer = setTimeout(startNewWord, 40/home/thomas/Projekte/Hangman/Hangman.html00);
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Buttons
+  // ------------------------------------------------------------
+  btnNew.addEventListener("click", () => {
+    startNewWord();
+  });
+
+  btnSolve.addEventListener("click", () => {
+    if (!roundActive) return;
+    endRound("shown");
+  });
+
+  btnSolvedPlus.addEventListener("click", () => {
+    if (!roundActive) return;
+
+    clearTimeout(pendingTimer);
+
+    // Wort vollständig aufdecken
+    forceRevealAll = true;
+    renderWord();
+
+    // Runde als gelöst darstellen
+    roundActive = false;
+    disableAllKeys();
+    solvedCount++;
+    updateStats();
+    wordWrapEl.classList.add("state-solved");
+
+    // kurze Pause, dann neuer Begriff
+    pendingTimer = setTimeout(startNewWord, 4000);
+});
+
+  // ------------------------------------------------------------
+  // Start
+  // ------------------------------------------------------------
+  buildKeyboard();
+  refillBag();
+  startNewWord();
+})();
+</script>
+
+</body>
+</html>

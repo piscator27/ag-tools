@@ -1,0 +1,1417 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skalarprodukt im Raum – dynamisches Tafelbild</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    .app {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    .canvas-area {
+      position: relative;
+      width: 72%;
+      height: 100%;
+      background: #000;
+      border-right: 2px solid #222;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      cursor: default;
+      touch-action: none;
+    }
+
+    .info {
+      position: absolute;
+      left: 24px;
+      bottom: 20px;
+      color: #aaa;
+      font-size: 17px;
+      line-height: 1.5;
+      pointer-events: none;
+    }
+
+    .fi {
+      position: absolute;
+      right: 22px;
+      bottom: 16px;
+      color: #555;
+      font-size: 26px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .panel {
+      width: 28%;
+      height: 100%;
+      padding: 16px 24px 28px 24px;
+      background: #050505;
+      overflow-y: auto;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 27px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    h2 {
+      margin: 14px 0 6px 0;
+      font-size: 21px;
+      color: #ddd;
+      border-bottom: 1px solid #333;
+      padding-bottom: 3px;
+    }
+
+    .vector-row {
+      display: flex;
+      gap: 26px;
+      align-items: flex-start;
+      margin-top: 4px;
+    }
+
+    .vector-block {
+      min-width: 120px;
+    }
+
+    .vector-name {
+      font-size: 23px;
+      margin-bottom: 2px;
+      font-weight: bold;
+    }
+
+    .green {
+      color: #39d353;
+    }
+
+    .orange {
+      color: #ff9f1c;
+    }
+
+    .paren-vector {
+      display: inline-flex;
+      align-items: center;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .paren {
+      font-size: 74px;
+      font-weight: 300;
+      line-height: 0.9;
+      color: #fff;
+    }
+
+    .vector-values {
+      display: inline-grid;
+      grid-template-rows: auto auto auto;
+      gap: 0;
+      text-align: right;
+      padding: 2px 4px;
+    }
+
+    .vector-values input {
+      width: 80px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #333;
+      color: inherit;
+      font-family: inherit;
+      font-size: 23px;
+      text-align: right;
+      padding: 0 2px;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    /* Die Pfeilchen des Zahlenfeldes würden längere Werte wie -1,26 abschneiden. */
+    .vector-values input::-webkit-outer-spin-button,
+    .vector-values input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .vector-values input:focus {
+      outline: none;
+      border-bottom: 1px solid #888;
+      background: #101010;
+    }
+
+    .formula {
+      margin: 4px 0;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 20px;
+    }
+
+    .result {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .math-line {
+      margin: 4px 0;
+      white-space: nowrap;
+    }
+
+    .angle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 4px 0;
+    }
+
+    .angle-row .formula {
+      margin: 0;
+      margin-right: auto;
+      font-size: 22px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #151515;
+      color: #fff;
+      border: 2px solid #555;
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 17px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: #252525;
+      border-color: #999;
+    }
+
+    button:active {
+      background: #333;
+    }
+
+    .options {
+      margin-top: 6px;
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    .options.two-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 10px;
+    }
+
+    .options.inline-row {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 16px;
+    }
+
+    .options label {
+      white-space: nowrap;
+    }
+
+    sub {
+      font-size: 0.7em;
+    }
+
+    .hint {
+      color: #888;
+      font-size: 15px;
+      margin-top: 2px;
+      line-height: 1.3;
+      white-space: normal;
+    }
+
+    /* Beamer mit geringer Höhe: alles etwas kleiner, damit beide Rechenwege sichtbar bleiben. */
+    @media (max-height: 960px) {
+      .panel { font-size: 18px; padding: 12px 20px 20px 20px; }
+      h1 { font-size: 24px; margin-bottom: 8px; }
+      h2 { font-size: 19px; margin: 11px 0 5px 0; }
+      .paren { font-size: 64px; }
+      .vector-values input { font-size: 21px; width: 72px; }
+      .vector-name { font-size: 21px; }
+      .formula, .math-line { font-size: 18px; }
+      .angle-row .formula { font-size: 20px; }
+      .options { font-size: 16px; line-height: 1.4; }
+      button { font-size: 16px; padding: 6px 9px; }
+      .hint { font-size: 14px; }
+    }
+
+    @media (max-height: 800px) {
+      .panel { font-size: 16px; padding: 8px 18px 12px 18px; }
+      h1 { font-size: 21px; margin-bottom: 4px; }
+      h2 { font-size: 17px; margin: 6px 0 3px 0; }
+      .paren { font-size: 50px; }
+      .vector-values input { font-size: 18px; width: 62px; }
+      .vector-name { font-size: 18px; margin-bottom: 0; }
+      .formula, .math-line { font-size: 16px; margin: 2px 0; }
+      .angle-row { margin: 2px 0; }
+      .angle-row .formula { font-size: 18px; }
+      .options { font-size: 15px; line-height: 1.3; margin-top: 3px; }
+      .button-row { margin-top: 5px; }
+      button { font-size: 15px; padding: 4px 8px; }
+      .info { font-size: 15px; }
+      .hint { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="canvas-area">
+      <canvas id="canvas"></canvas>
+
+      <div class="info">
+        Endpunkt ziehen &nbsp;·&nbsp; Hintergrund ziehen = Ansicht drehen &nbsp;·&nbsp; Mausrad = Zoom<br>
+        Beide Vektoren starten im Ursprung.
+      </div>
+
+      <div class="fi">Fi</div>
+    </div>
+
+    <aside class="panel">
+      <h1>Skalarprodukt im Raum</h1>
+
+      <h2>Vektoren</h2>
+
+      <div class="vector-row">
+        <div class="vector-block">
+          <div class="vector-name green">a⃗</div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values green">
+              <input id="a1" type="number" step="0.5" value="1">
+              <input id="a2" type="number" step="0.5" value="4">
+              <input id="a3" type="number" step="0.5" value="1">
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+
+        <div class="vector-block">
+          <div class="vector-name orange">b⃗</div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values orange">
+              <input id="b1" type="number" step="0.5" value="1">
+              <input id="b2" type="number" step="0.5" value="3">
+              <input id="b3" type="number" step="0.5" value="4">
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint">Werte sind auch direkt eintippbar.</div>
+
+      <h2>Beträge</h2>
+
+      <div class="formula">
+        |a⃗| = √(<span id="a1sq">0</span> + <span id="a2sq">0</span> + <span id="a3sq">0</span>)
+        = <span id="lenA" class="result">0</span>
+      </div>
+
+      <div class="formula">
+        |b⃗| = √(<span id="b1sq">0</span> + <span id="b2sq">0</span> + <span id="b3sq">0</span>)
+        = <span id="lenB" class="result">0</span>
+      </div>
+
+      <h2>Winkel</h2>
+
+      <div class="angle-row">
+        <span class="formula">α = <span id="angle" class="result">0</span>°</span>
+        <button id="set0">0°</button>
+        <button id="set90">90°</button>
+      </div>
+
+      <h2>Modus</h2>
+
+      <div class="options inline-row">
+        <label><input type="radio" name="mode" value="free" checked> Freies Ziehen</label>
+        <label><input type="radio" name="mode" value="angle"> Nur Winkel ändern</label>
+        <label><input type="radio" name="mode" value="length"> Nur Länge ändern</label>
+      </div>
+
+      <h2>Ansicht</h2>
+
+      <div class="button-row">
+        <button id="view3d">Schrägbild</button>
+        <button id="viewTop">Draufsicht x-y</button>
+        <button id="flatten">z = 0 setzen</button>
+      </div>
+
+      <div class="options two-columns">
+        <label><input type="checkbox" id="optSnap" checked> ganze Zahlen</label>
+        <label><input type="checkbox" id="optHelp" checked> Hilfslinien</label>
+        <label><input type="checkbox" id="optPlane" checked> Aufspannebene</label>
+        <label><input type="checkbox" id="optProj"> Projektion b⃗ auf a⃗</label>
+      </div>
+
+      <h2>Geometrischer Weg</h2>
+
+      <div class="math-line">
+        a⃗ · b⃗ = |a⃗| · |b⃗| · cos(α)
+      </div>
+
+      <div class="math-line">
+        = <span id="geoLenA">0</span>
+        ·
+        <span id="geoLenB">0</span>
+        · cos(<span id="geoAngle">0</span>°)
+      </div>
+
+      <div class="math-line">
+        = <span id="geoProductLengths">0</span>
+        ·
+        <span id="cosAngle">0</span>
+      </div>
+
+      <div class="math-line">
+        = <span id="geoResult" class="result">0</span>
+      </div>
+
+      <h2>Algebraischer Weg</h2>
+
+      <div class="math-line">
+        a⃗ · b⃗ = a<sub>1</sub>b<sub>1</sub> + a<sub>2</sub>b<sub>2</sub> + a<sub>3</sub>b<sub>3</sub>
+      </div>
+
+      <div class="math-line">
+        = <span id="algA1">0</span> · <span id="algB1">0</span>
+        +
+        <span id="algA2">0</span> · <span id="algB2">0</span>
+        +
+        <span id="algA3">0</span> · <span id="algB3">0</span>
+      </div>
+
+      <div class="math-line">
+        = <span id="algPart1">0</span>
+        <span id="algPart2">+ 0</span>
+        <span id="algPart3">+ 0</span>
+      </div>
+
+      <div class="math-line">
+        = <span id="algResult" class="result">0</span>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const colors = {
+      background: "#000000",
+      gridFar: "#161616",
+      gridNear: "#242424",
+      axis: "#ffffff",
+      axisNegative: "#555555",
+      labels: "#cccccc",
+      green: "#39d353",
+      orange: "#ff9f1c",
+      point: "#ffffff",
+      angle: "#dddddd",
+      plane: "rgba(200, 200, 200, 0.10)",
+      planeEdge: "rgba(200, 200, 200, 0.35)"
+    };
+
+    const AXIS_RANGE = 5;
+
+    let width = 0;
+    let height = 0;
+    let scale = 62;
+    let zoomFactor = 1;
+    let origin = { x: 0, y: 0 };
+
+    // Kameraausrichtung in Grad: azimuth dreht um die z-Achse, elevation kippt.
+    // Der Startwert ist so gewählt, dass beide Vektoren kaum verkürzt erscheinen
+    // und der Bildwinkel nahe am echten Winkel liegt.
+    const START_AZIMUTH = 15;
+    const START_ELEVATION = 22;
+
+    let azimuth = START_AZIMUTH;
+    let elevation = START_ELEVATION;
+
+    let vectorA = { x: 1, y: 4, z: 1 };
+    let vectorB = { x: 1, y: 3, z: 4 };
+
+    let dragging = null;
+    // Tiefe beim Griff: sie muss über den ganzen Zug konstant bleiben. Würde sie
+    // aus dem aktuellen Vektor neu berechnet, wanderte sie beim Einrasten mit.
+    let dragDepth = 0;
+    let orbiting = false;
+    let lastPointer = { x: 0, y: 0 };
+    let dragMode = "free";
+
+    const options = {
+      snap: true,
+      helpers: true,
+      plane: true,
+      projection: false
+    };
+
+    function toRadians(degrees) {
+      return degrees * Math.PI / 180;
+    }
+
+    function add(a, b) {
+      return { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z };
+    }
+
+    function subtract(a, b) {
+      return { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z };
+    }
+
+    function multiply(v, factorValue) {
+      return { x: v.x * factorValue, y: v.y * factorValue, z: v.z * factorValue };
+    }
+
+    function dot(a, b) {
+      return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+
+    function length(v) {
+      return Math.sqrt(dot(v, v));
+    }
+
+    function normalize(v) {
+      const len = length(v);
+
+      if (len < 0.000001) {
+        return { x: 0, y: 0, z: 0 };
+      }
+
+      return multiply(v, 1 / len);
+    }
+
+    function cross(a, b) {
+      return {
+        x: a.y * b.z - a.z * b.y,
+        y: a.z * b.x - a.x * b.z,
+        z: a.x * b.y - a.y * b.x
+      };
+    }
+
+    // Kamerabasis: right und up spannen die Bildebene auf, forward zeigt zur Kamera.
+    function cameraBasis() {
+      const a = toRadians(azimuth);
+      const e = toRadians(elevation);
+
+      const forward = {
+        x: Math.cos(e) * Math.cos(a),
+        y: Math.cos(e) * Math.sin(a),
+        z: Math.sin(e)
+      };
+
+      const right = {
+        x: -Math.sin(a),
+        y: Math.cos(a),
+        z: 0
+      };
+
+      const up = cross(forward, right);
+
+      return { forward, right, up };
+    }
+
+    let camera = cameraBasis();
+
+    function toScreen(point) {
+      return {
+        x: origin.x + dot(point, camera.right) * scale,
+        y: origin.y - dot(point, camera.up) * scale
+      };
+    }
+
+    function depthOf(point) {
+      return dot(point, camera.forward);
+    }
+
+    // Umkehrung: Bildschirmpunkt in die Bildebene durch die gegebene Tiefe zurückrechnen.
+    function toSpace(screenPoint, depth) {
+      const u = (screenPoint.x - origin.x) / scale;
+      const v = (origin.y - screenPoint.y) / scale;
+
+      return add(
+        add(multiply(camera.right, u), multiply(camera.up, v)),
+        multiply(camera.forward, depth)
+      );
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+
+      width = rect.width;
+      height = rect.height;
+
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+
+      ctx.setTransform(
+        window.devicePixelRatio,
+        0,
+        0,
+        window.devicePixelRatio,
+        0,
+        0
+      );
+
+      // Grundzoom aus der Fensterhöhe, damit das Bild den Beamer ausfüllt.
+      // Der per Mausrad gewählte Faktor bleibt bei Größenänderungen erhalten.
+      const baseScale = Math.max(26, Math.min(110, Math.min(width, height) / 14));
+      scale = baseScale * zoomFactor;
+
+      origin = {
+        x: width * 0.46,
+        y: height * 0.56
+      };
+
+      draw();
+    }
+
+    // Anzeige mit deutschem Dezimalkomma und echtem Minuszeichen.
+    function format(value, digits = 2) {
+      if (Math.abs(value) < 0.0000001) value = 0;
+      return Number(value).toFixed(digits).replace(".", ",").replace("-", "−");
+    }
+
+    function formatShort(value) {
+      if (Math.abs(value) < 0.0000001) value = 0;
+
+      const rounded = Math.round(value * 100) / 100;
+
+      return String(rounded).replace(".", ",").replace("-", "−");
+    }
+
+    function factor(value) {
+      const s = formatShort(value);
+      return value < 0 ? "(" + s + ")" : s;
+    }
+
+    function angleBetween(a, b) {
+      const lenA = length(a);
+      const lenB = length(b);
+
+      if (lenA === 0 || lenB === 0) {
+        return null;
+      }
+
+      let cosValue = dot(a, b) / (lenA * lenB);
+      cosValue = Math.max(-1, Math.min(1, cosValue));
+
+      return Math.acos(cosValue) * 180 / Math.PI;
+    }
+
+    function clear() {
+      ctx.fillStyle = colors.background;
+      ctx.fillRect(0, 0, width, height);
+    }
+
+    function strokeSpaceLine(from, to, color, lineWidth, dash) {
+      const p1 = toScreen(from);
+      const p2 = toScreen(to);
+
+      ctx.save();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+
+      if (dash) {
+        ctx.setLineDash(dash);
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Gitter der x-y-Ebene. Linien hinter dem Ursprung werden dunkler gezeichnet.
+    function drawGroundGrid() {
+      for (let i = -AXIS_RANGE; i <= AXIS_RANGE; i++) {
+        const alongY = {
+          from: { x: i, y: -AXIS_RANGE, z: 0 },
+          to: { x: i, y: AXIS_RANGE, z: 0 }
+        };
+
+        const alongX = {
+          from: { x: -AXIS_RANGE, y: i, z: 0 },
+          to: { x: AXIS_RANGE, y: i, z: 0 }
+        };
+
+        const colorY = i < 0 ? colors.gridFar : colors.gridNear;
+        const colorX = i < 0 ? colors.gridFar : colors.gridNear;
+
+        strokeSpaceLine(alongY.from, alongY.to, colorY, 1);
+        strokeSpaceLine(alongX.from, alongX.to, colorX, 1);
+      }
+    }
+
+    function drawArrowHead(tip, tail, color, size = 16) {
+      const angle = Math.atan2(tip.y - tail.y, tip.x - tail.x);
+
+      ctx.save();
+      ctx.fillStyle = color;
+
+      ctx.beginPath();
+      ctx.moveTo(tip.x, tip.y);
+      ctx.lineTo(
+        tip.x - size * Math.cos(angle - Math.PI / 6),
+        tip.y - size * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        tip.x - size * Math.cos(angle + Math.PI / 6),
+        tip.y - size * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // Länge, mit der eine Richtung auf dem Bildschirm erscheint (in Einheiten).
+    function screenExtent(direction) {
+      return Math.hypot(dot(direction, camera.right), dot(direction, camera.up));
+    }
+
+    function drawAxis(direction, label) {
+      const negativeEnd = multiply(direction, -AXIS_RANGE);
+      const positiveEnd = multiply(direction, AXIS_RANGE + 0.9);
+
+      strokeSpaceLine({ x: 0, y: 0, z: 0 }, negativeEnd, colors.axisNegative, 1.5);
+      strokeSpaceLine({ x: 0, y: 0, z: 0 }, positiveEnd, colors.axis, 2);
+
+      const tip = toScreen(positiveEnd);
+      const tail = toScreen(multiply(direction, AXIS_RANGE * 0.7));
+
+      // Bei einer Achse, die fast senkrecht zur Bildebene steht, ist keine Richtung erkennbar.
+      if (Math.hypot(tip.x - tail.x, tip.y - tail.y) > 6) {
+        drawArrowHead(tip, tail, colors.axis, 12);
+      }
+
+      // Zeigt die Achse fast in Blickrichtung, würde die Beschriftung im Ursprung kleben.
+      if (screenExtent(direction) < 0.2) {
+        return;
+      }
+
+      const labelPoint = toScreen(multiply(direction, AXIS_RANGE + 1.5));
+
+      ctx.save();
+      ctx.fillStyle = colors.labels;
+      ctx.font = "22px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, labelPoint.x, labelPoint.y);
+      ctx.restore();
+    }
+
+    function drawAxes() {
+      drawAxis({ x: 1, y: 0, z: 0 }, "x");
+      drawAxis({ x: 0, y: 1, z: 0 }, "y");
+      drawAxis({ x: 0, y: 0, z: 1 }, "z");
+    }
+
+    function drawAxisNumbers() {
+      ctx.save();
+
+      ctx.fillStyle = colors.labels;
+      ctx.font = "15px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // Beschriftung jeweils zur Seite versetzt, damit sie nicht auf der Achse liegt.
+      const directions = [
+        { direction: { x: 1, y: 0, z: 0 }, offset: { x: 15, y: 8 } },
+        { direction: { x: 0, y: 1, z: 0 }, offset: { x: 4, y: 17 } },
+        { direction: { x: 0, y: 0, z: 1 }, offset: { x: -16, y: 0 } }
+      ];
+
+      directions.forEach((entry) => {
+        if (screenExtent(entry.direction) < 0.2) {
+          return;
+        }
+
+        for (let i = 1; i <= AXIS_RANGE; i++) {
+          const point = toScreen(multiply(entry.direction, i));
+          ctx.fillText(String(i), point.x + entry.offset.x, point.y + entry.offset.y);
+        }
+      });
+
+      const zero = toScreen({ x: 0, y: 0, z: 0 });
+      ctx.fillText("0", zero.x - 16, zero.y + 16);
+
+      ctx.restore();
+    }
+
+    // Senkrechte auf die x-y-Ebene plus Grundriss des Vektors.
+    function drawHelperLines(vector, color) {
+      if (Math.abs(vector.z) < 0.01) {
+        return;
+      }
+
+      const foot = { x: vector.x, y: vector.y, z: 0 };
+
+      strokeSpaceLine(vector, foot, color, 1.5, [5, 5]);
+      strokeSpaceLine({ x: 0, y: 0, z: 0 }, foot, color, 1.5, [5, 5]);
+    }
+
+    function drawSpannedPlane() {
+      const lenA = length(vectorA);
+      const lenB = length(vectorB);
+
+      if (lenA < 0.15 || lenB < 0.15) {
+        return;
+      }
+
+      const zero = toScreen({ x: 0, y: 0, z: 0 });
+      const endA = toScreen(vectorA);
+      const endB = toScreen(vectorB);
+      const endSum = toScreen(add(vectorA, vectorB));
+
+      ctx.save();
+
+      ctx.beginPath();
+      ctx.moveTo(zero.x, zero.y);
+      ctx.lineTo(endA.x, endA.y);
+      ctx.lineTo(endSum.x, endSum.y);
+      ctx.lineTo(endB.x, endB.y);
+      ctx.closePath();
+
+      ctx.fillStyle = colors.plane;
+      ctx.fill();
+
+      ctx.strokeStyle = colors.planeEdge;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 6]);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawProjection() {
+      const lenA = length(vectorA);
+
+      if (lenA < 0.15) {
+        return;
+      }
+
+      const factorValue = dot(vectorA, vectorB) / (lenA * lenA);
+      const foot = multiply(vectorA, factorValue);
+
+      strokeSpaceLine({ x: 0, y: 0, z: 0 }, foot, "rgba(255, 159, 28, 0.75)", 11);
+      strokeSpaceLine(vectorB, foot, "rgba(255, 255, 255, 0.55)", 1.5, [5, 5]);
+
+      // Fußpunkt markieren, damit die Länge der Projektion ablesbar bleibt.
+      const footScreen = toScreen(foot);
+
+      ctx.save();
+      ctx.fillStyle = colors.orange;
+      ctx.beginPath();
+      ctx.arc(footScreen.x, footScreen.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawAngleArc() {
+      const lenA = length(vectorA);
+      const lenB = length(vectorB);
+
+      if (lenA < 0.15 || lenB < 0.15) {
+        return;
+      }
+
+      const angle = angleBetween(vectorA, vectorB);
+
+      if (angle === null || angle < 0.5) {
+        return;
+      }
+
+      // Orthonormale Basis der von a und b aufgespannten Ebene.
+      const e1 = normalize(vectorA);
+      const rest = subtract(vectorB, multiply(e1, dot(vectorB, e1)));
+
+      if (length(rest) < 0.000001) {
+        return;
+      }
+
+      const e2 = normalize(rest);
+
+      const radius = Math.min(1.5, Math.max(0.7, Math.min(lenA, lenB) * 0.32));
+      const total = toRadians(angle);
+      const steps = 72;
+
+      ctx.save();
+
+      ctx.strokeStyle = colors.angle;
+      ctx.lineWidth = 4;
+      ctx.lineCap = "round";
+
+      ctx.beginPath();
+
+      for (let i = 0; i <= steps; i++) {
+        const t = total * i / steps;
+
+        const point = add(
+          multiply(e1, Math.cos(t) * radius),
+          multiply(e2, Math.sin(t) * radius)
+        );
+
+        const screenPoint = toScreen(point);
+
+        if (i === 0) {
+          ctx.moveTo(screenPoint.x, screenPoint.y);
+        } else {
+          ctx.lineTo(screenPoint.x, screenPoint.y);
+        }
+      }
+
+      ctx.stroke();
+
+      const half = total / 2;
+
+      const labelPoint = add(
+        multiply(e1, Math.cos(half) * (radius + 0.45)),
+        multiply(e2, Math.sin(half) * (radius + 0.45))
+      );
+
+      const labelScreen = toScreen(labelPoint);
+
+      ctx.fillStyle = colors.angle;
+      ctx.font = "bold 28px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("α", labelScreen.x, labelScreen.y);
+
+      ctx.restore();
+    }
+
+    function drawVector(vector, color, label) {
+      const startScreen = toScreen({ x: 0, y: 0, z: 0 });
+      const endScreen = toScreen(vector);
+
+      ctx.save();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
+
+      ctx.beginPath();
+      ctx.moveTo(startScreen.x, startScreen.y);
+      ctx.lineTo(endScreen.x, endScreen.y);
+      ctx.stroke();
+
+      if (Math.hypot(endScreen.x - startScreen.x, endScreen.y - startScreen.y) > 8) {
+        drawArrowHead(endScreen, startScreen, color, 18);
+      }
+
+      ctx.fillStyle = color;
+      ctx.font = "bold 28px Arial";
+
+      const labelOffsetX = endScreen.x >= startScreen.x ? 16 : -38;
+      const labelOffsetY = endScreen.y <= startScreen.y ? -14 : 32;
+
+      ctx.fillText(label, endScreen.x + labelOffsetX, endScreen.y + labelOffsetY);
+
+      ctx.restore();
+    }
+
+    function drawEndpoint(vector, color) {
+      const p = toScreen(vector);
+
+      ctx.save();
+
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawStartPoint() {
+      const p = toScreen({ x: 0, y: 0, z: 0 });
+
+      ctx.save();
+
+      ctx.fillStyle = colors.point;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function draw() {
+      camera = cameraBasis();
+
+      clear();
+      drawGroundGrid();
+      drawAxes();
+      drawAxisNumbers();
+
+      if (options.helpers) {
+        drawHelperLines(vectorA, "rgba(57, 211, 83, 0.45)");
+        drawHelperLines(vectorB, "rgba(255, 159, 28, 0.45)");
+      }
+
+      if (options.plane) {
+        drawSpannedPlane();
+      }
+
+      if (options.projection) {
+        drawProjection();
+      }
+
+      drawAngleArc();
+
+      // Der zur Kamera nähere Vektor wird zuletzt gezeichnet.
+      const items = [
+        { vector: vectorA, color: colors.green, label: "a⃗" },
+        { vector: vectorB, color: colors.orange, label: "b⃗" }
+      ];
+
+      items.sort((one, other) => depthOf(one.vector) - depthOf(other.vector));
+
+      items.forEach((item) => {
+        drawVector(item.vector, item.color, item.label);
+      });
+
+      drawStartPoint();
+
+      items.forEach((item) => {
+        drawEndpoint(item.vector, item.color);
+      });
+
+      updatePanel();
+    }
+
+    function setInputValue(id, value) {
+      const input = document.getElementById(id);
+
+      if (document.activeElement === input) {
+        return;
+      }
+
+      input.value = String(Math.round(value * 100) / 100);
+    }
+
+    function updatePanel() {
+      const a = vectorA;
+      const b = vectorB;
+
+      const lenA = length(a);
+      const lenB = length(b);
+      const dotProduct = dot(a, b);
+      const angle = angleBetween(a, b);
+
+      const cosValue = angle === null ? null : Math.cos(toRadians(angle));
+      const productLengths = lenA * lenB;
+
+      setInputValue("a1", a.x);
+      setInputValue("a2", a.y);
+      setInputValue("a3", a.z);
+      setInputValue("b1", b.x);
+      setInputValue("b2", b.y);
+      setInputValue("b3", b.z);
+
+      document.getElementById("a1sq").textContent = formatShort(a.x * a.x);
+      document.getElementById("a2sq").textContent = formatShort(a.y * a.y);
+      document.getElementById("a3sq").textContent = formatShort(a.z * a.z);
+      document.getElementById("b1sq").textContent = formatShort(b.x * b.x);
+      document.getElementById("b2sq").textContent = formatShort(b.y * b.y);
+      document.getElementById("b3sq").textContent = formatShort(b.z * b.z);
+
+      document.getElementById("lenA").textContent = format(lenA);
+      document.getElementById("lenB").textContent = format(lenB);
+
+      document.getElementById("angle").textContent =
+        angle === null ? "nicht definiert" : format(angle);
+
+      document.getElementById("geoLenA").textContent = format(lenA);
+      document.getElementById("geoLenB").textContent = format(lenB);
+      document.getElementById("geoAngle").textContent =
+        angle === null ? "–" : format(angle);
+
+      document.getElementById("geoProductLengths").textContent = format(productLengths);
+      document.getElementById("cosAngle").textContent =
+        cosValue === null ? "–" : factor(cosValue);
+
+      document.getElementById("geoResult").textContent =
+        angle === null ? "nicht definiert" : format(productLengths * cosValue);
+
+      document.getElementById("algA1").textContent = factor(a.x);
+      document.getElementById("algB1").textContent = factor(b.x);
+      document.getElementById("algA2").textContent = factor(a.y);
+      document.getElementById("algB2").textContent = factor(b.y);
+      document.getElementById("algA3").textContent = factor(a.z);
+      document.getElementById("algB3").textContent = factor(b.z);
+
+      const part1 = a.x * b.x;
+      const part2 = a.y * b.y;
+      const part3 = a.z * b.z;
+
+      document.getElementById("algPart1").textContent = formatShort(part1);
+      document.getElementById("algPart2").textContent = signedTerm(part2);
+      document.getElementById("algPart3").textContent = signedTerm(part3);
+
+      document.getElementById("algResult").textContent = format(dotProduct);
+    }
+
+    function signedTerm(value) {
+      return value < 0
+        ? "− " + formatShort(Math.abs(value))
+        : "+ " + formatShort(value);
+    }
+
+    function getPointerPosition(event) {
+      const rect = canvas.getBoundingClientRect();
+
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+    }
+
+    function distance(p1, p2) {
+      return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+    }
+
+    function detectVectorAtPointer(pointer) {
+      const screenA = toScreen(vectorA);
+      const screenB = toScreen(vectorB);
+
+      const hitA = distance(pointer, screenA) < 32;
+      const hitB = distance(pointer, screenB) < 32;
+
+      if (hitA && hitB) {
+        return depthOf(vectorA) >= depthOf(vectorB) ? "a" : "b";
+      }
+
+      if (hitA) return "a";
+      if (hitB) return "b";
+
+      return null;
+    }
+
+    function snapVector(v) {
+      return {
+        x: Math.round(v.x),
+        y: Math.round(v.y),
+        z: Math.round(v.z)
+      };
+    }
+
+    function isIntegerVector(v) {
+      return Number.isInteger(v.x) && Number.isInteger(v.y) && Number.isInteger(v.z);
+    }
+
+    // Ganzzahliger Vektor senkrecht zu a, möglichst ähnlich zu b in Länge und Richtung.
+    // So bleibt das Skalarprodukt im Unterricht von Hand nachrechenbar.
+    function integerPerpendicular(a, b) {
+      const targetLength = length(b);
+      const unitB = normalize(b);
+
+      let best = null;
+
+      for (let x = -5; x <= 5; x++) {
+        for (let y = -5; y <= 5; y++) {
+          for (let z = -5; z <= 5; z++) {
+            if (x === 0 && y === 0 && z === 0) continue;
+
+            const candidate = { x, y, z };
+
+            if (dot(a, candidate) !== 0) continue;
+
+            const len = length(candidate);
+
+            if (len < 1.2 || len > 7.5) continue;
+
+            // Nähe zur bisherigen Länge, dann Nähe zur bisherigen Richtung.
+            const score =
+              -Math.abs(len - targetLength) * 2
+              + dot(normalize(candidate), unitB);
+
+            if (!best || score > best.score) {
+              best = { score, vector: candidate };
+            }
+          }
+        }
+      }
+
+      return best === null ? null : best.vector;
+    }
+
+    function setAngle(degrees) {
+      let lenA = length(vectorA);
+      let lenB = length(vectorB);
+
+      if (lenA < 0.001) {
+        vectorA = { x: 1, y: 4, z: 1 };
+        lenA = length(vectorA);
+      }
+
+      if (lenB < 0.001) {
+        vectorB = { x: 1, y: 3, z: 4 };
+        lenB = length(vectorB);
+      }
+
+      const unitA = normalize(vectorA);
+      const wantsIntegers = options.snap && isIntegerVector(vectorA);
+
+      if (degrees === 0) {
+        if (wantsIntegers) {
+          // b = λ·a ist für jedes λ exakt parallel, also darf λ glatt gerundet werden.
+          let lambda = Math.round(lenB / lenA * 2) / 2;
+
+          if (lambda < 0.5) lambda = 0.5;
+
+          // Bei λ = 1 lägen beide Pfeile deckungsgleich übereinander.
+          // Der kürzere Vektor bleibt sichtbar und innerhalb des Gitters.
+          if (Math.abs(lambda - 1) < 0.01) lambda = 0.5;
+
+          vectorB = multiply(vectorA, lambda);
+        } else {
+          vectorB = multiply(unitA, lenB);
+        }
+      }
+
+      if (degrees === 90) {
+        const integerChoice = wantsIntegers
+          ? integerPerpendicular(vectorA, vectorB)
+          : null;
+
+        if (integerChoice !== null) {
+          vectorB = integerChoice;
+        } else {
+          // Exakt senkrechter Anteil von b, Betrag bleibt erhalten.
+          let rest = subtract(vectorB, multiply(unitA, dot(vectorB, unitA)));
+
+          if (length(rest) < 0.001) {
+            const helper = Math.abs(unitA.z) < 0.9
+              ? { x: 0, y: 0, z: 1 }
+              : { x: 1, y: 0, z: 0 };
+
+            rest = cross(unitA, helper);
+          }
+
+          vectorB = multiply(normalize(rest), lenB);
+        }
+      }
+
+      draw();
+    }
+
+    canvas.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+
+      const pointer = getPointerPosition(event);
+      lastPointer = pointer;
+
+      dragging = detectVectorAtPointer(pointer);
+
+      if (dragging) {
+        dragDepth = depthOf(dragging === "a" ? vectorA : vectorB);
+        canvas.setPointerCapture(event.pointerId);
+        canvas.style.cursor = "grabbing";
+      } else {
+        orbiting = true;
+        canvas.setPointerCapture(event.pointerId);
+        canvas.style.cursor = "move";
+      }
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      event.preventDefault();
+
+      const pointer = getPointerPosition(event);
+
+      if (orbiting) {
+        azimuth -= (pointer.x - lastPointer.x) * 0.4;
+        elevation += (pointer.y - lastPointer.y) * 0.4;
+        elevation = Math.max(-90, Math.min(90, elevation));
+
+        lastPointer = pointer;
+        draw();
+        return;
+      }
+
+      if (!dragging) {
+        const hoverVector = detectVectorAtPointer(pointer);
+        canvas.style.cursor = hoverVector ? "grab" : "move";
+        return;
+      }
+
+      const target = dragging === "a" ? vectorA : vectorB;
+
+      // In der Bildebene ziehen, die Tiefe vom Moment des Griffs bleibt erhalten.
+      let newVector = toSpace(pointer, dragDepth);
+
+      if (dragMode === "angle") {
+        const len = length(target);
+        newVector = multiply(normalize(newVector), len);
+      } else if (dragMode === "length") {
+        const direction = normalize(target);
+        const len = length(newVector);
+        newVector = multiply(direction, len);
+      } else if (options.snap) {
+        newVector = snapVector(newVector);
+      }
+
+      if (dragging === "a") vectorA = newVector;
+      if (dragging === "b") vectorB = newVector;
+
+      lastPointer = pointer;
+      draw();
+    });
+
+    function endPointer(event) {
+      dragging = null;
+      orbiting = false;
+      canvas.style.cursor = "default";
+
+      try {
+        canvas.releasePointerCapture(event.pointerId);
+      } catch (error) {
+        // Falls der Pointer nicht mehr erfasst ist, ist nichts weiter zu tun.
+      }
+    }
+
+    canvas.addEventListener("pointerup", (event) => {
+      event.preventDefault();
+      endPointer(event);
+    });
+
+    canvas.addEventListener("pointercancel", endPointer);
+
+    canvas.addEventListener("pointerleave", () => {
+      if (!dragging && !orbiting) {
+        canvas.style.cursor = "default";
+      }
+    });
+
+    canvas.addEventListener("wheel", (event) => {
+      event.preventDefault();
+
+      const step = event.deltaY < 0 ? 1.08 : 1 / 1.08;
+
+      zoomFactor = Math.max(0.4, Math.min(2.5, zoomFactor * step));
+      const baseScale = Math.max(26, Math.min(110, Math.min(width, height) / 14));
+      scale = baseScale * zoomFactor;
+
+      draw();
+    }, { passive: false });
+
+    document.getElementById("set0").addEventListener("click", () => setAngle(0));
+    document.getElementById("set90").addEventListener("click", () => setAngle(90));
+
+    document.getElementById("view3d").addEventListener("click", () => {
+      azimuth = START_AZIMUTH;
+      elevation = START_ELEVATION;
+      draw();
+    });
+
+    document.getElementById("viewTop").addEventListener("click", () => {
+      azimuth = -90;
+      elevation = 90;
+      draw();
+    });
+
+    document.getElementById("flatten").addEventListener("click", () => {
+      vectorA = { x: vectorA.x, y: vectorA.y, z: 0 };
+      vectorB = { x: vectorB.x, y: vectorB.y, z: 0 };
+      draw();
+    });
+
+    document.querySelectorAll('input[name="mode"]').forEach((radio) => {
+      radio.addEventListener("change", (event) => {
+        dragMode = event.target.value;
+      });
+    });
+
+    const optionMap = {
+      optSnap: "snap",
+      optHelp: "helpers",
+      optPlane: "plane",
+      optProj: "projection"
+    };
+
+    Object.keys(optionMap).forEach((id) => {
+      document.getElementById(id).addEventListener("change", (event) => {
+        options[optionMap[id]] = event.target.checked;
+        draw();
+      });
+    });
+
+    const inputMap = {
+      a1: ["a", "x"],
+      a2: ["a", "y"],
+      a3: ["a", "z"],
+      b1: ["b", "x"],
+      b2: ["b", "y"],
+      b3: ["b", "z"]
+    };
+
+    Object.keys(inputMap).forEach((id) => {
+      const input = document.getElementById(id);
+
+      input.addEventListener("input", () => {
+        const raw = input.value.replace(",", ".");
+        const value = Number(raw);
+
+        if (raw === "" || Number.isNaN(value)) {
+          return;
+        }
+
+        const [which, component] = inputMap[id];
+        const target = which === "a" ? vectorA : vectorB;
+
+        target[component] = value;
+
+        draw();
+      });
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+
+    resizeCanvas();
+  </script>
+</body>
+</html>

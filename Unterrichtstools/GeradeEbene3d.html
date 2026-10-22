@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<title>Winkel zwischen Gerade und Ebene – dynamisches Tafelbild</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+  }
+
+  .app { display: flex; width: 100vw; height: 100vh; background: #000; }
+
+  .canvas-area {
+    position: relative;
+    width: 68%;
+    height: 100%;
+    background: #000;
+    border-right: 2px solid #222;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    touch-action: none;
+    cursor: move;
+  }
+
+  .info {
+    position: absolute;
+    left: 24px;
+    bottom: 18px;
+    color: #888;
+    font-size: 17px;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+
+  .headline {
+    position: absolute;
+    left: 24px;
+    top: 18px;
+    color: #fff;
+    font-size: 26px;
+    font-weight: bold;
+    pointer-events: none;
+  }
+
+  .lage {
+    position: absolute;
+    left: 24px;
+    top: 52px;
+    font-size: 20px;
+    color: #ff5d8f;
+    pointer-events: none;
+  }
+
+  .fi {
+    position: absolute;
+    right: 22px;
+    bottom: 16px;
+    color: #555;
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .panel {
+    width: 32%;
+    height: 100%;
+    padding: 14px 22px 30px 22px;
+    background: #050505;
+    overflow-y: auto;
+    font-size: 19px;
+    line-height: 1.35;
+  }
+
+  h1 { margin: 0 0 8px 0; font-size: 25px; font-weight: 700; }
+
+  h2 {
+    margin: 15px 0 6px 0;
+    font-size: 20px;
+    color: #ddd;
+    border-bottom: 1px solid #333;
+    padding-bottom: 3px;
+  }
+
+  button {
+    font-size: 16px;
+    padding: 5px 9px;
+    background: #151515;
+    color: #ddd;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover { background: #222; color: #fff; }
+
+  .button-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
+
+  .green  { color: #39d353; }
+  .orange { color: #ff9f1c; }
+  .pink   { color: #ff5d8f; }
+  .dim    { color: #888; }
+
+  .paren-vector { display: inline-flex; align-items: center; font-size: 26px; line-height: 1; }
+  .paren { font-size: 46px; font-weight: 200; }
+  .vector-values { display: inline-flex; flex-direction: column; padding: 0 3px; }
+
+  .vector-values input {
+    width: 62px;
+    background: #000;
+    border: 1px solid #333;
+    color: inherit;
+    font-family: inherit;
+    font-size: 20px;
+    text-align: center;
+    padding: 1px 2px;
+    margin: 1px 0;
+    border-radius: 3px;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { opacity: 0.35; }
+
+  .vector-row { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; margin-top: 4px; }
+  .vector-block { min-width: 96px; }
+  .vector-name { font-size: 21px; margin-bottom: 2px; font-weight: bold; }
+
+  .formula { font-size: 21px; margin: 5px 0; }
+  .result { color: #fff; font-weight: bold; }
+  .note { font-size: 16px; color: #999; margin-top: 5px; line-height: 1.4; }
+
+  .eqbox {
+    background: #0d0d0d;
+    border: 1px solid #262626;
+    border-left: 3px solid #444;
+    border-radius: 4px;
+    padding: 8px 11px;
+    margin: 7px 0;
+  }
+
+  .eqbox .label { font-size: 15px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .eqbox .eq { font-size: 21px; margin-top: 3px; }
+  .eqbox.hi { border-left-color: #ff9f1c; }
+  .eqbox.weg { border-left-color: #58b9ff; }
+
+  .eqbox .eq.voll { color: #999; font-size: 19px; }
+
+  .eqbox .label #eKoordSchema {
+    text-transform: none;
+    letter-spacing: 0;
+    color: #666;
+    font-size: 15px;
+  }
+
+  .options { font-size: 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; }
+  .options label { white-space: nowrap; }
+
+  .big { font-size: 32px; font-weight: bold; }
+
+  .slider-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 18px; }
+  input[type="range"] { flex: 1; }
+
+  .sonderfall {
+    margin-top: 8px;
+    padding: 8px 11px;
+    border-radius: 4px;
+    background: #16100c;
+    border-left: 3px solid #ff5d8f;
+    font-size: 17px;
+    color: #ffc7d6;
+    line-height: 1.4;
+  }
+
+  @media (max-height: 760px) {
+    .panel { font-size: 17px; }
+    h1 { font-size: 21px; }
+    h2 { font-size: 18px; margin-top: 11px; }
+    .formula { font-size: 19px; }
+    .eqbox .eq { font-size: 18px; }
+    .eqbox .eq.voll { font-size: 16px; }
+    .paren-vector { font-size: 22px; }
+    .paren { font-size: 38px; }
+    .vector-values input { font-size: 17px; width: 54px; }
+    .big { font-size: 26px; }
+    .info { font-size: 15px; }
+    .sonderfall { font-size: 15px; }
+  }
+</style>
+</head>
+
+<body>
+<div class="app">
+  <div class="canvas-area">
+    <canvas id="canvas"></canvas>
+    <div class="headline">Winkel zwischen Gerade und Ebene</div>
+    <div class="lage" id="lage"></div>
+    <div class="info">Ziehen = Ansicht drehen &nbsp;·&nbsp; Mausrad = Zoom</div>
+    <div class="fi">Fi</div>
+  </div>
+
+  <aside class="panel">
+    <div class="options" style="margin-bottom:8px">
+      <span class="dim">Achsen:</span>
+      <label><input type="radio" name="axisNames" value="x123" checked> x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub></label>
+      <label><input type="radio" name="axisNames" value="xyz"> x, y, z</label>
+    </div>
+
+    <h1>Gerade und Ebene</h1>
+
+    <div class="eqbox">
+      <div class="label">Gerade g</div>
+      <div class="eq" id="gEq">&nbsp;</div>
+    </div>
+
+    <div class="eqbox hi">
+      <div class="label">Ebene E &nbsp;<span id="eKoordSchema"></span></div>
+      <div class="eq voll" id="eKoordVoll">&nbsp;</div>
+      <div class="eq" id="eKoord">&nbsp;</div>
+    </div>
+
+    <h2>Gerade</h2>
+
+    <div class="vector-row">
+      <div class="vector-block">
+        <div class="vector-name">a&#8407; <span class="dim" style="font-size:15px">St&uuml;tz</span></div>
+        <div class="paren-vector">
+          <span class="paren">(</span>
+          <span class="vector-values">
+            <input id="ga1" type="number" step="1" value="-1">
+            <input id="ga2" type="number" step="1" value="0">
+            <input id="ga3" type="number" step="1" value="1">
+          </span>
+          <span class="paren">)</span>
+        </div>
+      </div>
+
+      <div class="vector-block">
+        <div class="vector-name green">u&#8407; <span class="dim" style="font-size:15px">Richtung</span></div>
+        <div class="paren-vector">
+          <span class="paren">(</span>
+          <span class="vector-values green">
+            <input id="gu1" type="number" step="1" value="1">
+            <input id="gu2" type="number" step="1" value="2">
+            <input id="gu3" type="number" step="1" value="2">
+          </span>
+          <span class="paren">)</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>Ebene</h2>
+
+    <div class="vector-row">
+      <div class="vector-block">
+        <div class="vector-name orange">n&#8407;</div>
+        <div class="paren-vector">
+          <span class="paren">(</span>
+          <span class="vector-values orange">
+            <input id="en1" type="number" step="1" value="2">
+            <input id="en2" type="number" step="1" value="-1">
+            <input id="en3" type="number" step="1" value="2">
+          </span>
+          <span class="paren">)</span>
+        </div>
+      </div>
+
+      <div class="vector-block">
+        <div class="vector-name">d</div>
+        <div class="paren-vector">
+          <span class="vector-values">
+            <input id="ed" type="number" step="1" value="4">
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <h2>Passende Vektoren?</h2>
+
+    <div class="note">
+      <span class="green">u&#8407;</span> und <span class="orange">n&#8407;</span> sind die
+      einzigen ausgezeichneten Vektoren &ndash; aber sie stehen <b>quer</b> zueinander:
+      n&#8407; steht senkrecht auf der Ebene, der Winkel wird aber <b>in</b> der Ebene gemessen.
+      Deshalb ist der Winkel zwischen u&#8407; und n&#8407; nicht der gesuchte, sondern sein
+      Komplement.
+    </div>
+
+    <div class="eqbox weg">
+      <div class="label">Weg 1 &middot; &uuml;ber den Umweg</div>
+      <div class="eq" id="w1a">&nbsp;</div>
+      <div class="eq" id="w1b">&nbsp;</div>
+      <div class="eq" id="w1c">&nbsp;</div>
+    </div>
+
+    <div class="eqbox weg">
+      <div class="label">Weg 2 &middot; direkt mit dem Sinus</div>
+      <div class="eq" id="w2a">&nbsp;</div>
+      <div class="eq" id="w2b">&nbsp;</div>
+    </div>
+
+    <div class="formula big">&alpha; = <span id="alphaOut">0</span>&deg;</div>
+
+    <div class="sonderfall" id="sonderfall"></div>
+
+    <h2>Gerade kippen</h2>
+
+    <div class="slider-row">
+      <span>&alpha; =</span>
+      <input id="tilt" type="range" min="0" max="90" step="1" value="26">
+      <span class="result" id="tiltOut">26°</span>
+    </div>
+
+    <div class="note">
+      Kippt die Gerade in der Ebene aus u&#8407; und n&#8407;. Bei 0&deg; liegt sie in der
+      Ebene, bei 90&deg; steht sie senkrecht darauf. Die Koordinaten werden dabei krumm &ndash;
+      zum Rechnen die Beispiele unten nehmen.
+    </div>
+
+    <h2>Beispiele</h2>
+
+    <div class="button-row">
+      <button class="preset" data-val="-1,0,1|1,2,2|2,-1,2|4">Standard (26,4°)</button>
+      <button class="preset" data-val="1,0,0|1,1,0|1,-1,1|1">g liegt in E</button>
+      <button class="preset" data-val="1,0,2|1,1,0|1,-1,1|1">echt parallel</button>
+      <button class="preset" data-val="0,0,0|1,-1,1|1,-1,1|1">senkrecht</button>
+    </div>
+
+    <h2>Anzeige</h2>
+
+    <div class="options">
+      <label><input type="checkbox" id="optN" checked> Normalenvektor</label>
+      <label><input type="checkbox" id="optLot" checked> Lot und Projektion</label>
+      <label><input type="checkbox" id="optArc" checked> Winkelb&ouml;gen</label>
+      <label><input type="checkbox" id="optGrid" checked> Ebenenraster</label>
+    </div>
+
+    <div class="button-row">
+      <button id="viewStd">Schr&auml;gbild</button>
+      <button id="viewSide">Seitenansicht</button>
+      <button id="viewFit">einpassen</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  const colors = {
+    background: "#000000",
+    gridFar: "#161616",
+    gridNear: "#242424",
+    axis: "#ffffff",
+    axisNegative: "#555555",
+    labels: "#cccccc",
+    green: "#39d353",
+    orange: "#ff9f1c",
+    pink: "#ff5d8f",
+    line: "#ffffff"
+  };
+
+  const AXIS_RANGE = 5;
+
+  // Der Kurs nennt die Achsen x1, x2, x3; umschaltbar auf x, y, z.
+  let axisNames = ["x₁", "x₂", "x₃"];
+
+  let width = 0;
+  let height = 0;
+  let scale = 62;
+  let zoomFactor = 1;
+  let origin = { x: 0, y: 0 };
+
+  const START_AZIMUTH = 22;
+  const START_ELEVATION = 20;
+
+  let azimuth = START_AZIMUTH;
+  let elevation = START_ELEVATION;
+
+  let orbiting = false;
+  let lastPointer = { x: 0, y: 0 };
+
+  // ---------------------------------------------------------------- Vektormathematik
+
+  function toRadians(d) { return d * Math.PI / 180; }
+  function add(a, b) { return { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z }; }
+  function subtract(a, b) { return { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z }; }
+  function multiply(v, f) { return { x: v.x * f, y: v.y * f, z: v.z * f }; }
+  function dot(a, b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+  function length(v) { return Math.sqrt(dot(v, v)); }
+
+  function normalize(v) {
+    const len = length(v);
+    if (len < 0.000001) return { x: 0, y: 0, z: 0 };
+    return multiply(v, 1 / len);
+  }
+
+  function cross(a, b) {
+    return {
+      x: a.y * b.z - a.z * b.y,
+      y: a.z * b.x - a.x * b.z,
+      z: a.x * b.y - a.y * b.x
+    };
+  }
+
+  function isParallel(a, b) {
+    return length(cross(a, b)) < 0.000001;
+  }
+
+  function angleBetween(a, b) {
+    const la = length(a);
+    const lb = length(b);
+    if (la < 0.000001 || lb < 0.000001) return null;
+    let c = dot(a, b) / (la * lb);
+    c = Math.max(-1, Math.min(1, c));
+    return Math.acos(c) * 180 / Math.PI;
+  }
+
+  // ---------------------------------------------------------------- Kamera
+
+  function cameraBasis() {
+    const a = toRadians(azimuth);
+    const e = toRadians(elevation);
+
+    const forward = {
+      x: Math.cos(e) * Math.cos(a),
+      y: Math.cos(e) * Math.sin(a),
+      z: Math.sin(e)
+    };
+
+    const right = { x: -Math.sin(a), y: Math.cos(a), z: 0 };
+    const up = cross(forward, right);
+
+    return { forward, right, up };
+  }
+
+  let camera = cameraBasis();
+
+  function toScreen(p) {
+    return {
+      x: origin.x + dot(p, camera.right) * scale,
+      y: origin.y - dot(p, camera.up) * scale
+    };
+  }
+
+  function depthOf(p) { return dot(p, camera.forward); }
+
+  function baseScale() {
+    return Math.max(26, Math.min(110, Math.min(width, height) / 14));
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+
+    width = rect.width;
+    height = rect.height;
+
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+
+    scale = baseScale() * zoomFactor;
+    origin = { x: width * 0.47, y: height * 0.55 };
+
+    draw();
+  }
+
+  function fitView(points) {
+    camera = cameraBasis();
+
+    let maxExtent = 1;
+
+    const box = [
+      { x: AXIS_RANGE, y: 0, z: 0 }, { x: -AXIS_RANGE, y: 0, z: 0 },
+      { x: 0, y: AXIS_RANGE, z: 0 }, { x: 0, y: -AXIS_RANGE, z: 0 },
+      { x: 0, y: 0, z: AXIS_RANGE }, { x: 0, y: 0, z: -AXIS_RANGE }
+    ];
+
+    box.concat(points).forEach((p) => {
+      maxExtent = Math.max(
+        maxExtent,
+        Math.abs(dot(p, camera.right)),
+        Math.abs(dot(p, camera.up))
+      );
+    });
+
+    const wanted = 0.40 * Math.min(width, height) / maxExtent;
+
+    zoomFactor = Math.max(0.25, Math.min(3, wanted / baseScale()));
+    scale = baseScale() * zoomFactor;
+  }
+
+  // ---------------------------------------------------------------- Formatierung
+
+  function format(value, digits = 1) {
+    if (Math.abs(value) < 0.0000001) value = 0;
+    return Number(value).toFixed(digits).replace(".", ",").replace("-", "−");
+  }
+
+  function formatShort(value) {
+    if (Math.abs(value) < 0.0000001) value = 0;
+    const rounded = Math.round(value * 1000) / 1000;
+    return String(rounded).replace(".", ",").replace("-", "−");
+  }
+
+  function vecText(v) {
+    return "(" + formatShort(v.x) + " | " + formatShort(v.y) + " | " + formatShort(v.z) + ")";
+  }
+
+  function koordText(n, d) {
+    const parts = [
+      { c: n.x, v: axisNames[0] },
+      { c: n.y, v: axisNames[1] },
+      { c: n.z, v: axisNames[2] }
+    ];
+
+    let out = "";
+
+    parts.forEach((p) => {
+      if (Math.abs(p.c) < 0.0000001) return;
+
+      const sign = p.c < 0 ? " − " : (out === "" ? "" : " + ");
+      const abs = Math.abs(p.c);
+      const num = Math.abs(abs - 1) < 0.0000001 ? "" : formatShort(abs);
+
+      out += sign + num + p.v;
+    });
+
+    if (out === "") out = "0";
+
+    return out + " = " + formatShort(d);
+  }
+
+  function koordTextFull(n, d) {
+    const parts = [n.x, n.y, n.z].map((c, index) => {
+      const value = c < 0 ? "(" + formatShort(c) + ")" : formatShort(c);
+      return value + " · " + axisNames[index];
+    });
+
+    return parts.join(" + ") + " = " + formatShort(d);
+  }
+
+  function koordSchema() {
+    return "n₁" + axisNames[0]
+      + " + n₂" + axisNames[1]
+      + " + n₃" + axisNames[2]
+      + " = d";
+  }
+
+  function readVector(id1, id2, id3) {
+    return {
+      x: Number(document.getElementById(id1).value) || 0,
+      y: Number(document.getElementById(id2).value) || 0,
+      z: Number(document.getElementById(id3).value) || 0
+    };
+  }
+
+  function setInput(id, value) {
+    const input = document.getElementById(id);
+    if (document.activeElement === input) return;
+    input.value = String(Math.round(value * 100) / 100);
+  }
+
+  function writeVector(id1, id2, id3, v) {
+    setInput(id1, v.x);
+    setInput(id2, v.y);
+    setInput(id3, v.z);
+  }
+
+  // ---------------------------------------------------------------- Grundzeichnen
+
+  function clear() {
+    ctx.fillStyle = colors.background;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  function strokeSpaceLine(from, to, color, lineWidth, dash) {
+    const p1 = toScreen(from);
+    const p2 = toScreen(to);
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    if (dash) ctx.setLineDash(dash);
+
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawGroundGrid() {
+    for (let i = -AXIS_RANGE; i <= AXIS_RANGE; i++) {
+      const color = i < 0 ? colors.gridFar : colors.gridNear;
+
+      strokeSpaceLine({ x: i, y: -AXIS_RANGE, z: 0 }, { x: i, y: AXIS_RANGE, z: 0 }, color, 1);
+      strokeSpaceLine({ x: -AXIS_RANGE, y: i, z: 0 }, { x: AXIS_RANGE, y: i, z: 0 }, color, 1);
+    }
+  }
+
+  function drawArrowHead(tip, tail, color, size = 15) {
+    const angle = Math.atan2(tip.y - tail.y, tip.x - tail.x);
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(tip.x, tip.y);
+    ctx.lineTo(tip.x - size * Math.cos(angle - Math.PI / 6), tip.y - size * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(tip.x - size * Math.cos(angle + Math.PI / 6), tip.y - size * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function screenExtent(direction) {
+    return Math.hypot(dot(direction, camera.right), dot(direction, camera.up));
+  }
+
+  function drawAxis(direction, label) {
+    strokeSpaceLine({ x: 0, y: 0, z: 0 }, multiply(direction, -AXIS_RANGE), colors.axisNegative, 1.5);
+    strokeSpaceLine({ x: 0, y: 0, z: 0 }, multiply(direction, AXIS_RANGE + 0.9), colors.axis, 2);
+
+    const tip = toScreen(multiply(direction, AXIS_RANGE + 0.9));
+    const tail = toScreen(multiply(direction, AXIS_RANGE * 0.7));
+
+    if (Math.hypot(tip.x - tail.x, tip.y - tail.y) > 6) {
+      drawArrowHead(tip, tail, colors.axis, 12);
+    }
+
+    if (screenExtent(direction) < 0.2) return;
+
+    const labelPoint = toScreen(multiply(direction, AXIS_RANGE + 1.5));
+
+    ctx.save();
+    ctx.fillStyle = colors.labels;
+    ctx.font = "22px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, labelPoint.x, labelPoint.y);
+    ctx.restore();
+  }
+
+  function drawAxes() {
+    drawAxis({ x: 1, y: 0, z: 0 }, axisNames[0]);
+    drawAxis({ x: 0, y: 1, z: 0 }, axisNames[1]);
+    drawAxis({ x: 0, y: 0, z: 1 }, axisNames[2]);
+  }
+
+  function drawAxisNumbers() {
+    ctx.save();
+    ctx.fillStyle = colors.labels;
+    ctx.font = "15px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const entries = [
+      { direction: { x: 1, y: 0, z: 0 }, offset: { x: 15, y: 8 } },
+      { direction: { x: 0, y: 1, z: 0 }, offset: { x: 4, y: 17 } },
+      { direction: { x: 0, y: 0, z: 1 }, offset: { x: -16, y: 0 } }
+    ];
+
+    entries.forEach((entry) => {
+      if (screenExtent(entry.direction) < 0.2) return;
+
+      for (let i = 1; i <= AXIS_RANGE; i++) {
+        const point = toScreen(multiply(entry.direction, i));
+        ctx.fillText(String(i), point.x + entry.offset.x, point.y + entry.offset.y);
+      }
+    });
+
+    const zero = toScreen({ x: 0, y: 0, z: 0 });
+    ctx.fillText("0", zero.x - 16, zero.y + 16);
+    ctx.restore();
+  }
+
+  function drawVectorArrow(start, vector, color, label, lineWidth = 5) {
+    const end = add(start, vector);
+    const p1 = toScreen(start);
+    const p2 = toScreen(end);
+
+    strokeSpaceLine(start, end, color, lineWidth);
+
+    if (Math.hypot(p2.x - p1.x, p2.y - p1.y) > 8) {
+      drawArrowHead(p2, p1, color);
+    }
+
+    if (label) {
+      const mid = toScreen(add(start, multiply(vector, 0.55)));
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = "bold 23px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, mid.x + 20, mid.y - 16);
+      ctx.restore();
+    }
+  }
+
+  function drawPoint(p, color, label, radius = 6) {
+    const s = toScreen(p);
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (label) {
+      ctx.fillStyle = color;
+      ctx.font = "bold 21px Arial";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, s.x + 12, s.y - 14);
+    }
+
+    ctx.restore();
+  }
+
+  function planeBasis(n) {
+    const unit = normalize(n);
+
+    let helper = { x: 1, y: 0, z: 0 };
+    if (Math.abs(unit.x) > 0.9) helper = { x: 0, y: 1, z: 0 };
+
+    const e1 = normalize(cross(unit, helper));
+    const e2 = cross(unit, e1);
+
+    return { unit, e1, e2 };
+  }
+
+  function drawPlane(n, d, fill, edge, showGrid, size = 3.4, centerOn) {
+    const len = length(n);
+    if (len < 0.000001) return null;
+
+    const basis = planeBasis(n);
+
+    // Standardmaessig um den Fusspunkt vom Ursprung, auf Wunsch um einen
+    // vorgegebenen Punkt - dann liegt das Geschehen in der Mitte der Flaeche.
+    const center = centerOn
+      ? subtract(centerOn, multiply(basis.unit, (dot(n, centerOn) - d) / len))
+      : multiply(basis.unit, d / len);
+
+    const corners = [
+      add(add(center, multiply(basis.e1, size)), multiply(basis.e2, size)),
+      add(add(center, multiply(basis.e1, -size)), multiply(basis.e2, size)),
+      add(add(center, multiply(basis.e1, -size)), multiply(basis.e2, -size)),
+      add(add(center, multiply(basis.e1, size)), multiply(basis.e2, -size))
+    ];
+
+    ctx.save();
+    ctx.beginPath();
+
+    corners.forEach((c, index) => {
+      const s = toScreen(c);
+      if (index === 0) ctx.moveTo(s.x, s.y);
+      else ctx.lineTo(s.x, s.y);
+    });
+
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    ctx.strokeStyle = edge;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    if (showGrid) {
+      for (let i = -size + 1; i <= size - 1; i += 1) {
+        strokeSpaceLine(
+          add(add(center, multiply(basis.e1, i)), multiply(basis.e2, size)),
+          add(add(center, multiply(basis.e1, i)), multiply(basis.e2, -size)),
+          edge, 1
+        );
+        strokeSpaceLine(
+          add(add(center, multiply(basis.e2, i)), multiply(basis.e1, size)),
+          add(add(center, multiply(basis.e2, i)), multiply(basis.e1, -size)),
+          edge, 1
+        );
+      }
+    }
+
+    return center;
+  }
+
+  function drawAngleArc(q, dirA, dirB, radius, color, text, lineWidth = 2.5) {
+    const a = normalize(dirA);
+    const b = normalize(dirB);
+
+    if (length(a) < 0.5 || length(b) < 0.5) return;
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+
+    const steps = 48;
+
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const mixed = normalize(add(multiply(a, 1 - t), multiply(b, t)));
+
+      if (length(mixed) < 0.5) continue;
+
+      const s = toScreen(add(q, multiply(mixed, radius)));
+
+      if (i === 0) ctx.moveTo(s.x, s.y);
+      else ctx.lineTo(s.x, s.y);
+    }
+
+    ctx.stroke();
+
+    if (text) {
+      const middle = normalize(add(a, b));
+      const labelPoint = length(middle) < 0.5
+        ? add(q, multiply(a, radius))
+        : add(q, multiply(middle, radius * 1.45));
+
+      const s = toScreen(labelPoint);
+
+      ctx.fillStyle = color;
+      ctx.font = "bold 23px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(
+        text,
+        Math.max(70, Math.min(width - 70, s.x)),
+        Math.max(62, Math.min(height - 30, s.y))
+      );
+    }
+
+    ctx.restore();
+  }
+
+  // Rechter Winkel als kleines Quadrat im Fusspunkt des Lots.
+  function drawRightAngle(corner, dirA, dirB, size, color) {
+    const a = normalize(dirA);
+    const b = normalize(dirB);
+
+    if (length(a) < 0.5 || length(b) < 0.5) return;
+
+    const p1 = toScreen(add(corner, multiply(a, size)));
+    const p2 = toScreen(add(add(corner, multiply(a, size)), multiply(b, size)));
+    const p3 = toScreen(add(corner, multiply(b, size)));
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawPositionVector(target, label) {
+    const zero = { x: 0, y: 0, z: 0 };
+
+    strokeSpaceLine(zero, target, "rgba(255, 255, 255, 0.75)", 3, [8, 6]);
+
+    const tip = toScreen(target);
+    const tail = toScreen(zero);
+
+    if (Math.hypot(tip.x - tail.x, tip.y - tail.y) > 10) {
+      drawArrowHead(tip, tail, "rgba(255, 255, 255, 0.9)", 14);
+    }
+
+    if (label) {
+      const point = toScreen(target);
+
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 22px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, point.x - 4, point.y + 28);
+      ctx.restore();
+    }
+  }
+
+  // ---------------------------------------------------------------- Zustand
+
+  let lineA = { x: -1, y: 0, z: 1 };
+  let lineU = { x: 1, y: 2, z: 2 };
+  let planeN = { x: 2, y: -1, z: 2 };
+  let planeD = 4;
+
+  // Richtung in der Ebene, um die der Kipp-Schieber dreht. Wird nur bei
+  // Eingaben und Beispielen neu bestimmt, nicht waehrend des Kippens -
+  // sonst wandert die Bezugsrichtung mit und der Schieber driftet.
+  let tiltBase = { x: 1, y: 0, z: 0 };
+
+  const options = { normal: true, lot: true, arc: true, grid: true };
+
+  function readAll() {
+    lineA = readVector("ga1", "ga2", "ga3");
+    lineU = readVector("gu1", "gu2", "gu3");
+    planeN = readVector("en1", "en2", "en3");
+    planeD = Number(document.getElementById("ed").value) || 0;
+  }
+
+  function updateTiltBase() {
+    const unit = normalize(planeN);
+    const inPlane = subtract(lineU, multiply(unit, dot(lineU, unit)));
+
+    if (length(inPlane) > 0.000001) {
+      tiltBase = normalize(inPlane);
+    } else {
+      tiltBase = planeBasis(planeN).e1;
+    }
+  }
+
+  // Lagebeziehung und alle abgeleiteten Groessen an einer Stelle.
+  function analyse() {
+    const nLen = length(planeN);
+    const uLen = length(lineU);
+
+    if (nLen < 0.000001 || uLen < 0.000001) {
+      return { art: "entartet" };
+    }
+
+    const product = dot(lineU, planeN);
+    const sinValue = Math.abs(product) / (uLen * nLen);
+    const alpha = Math.asin(Math.max(-1, Math.min(1, sinValue))) * 180 / Math.PI;
+    const phi = 90 - alpha;
+
+    const aAufEbene = Math.abs(dot(planeN, lineA) - planeD) < 0.000001;
+
+    let art = "schneidend";
+    let schnittpunkt = null;
+
+    if (Math.abs(product) < 0.000001) {
+      art = aAufEbene ? "enthalten" : "parallel";
+    } else {
+      const t = (planeD - dot(planeN, lineA)) / product;
+      schnittpunkt = add(lineA, multiply(lineU, t));
+
+      if (isParallel(lineU, planeN)) art = "senkrecht";
+    }
+
+    return { art, alpha, phi, product, uLen, nLen, sinValue, schnittpunkt };
+  }
+
+  // ---------------------------------------------------------------- Zeichnen
+
+  function drawScene() {
+    const info = analyse();
+
+    if (info.art === "entartet") {
+      drawPlane(planeN, planeD, "rgba(255, 159, 28, 0.13)", "rgba(255, 159, 28, 0.55)", options.grid);
+      drawPositionVector(lineA, "a\u20d7");
+      return;
+    }
+
+    const unit = normalize(planeN);
+    const uLen = length(lineU);
+
+    // Bezugspunkt: Schnittpunkt, sonst der Lotfusspunkt des Stuetzpunktes
+    const anchor = info.schnittpunkt
+      ? info.schnittpunkt
+      : subtract(lineA, multiply(unit, (dot(planeN, lineA) - planeD) / length(planeN)));
+
+    // Punkt P auf der Geraden, und zwar auf der Seite, in die n zeigt
+    const richtung = dot(lineU, planeN) >= 0 ? 1 : -1;
+    const schritt = multiply(normalize(lineU), richtung * Math.min(3.0, AXIS_RANGE * 0.62));
+    const P = add(info.schnittpunkt ? anchor : lineA, schritt);
+
+    // Lotfusspunkt von P auf die Ebene
+    const F = subtract(P, multiply(unit, (dot(planeN, P) - planeD) / length(planeN)));
+
+    const planeSize = 3.4;
+
+    drawPlane(
+      planeN,
+      planeD,
+      "rgba(255, 159, 28, 0.13)",
+      "rgba(255, 159, 28, 0.55)",
+      options.grid,
+      planeSize,
+      anchor
+    );
+
+    // Die Gerade selbst. Die Haelfte hinter der Ebene wird blasser gezeichnet,
+    // sonst laeuft die Gerade optisch vor einer Flaeche her, hinter der sie liegt.
+    const reach = (AXIS_RANGE * 2.0) / uLen;
+    const zurKamera = dot(planeN, camera.forward);
+
+    // Ohne Schnittpunkt liegt der Anker im Lotfusspunkt - der gehoert zur Ebene,
+    // nicht zur Geraden. Gezeichnet wird die Gerade dann durch ihren Stuetzpunkt.
+    const lineBase = info.schnittpunkt ? anchor : lineA;
+
+    const enden = [
+      add(lineBase, multiply(lineU, reach)),
+      add(lineBase, multiply(lineU, -reach))
+    ];
+
+    enden.forEach((ende) => {
+      const seite = info.schnittpunkt
+        ? dot(planeN, subtract(ende, anchor)) * zurKamera
+        : dot(planeN, subtract(lineA, anchor)) * zurKamera;
+
+      strokeSpaceLine(
+        lineBase,
+        ende,
+        seite >= 0 ? colors.line : "rgba(255, 255, 255, 0.28)",
+        3
+      );
+    });
+
+    drawPositionVector(lineA, "a\u20d7");
+    drawVectorArrow(lineA, lineU, colors.green, "u\u20d7", 6);
+
+    if (options.lot) {
+      // Projektion der Geraden in die Ebene - bleibt innerhalb der Flaeche
+      const proj = subtract(lineU, multiply(unit, dot(lineU, unit)));
+
+      if (length(proj) > 0.000001) {
+        const projReach = (planeSize * 0.95) / length(proj);
+
+        strokeSpaceLine(
+          add(anchor, multiply(proj, -projReach)),
+          add(anchor, multiply(proj, projReach)),
+          "rgba(255, 93, 143, 0.85)",
+          3
+        );
+      }
+
+      // Das Lot von P auf die Ebene
+      if (length(subtract(P, F)) > 0.02) {
+        strokeSpaceLine(P, F, "rgba(255, 255, 255, 0.65)", 2.5, [7, 6]);
+        drawRightAngle(F, normalize(subtract(P, F)), normalize(subtract(anchor, F)), 0.35, "rgba(255,255,255,0.7)");
+        strokeSpaceLine(anchor, F, "rgba(255, 93, 143, 0.95)", 5);
+      }
+
+      drawPoint(P, colors.line, "P", 5);
+      drawPoint(F, colors.pink, "F", 5);
+    }
+
+    if (options.normal) {
+      drawVectorArrow(anchor, multiply(unit, 2.6), colors.orange, "n\u20d7", 6);
+    }
+
+    if (options.arc) {
+      const zurGeraden = subtract(P, anchor);
+      const inDerEbene = subtract(F, anchor);
+
+      // Der kleine Bogen ist der gesuchte Winkel, der grosse der Umweg -
+      // unterschiedliche Radien, damit sich die Beschriftungen nicht treffen.
+      if (length(inDerEbene) > 0.05 && length(zurGeraden) > 0.05) {
+        drawAngleArc(anchor, zurGeraden, inDerEbene, 1.0, "#ffffff",
+          "\u03b1 = " + format(info.alpha, 1) + "\u00b0");
+      }
+
+      if (length(zurGeraden) > 0.05) {
+        drawAngleArc(anchor, zurGeraden, unit, 2.0, "rgba(255, 159, 28, 0.9)",
+          "\u03c6 = " + format(info.phi, 1) + "\u00b0", 2);
+      }
+    }
+
+    if (info.schnittpunkt) {
+      drawPoint(info.schnittpunkt, colors.line, "", 7);
+
+      const sp = toScreen(info.schnittpunkt);
+
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 21px Arial";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillText("S", sp.x - 14, sp.y + 18);
+      ctx.restore();
+    }
+  }
+
+  function draw() {
+    camera = cameraBasis();
+
+    clear();
+    drawGroundGrid();
+    drawAxes();
+    drawAxisNumbers();
+    drawScene();
+    updatePanel();
+  }
+
+  // ---------------------------------------------------------------- Panel
+
+  function updatePanel() {
+    const info = analyse();
+
+    document.getElementById("gEq").innerHTML =
+      "x⃗ = " + vecText(lineA) + " + r · <span class='green'>" + vecText(lineU) + "</span>";
+
+    document.getElementById("eKoordSchema").textContent = koordSchema();
+    document.getElementById("eKoordVoll").textContent = koordTextFull(planeN, planeD);
+    document.getElementById("eKoord").innerHTML =
+      "<span class='orange'>" + koordText(planeN, planeD) + "</span>";
+
+    if (info.art === "entartet") {
+      ["w1a", "w1b", "w1c", "w2a", "w2b"].forEach((id) => {
+        document.getElementById(id).textContent = "–";
+      });
+
+      document.getElementById("alphaOut").textContent = "–";
+      document.getElementById("sonderfall").textContent =
+        "u⃗ oder n⃗ ist der Nullvektor – damit gibt es keine Gerade bzw. keine Ebene.";
+      document.getElementById("lage").textContent = "";
+      return;
+    }
+
+    const zaehler = "|" + formatShort(info.product) + "|";
+    const nenner = format(info.uLen, 2) + " · " + format(info.nLen, 2);
+
+    document.getElementById("w1a").innerHTML =
+      "cos φ = |u⃗ ∘ n⃗| / (|u⃗| · |n⃗|) = "
+      + zaehler + " / (" + nenner + ") = <span class='result'>" + format(info.sinValue, 4) + "</span>";
+
+    document.getElementById("w1b").innerHTML =
+      "φ = <span class='result'>" + format(info.phi, 1) + "°</span>";
+
+    document.getElementById("w1c").innerHTML =
+      "α = 90° − φ = <span class='result'>" + format(info.alpha, 1) + "°</span>";
+
+    document.getElementById("w2a").innerHTML =
+      "sin α = |u⃗ ∘ n⃗| / (|u⃗| · |n⃗|) = "
+      + zaehler + " / (" + nenner + ") = <span class='result'>" + format(info.sinValue, 4) + "</span>";
+
+    document.getElementById("w2b").innerHTML =
+      "α = sin<sup>−1</sup>(" + format(info.sinValue, 4)
+      + ") = <span class='result'>" + format(info.alpha, 1) + "°</span>";
+
+    document.getElementById("alphaOut").textContent = format(info.alpha, 1);
+
+    const texte = {
+      enthalten: "u⃗ ∘ n⃗ = 0 – und trotzdem α = 0°: "
+        + "Die Gerade liegt in der Ebene. Zwischen Gerade und Ebene bedeutet "
+        + "„Skalarprodukt null“ nicht 90°, sondern 0°.",
+      parallel: "u⃗ ∘ n⃗ = 0 und der Stützpunkt liegt nicht in E: "
+        + "Die Gerade ist echt parallel zur Ebene. Kein Schnittpunkt, α = 0°.",
+      senkrecht: "u⃗ ist ein Vielfaches von n⃗: Die Gerade steht senkrecht auf "
+        + "der Ebene, α = 90°. Hier fällt die Projektion zu einem Punkt zusammen.",
+      schneidend: ""
+    };
+
+    const sonderfall = document.getElementById("sonderfall");
+
+    if (texte[info.art]) {
+      sonderfall.style.display = "block";
+      sonderfall.textContent = texte[info.art];
+    } else {
+      sonderfall.style.display = "none";
+      sonderfall.textContent = "";
+    }
+
+    const lagen = {
+      enthalten: "g liegt in E",
+      parallel: "g ist echt parallel zu E",
+      senkrecht: "g steht senkrecht auf E · S = " + (info.schnittpunkt ? vecText(info.schnittpunkt) : ""),
+      schneidend: info.schnittpunkt ? "S = " + vecText(info.schnittpunkt) : ""
+    };
+
+    document.getElementById("lage").textContent = lagen[info.art] || "";
+
+    const tilt = document.getElementById("tilt");
+
+    if (document.activeElement !== tilt) {
+      tilt.value = String(Math.round(info.alpha));
+      document.getElementById("tiltOut").textContent = Math.round(info.alpha) + "°";
+    }
+  }
+
+  // ---------------------------------------------------------------- Bedienung
+
+  function getPointerPosition(event) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  }
+
+  canvas.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    orbiting = true;
+    lastPointer = getPointerPosition(event);
+    canvas.setPointerCapture(event.pointerId);
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (!orbiting) return;
+
+    event.preventDefault();
+
+    const pointer = getPointerPosition(event);
+
+    azimuth -= (pointer.x - lastPointer.x) * 0.4;
+    elevation += (pointer.y - lastPointer.y) * 0.4;
+    elevation = Math.max(-90, Math.min(90, elevation));
+
+    lastPointer = pointer;
+    draw();
+  });
+
+  function endPointer(event) {
+    orbiting = false;
+
+    try {
+      canvas.releasePointerCapture(event.pointerId);
+    } catch (error) {
+      // Pointer war nicht erfasst - nichts zu tun.
+    }
+  }
+
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+
+  canvas.addEventListener("wheel", (event) => {
+    event.preventDefault();
+
+    const step = event.deltaY < 0 ? 1.08 : 1 / 1.08;
+
+    zoomFactor = Math.max(0.25, Math.min(3, zoomFactor * step));
+    scale = baseScale() * zoomFactor;
+
+    draw();
+  }, { passive: false });
+
+  ["ga1", "ga2", "ga3", "gu1", "gu2", "gu3", "en1", "en2", "en3", "ed"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", () => {
+      readAll();
+      updateTiltBase();
+      draw();
+    });
+  });
+
+  document.getElementById("tilt").addEventListener("input", (event) => {
+    const winkel = Number(event.target.value);
+
+    document.getElementById("tiltOut").textContent = winkel + "°";
+
+    const unit = normalize(planeN);
+    const len = length(lineU);
+
+    if (len < 0.000001 || length(unit) < 0.5) return;
+
+    const richtung = add(
+      multiply(tiltBase, Math.cos(toRadians(winkel))),
+      multiply(unit, Math.sin(toRadians(winkel)))
+    );
+
+    lineU = multiply(normalize(richtung), len);
+
+    writeVector("gu1", "gu2", "gu3", lineU);
+    draw();
+  });
+
+  document.querySelectorAll(".preset").forEach((button) => {
+    button.addEventListener("click", () => {
+      const parts = button.dataset.val.split("|");
+      const a = parts[0].split(",").map(Number);
+      const u = parts[1].split(",").map(Number);
+      const n = parts[2].split(",").map(Number);
+
+      writeVector("ga1", "ga2", "ga3", { x: a[0], y: a[1], z: a[2] });
+      writeVector("gu1", "gu2", "gu3", { x: u[0], y: u[1], z: u[2] });
+      writeVector("en1", "en2", "en3", { x: n[0], y: n[1], z: n[2] });
+      setInput("ed", Number(parts[3]));
+
+      readAll();
+      updateTiltBase();
+
+      azimuth = START_AZIMUTH;
+      elevation = START_ELEVATION;
+
+      fitCurrent();
+      draw();
+    });
+  });
+
+  [["optN", "normal"], ["optLot", "lot"], ["optArc", "arc"], ["optGrid", "grid"]].forEach((entry) => {
+    document.getElementById(entry[0]).addEventListener("change", (event) => {
+      options[entry[1]] = event.target.checked;
+      draw();
+    });
+  });
+
+  document.querySelectorAll('input[name="axisNames"]').forEach((radio) => {
+    radio.addEventListener("change", (event) => {
+      axisNames = event.target.value === "xyz"
+        ? ["x", "y", "z"]
+        : ["x₁", "x₂", "x₃"];
+
+      draw();
+    });
+  });
+
+  function fitCurrent() {
+    const info = analyse();
+    const points = [lineA, add(lineA, lineU)];
+
+    if (info.schnittpunkt) points.push(info.schnittpunkt);
+
+    fitView(points);
+  }
+
+  document.getElementById("viewStd").addEventListener("click", () => {
+    azimuth = START_AZIMUTH;
+    elevation = START_ELEVATION;
+    fitCurrent();
+    draw();
+  });
+
+  // Blick entlang der Ebene: dort sieht man den Winkel unverzerrt.
+  document.getElementById("viewSide").addEventListener("click", () => {
+    const unit = normalize(planeN);
+    const proj = subtract(lineU, multiply(unit, dot(lineU, unit)));
+    const inDerEbene = length(proj) > 0.000001 ? cross(unit, normalize(proj)) : planeBasis(planeN).e1;
+
+    // Nicht exakt entlang der Ebene: genau von der Kante gesehen verschwindet
+    // die Flaeche. Ein Hauch Normalenrichtung laesst sie als schmales Band stehen.
+    const blick = normalize(add(inDerEbene, multiply(unit, 0.22)));
+
+    azimuth = Math.atan2(blick.y, blick.x) * 180 / Math.PI;
+    elevation = Math.asin(Math.max(-1, Math.min(1, blick.z))) * 180 / Math.PI;
+
+    fitCurrent();
+    draw();
+  });
+
+  document.getElementById("viewFit").addEventListener("click", () => {
+    fitCurrent();
+    draw();
+  });
+
+  window.addEventListener("resize", resizeCanvas);
+
+  readAll();
+  updateTiltBase();
+  resizeCanvas();
+  fitCurrent();
+  draw();
+</script>
+</body>
+</html>

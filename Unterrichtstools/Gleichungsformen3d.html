@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<title>Geraden- und Ebenengleichungen – dynamisches Tafelbild</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+  }
+
+  .app { display: flex; width: 100vw; height: 100vh; background: #000; }
+
+  .canvas-area {
+    position: relative;
+    width: 68%;
+    height: 100%;
+    background: #000;
+    border-right: 2px solid #222;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    touch-action: none;
+    cursor: move;
+  }
+
+  .info {
+    position: absolute;
+    left: 24px;
+    bottom: 18px;
+    color: #888;
+    font-size: 17px;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+
+  .headline {
+    position: absolute;
+    left: 24px;
+    top: 18px;
+    color: #fff;
+    font-size: 26px;
+    font-weight: bold;
+    pointer-events: none;
+  }
+
+  .fi {
+    position: absolute;
+    right: 22px;
+    bottom: 16px;
+    color: #555;
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .panel {
+    width: 32%;
+    height: 100%;
+    padding: 14px 22px 30px 22px;
+    background: #050505;
+    overflow-y: auto;
+    font-size: 19px;
+    line-height: 1.35;
+  }
+
+  h1 { margin: 0 0 8px 0; font-size: 26px; font-weight: 700; }
+
+  h2 {
+    margin: 16px 0 6px 0;
+    font-size: 20px;
+    color: #ddd;
+    border-bottom: 1px solid #333;
+    padding-bottom: 3px;
+  }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+
+  .tabs button {
+    flex: 1;
+    font-size: 17px;
+    padding: 7px 4px;
+    background: #111;
+    color: #bbb;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .tabs button.active { background: #fff; color: #000; border-color: #fff; font-weight: bold; }
+
+  button {
+    font-size: 16px;
+    padding: 5px 9px;
+    background: #151515;
+    color: #ddd;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover { background: #222; color: #fff; }
+
+  .button-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
+
+  .green  { color: #39d353; }
+  .orange { color: #ff9f1c; }
+  .blue   { color: #58b9ff; }
+  .pink   { color: #ff5d8f; }
+  .dim    { color: #888; }
+
+  .paren-vector { display: inline-flex; align-items: center; font-size: 26px; line-height: 1; }
+  .paren { font-size: 46px; font-weight: 200; }
+  .vector-values { display: inline-flex; flex-direction: column; padding: 0 3px; }
+
+  .vector-values input {
+    width: 62px;
+    background: #000;
+    border: 1px solid #333;
+    color: inherit;
+    font-family: inherit;
+    font-size: 20px;
+    text-align: center;
+    padding: 1px 2px;
+    margin: 1px 0;
+    border-radius: 3px;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { opacity: 0.35; }
+
+  .vector-row { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; margin-top: 4px; }
+  .vector-block { min-width: 96px; }
+  .vector-name { font-size: 21px; margin-bottom: 2px; font-weight: bold; }
+
+  .formula { font-size: 22px; margin: 6px 0; }
+  .result { color: #fff; font-weight: bold; }
+  .note { font-size: 16px; color: #999; margin-top: 5px; line-height: 1.4; }
+
+  .eqbox {
+    background: #0d0d0d;
+    border: 1px solid #262626;
+    border-left: 3px solid #444;
+    border-radius: 4px;
+    padding: 8px 11px;
+    margin: 7px 0;
+  }
+
+  .eqbox .label { font-size: 15px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .eqbox .eq { font-size: 21px; margin-top: 3px; }
+
+  .eqbox.hi { border-left-color: #ff9f1c; }
+
+  .eqbox .eq.voll { color: #999; font-size: 19px; }
+
+  .eqbox .label #eKoordSchema {
+    text-transform: none;
+    letter-spacing: 0;
+    color: #666;
+    font-size: 15px;
+  }
+
+  .same-list { font-size: 19px; margin-top: 4px; }
+  .same-list div { padding: 2px 0; border-bottom: 1px dotted #222; }
+
+  .options { font-size: 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; }
+  .options label { white-space: nowrap; }
+
+  .big { font-size: 30px; font-weight: bold; }
+
+  .slider-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 18px; }
+  input[type="range"] { flex: 1; }
+
+  .hidden { display: none; }
+
+  @media (max-height: 760px) {
+    .panel { font-size: 17px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 18px; margin-top: 11px; }
+    .formula { font-size: 19px; }
+    .eqbox .eq { font-size: 18px; }
+    .eqbox .eq.voll { font-size: 16px; }
+    .paren-vector { font-size: 22px; }
+    .paren { font-size: 38px; }
+    .vector-values input { font-size: 17px; width: 54px; }
+    .big { font-size: 25px; }
+    .info { font-size: 15px; }
+  }
+</style>
+</head>
+
+<body>
+<div class="app">
+  <div class="canvas-area">
+    <canvas id="canvas"></canvas>
+    <div class="headline" id="headline">Geradengleichung</div>
+    <div class="info" id="info">Ziehen = Ansicht drehen &nbsp;·&nbsp; Mausrad = Zoom</div>
+    <div class="fi">Fi</div>
+  </div>
+
+  <aside class="panel">
+    <div class="tabs">
+      <button id="tabGerade" class="active">Gerade</button>
+      <button id="tabEbene">Ebene</button>
+      <button id="tabZwei">Zwei Ebenen</button>
+    </div>
+
+    <div class="options" style="margin-bottom:8px">
+      <span class="dim">Achsen:</span>
+      <label><input type="radio" name="axisNames" value="x123" checked> x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub></label>
+      <label><input type="radio" name="axisNames" value="xyz"> x, y, z</label>
+    </div>
+
+    <!-- ============================ GERADE ============================ -->
+    <section id="secGerade">
+      <h1>Geradengleichung</h1>
+
+      <div class="eqbox hi">
+        <div class="label">Parameterform</div>
+        <div class="eq">x&#8407; = a&#8407; + r &middot; u&#8407;</div>
+      </div>
+
+      <div class="note">
+        Im Raum ist das die einzige Form. Eine Koordinatenform gibt es f&uuml;r eine Gerade
+        im R&sup3; nicht &ndash; die beschreibt dort immer eine Ebene.
+      </div>
+
+      <h2>Vektoren</h2>
+
+      <div class="vector-row">
+        <div class="vector-block">
+          <div class="vector-name">a&#8407; <span class="dim" style="font-size:15px">St&uuml;tz</span></div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values">
+              <input id="ga1" type="number" step="1" value="1">
+              <input id="ga2" type="number" step="1" value="2">
+              <input id="ga3" type="number" step="1" value="0">
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+
+        <div class="vector-block">
+          <div class="vector-name green">u&#8407; <span class="dim" style="font-size:15px">Richtung</span></div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values green">
+              <input id="gu1" type="number" step="1" value="2">
+              <input id="gu2" type="number" step="1" value="3">
+              <input id="gu3" type="number" step="1" value="6">
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+      </div>
+
+      <h2>Gleichung &auml;ndern &ndash; Gerade beobachten</h2>
+
+      <div class="button-row">
+        <button id="gFlip">u&#8407; &rarr; &minus;u&#8407;</button>
+        <button id="gDouble">u&#8407; &rarr; 2&middot;u&#8407;</button>
+        <button id="gShift">a&#8407; &rarr; a&#8407; + u&#8407;</button>
+        <button id="gReset">zur&uuml;cksetzen</button>
+      </div>
+
+      <div class="same-list" id="gList"></div>
+
+      <div class="note" id="gNote"></div>
+
+      <h2>Was macht der Parameter r?</h2>
+
+      <div class="slider-row">
+        <span>r =</span>
+        <input id="gSlider" type="range" min="-3" max="3" step="0.25" value="2">
+        <span class="result" id="gRVal">2</span>
+      </div>
+
+      <div class="formula">
+        P = <span id="gPoint" class="result">( | | )</span>
+      </div>
+
+      <div class="note">
+        Jedes r liefert genau einen Punkt der Geraden. Negative r geh&ouml;ren dazu &ndash;
+        die Gerade endet nicht am St&uuml;tzpunkt.
+      </div>
+
+      <h2>Ansicht</h2>
+      <div class="button-row">
+        <button class="viewStd">Schr&auml;gbild</button>
+        <button class="viewTop">Draufsicht von oben</button>
+        <button class="viewFit">einpassen</button>
+      </div>
+    </section>
+
+    <!-- ============================ EBENE ============================ -->
+    <section id="secEbene" class="hidden">
+      <h1>Ebenengleichung</h1>
+
+      <div class="eqbox">
+        <div class="label">1 &middot; Parameterform</div>
+        <div class="eq">x&#8407; = a&#8407; + r&middot;<span class="green">u&#8407;</span> + s&middot;<span class="green">v&#8407;</span></div>
+      </div>
+
+      <div class="eqbox">
+        <div class="label">2 &middot; Normalenform</div>
+        <div class="eq"><span class="orange">n&#8407;</span> &#8728; (x&#8407; &minus; a&#8407;) = 0</div>
+      </div>
+
+      <div class="eqbox hi">
+        <div class="label">3 &middot; Koordinatenform &nbsp;<span id="eKoordSchema"></span></div>
+        <div class="eq voll" id="eKoordVoll">&nbsp;</div>
+        <div class="eq" id="eKoord">&nbsp;</div>
+      </div>
+
+      <div class="note">
+        Alle drei beschreiben dieselbe Ebene. Nur aus der Koordinatenform ist
+        <span class="orange">n&#8407;</span> direkt ablesbar &ndash; sie ist die Schreibweise
+        <span class="orange">n&#8407;</span> &#8728; x&#8407; = d.
+      </div>
+
+      <h2>Parameterform eingeben</h2>
+
+      <div class="vector-row">
+        <div class="vector-block">
+          <div class="vector-name">a&#8407;</div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values">
+              <input id="ea1" type="number" step="1" value="1">
+              <input id="ea2" type="number" step="1" value="0">
+              <input id="ea3" type="number" step="1" value="0">
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+
+        <div class="vector-block">
+          <div class="vector-name green">u&#8407;</div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values green">
+              <input id="eu1" type="number" step="1" value="1">
+              <input id="eu2" type="number" step="1" value="1">
+              <input id="eu3" type="number" step="1" value="0">
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+
+        <div class="vector-block">
+          <div class="vector-name green">v&#8407;</div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values green">
+              <input id="ev1" type="number" step="1" value="0">
+              <input id="ev2" type="number" step="1" value="1">
+              <input id="ev3" type="number" step="1" value="1">
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+      </div>
+
+      <h2>Koordinatenform eingeben</h2>
+
+      <div class="vector-row">
+        <div class="vector-block">
+          <div class="vector-name orange">n&#8407;</div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values orange">
+              <input id="en1" type="number" step="1" value="1">
+              <input id="en2" type="number" step="1" value="-1">
+              <input id="en3" type="number" step="1" value="1">
+            </span>
+            <span class="paren">)</span>
+          </div>
+        </div>
+
+        <div class="vector-block">
+          <div class="vector-name">d</div>
+          <div class="paren-vector">
+            <span class="vector-values">
+              <input id="ed" type="number" step="1" value="1">
+            </span>
+          </div>
+          <div class="button-row">
+            <button id="eDm">d &minus; 1</button>
+            <button id="eDp">d + 1</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        d &auml;ndern: Die Ebene verschiebt sich <b>parallel</b>, der Normalenvektor kippt nicht mit.
+        Deshalb spielt d f&uuml;r jeden Winkel keine Rolle.
+      </div>
+
+      <h2>Beispiele</h2>
+
+      <div class="button-row">
+        <button class="ePreset" data-kind="par" data-val="1,0,0|1,1,0|0,1,1">Nr. 3 (Parameterform)</button>
+        <button class="ePreset" data-kind="ko" data-val="6,2,3|5">6x+2y+3z=5</button>
+        <button class="ePreset" data-kind="ko" data-val="4,0,3|10">4x+3z=10</button>
+        <button class="ePreset" data-kind="ko" data-val="0,0,1|0">Grundebene (z = 0)</button>
+      </div>
+
+      <div class="note" id="eNote"></div>
+
+      <h2>Anzeige</h2>
+      <div class="options">
+        <label><input type="checkbox" id="optN" checked> Normalenvektor</label>
+        <label><input type="checkbox" id="optUV" checked> Spannvektoren</label>
+        <label><input type="checkbox" id="optGrid" checked> Ebenenraster</label>
+      </div>
+
+      <div class="button-row">
+        <button class="viewStd">Schr&auml;gbild</button>
+        <button class="viewTop">Draufsicht von oben</button>
+        <button class="viewFit">einpassen</button>
+      </div>
+    </section>
+
+    <!-- ========================== ZWEI EBENEN ========================== -->
+    <section id="secZwei" class="hidden">
+      <h1>Winkel zwischen zwei Ebenen</h1>
+
+      <div class="vector-row">
+        <div class="vector-block">
+          <div class="vector-name orange">n&#8407;<sub>1</sub></div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values orange">
+              <input id="zn11" type="number" step="1" value="4">
+              <input id="zn12" type="number" step="1" value="0">
+              <input id="zn13" type="number" step="1" value="3">
+            </span>
+            <span class="paren">)</span>
+          </div>
+          <div class="paren-vector" style="margin-top:4px">
+            <span style="font-size:18px">d<sub>1</sub>&nbsp;</span>
+            <span class="vector-values"><input id="zd1" type="number" step="1" value="10"></span>
+          </div>
+        </div>
+
+        <div class="vector-block">
+          <div class="vector-name blue">n&#8407;<sub>2</sub></div>
+          <div class="paren-vector">
+            <span class="paren">(</span>
+            <span class="vector-values blue">
+              <input id="zn21" type="number" step="1" value="0">
+              <input id="zn22" type="number" step="1" value="3">
+              <input id="zn23" type="number" step="1" value="-4">
+            </span>
+            <span class="paren">)</span>
+          </div>
+          <div class="paren-vector" style="margin-top:4px">
+            <span style="font-size:18px">d<sub>2</sub>&nbsp;</span>
+            <span class="vector-values"><input id="zd2" type="number" step="1" value="6"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="eqbox">
+        <div class="eq" id="zE1">&nbsp;</div>
+        <div class="eq" id="zE2">&nbsp;</div>
+      </div>
+
+      <h2>Rechnung</h2>
+
+      <div class="formula">
+        cos&nbsp;&alpha; = |n&#8407;<sub>1</sub> &#8728; n&#8407;<sub>2</sub>| / (|n&#8407;<sub>1</sub>| &middot; |n&#8407;<sub>2</sub>|)
+      </div>
+
+      <div class="formula">
+        = |<span id="zDot">0</span>| / (<span id="zL1">0</span> &middot; <span id="zL2">0</span>)
+        = <span id="zCos" class="result">0</span>
+      </div>
+
+      <div class="formula big">&alpha; = <span id="zAngle">0</span>&deg;</div>
+
+      <div class="note" id="zNote"></div>
+
+      <h2>Betragsstriche pr&uuml;fen</h2>
+
+      <div class="button-row">
+        <button id="zFlip">E<sub>2</sub> umdrehen (n&#8407; &rarr; &minus;n&#8407;, d &rarr; &minus;d)</button>
+      </div>
+
+      <div class="formula">
+        ohne Betrag: <span id="zRaw" class="result">0</span>&deg;
+      </div>
+
+      <div class="note">
+        Umdrehen &auml;ndert die Ebene nicht &ndash; ohne Betrag springt das Ergebnis trotzdem
+        auf den Nebenwinkel. Mit Betrag bleibt &alpha; stehen.
+      </div>
+
+      <h2>Aufgaben vom Arbeitsblatt</h2>
+
+      <div class="button-row">
+        <button class="zPreset" data-val="4,0,3|10|0,3,-4|6">Nr. 4</button>
+        <button class="zPreset" data-val="1,-2,2|3|2,2,-1|1">Nr. 5</button>
+        <button class="zPreset" data-val="1,2,2|6|0,0,1|0">Nr. 6 Dach</button>
+        <button class="zPreset" data-val="2,6,9|5|6,6,-7|1">HA b)</button>
+      </div>
+
+      <h2>Anzeige</h2>
+      <div class="options">
+        <label><input type="checkbox" id="optZN" checked> Normalenvektoren</label>
+        <label><input type="checkbox" id="optZS" checked> Schnittgerade</label>
+        <label><input type="checkbox" id="optZArc" checked> Winkelbogen</label>
+      </div>
+
+      <div class="button-row">
+        <button class="viewStd">Schr&auml;gbild</button>
+        <button class="viewTop">Draufsicht von oben</button>
+        <button class="viewFit">einpassen</button>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  const colors = {
+    background: "#000000",
+    gridFar: "#161616",
+    gridNear: "#242424",
+    axis: "#ffffff",
+    axisNegative: "#555555",
+    labels: "#cccccc",
+    green: "#39d353",
+    orange: "#ff9f1c",
+    blue: "#58b9ff",
+    pink: "#ff5d8f",
+    line: "#ffffff"
+  };
+
+  const AXIS_RANGE = 5;
+
+  // Der Kurs nennt die Achsen x1, x2, x3; das Arbeitsblatt schreibt die
+  // Koordinatenform mit x, y, z. Beides ist per Schalter erreichbar.
+  let axisNames = ["x\u2081", "x\u2082", "x\u2083"];
+
+  let width = 0;
+  let height = 0;
+  let scale = 62;
+  let zoomFactor = 1;
+  let origin = { x: 0, y: 0 };
+
+  const START_AZIMUTH = 22;
+  const START_ELEVATION = 20;
+
+  let azimuth = START_AZIMUTH;
+  let elevation = START_ELEVATION;
+
+  let orbiting = false;
+  let lastPointer = { x: 0, y: 0 };
+
+  let mode = "gerade";
+
+  // ---------------------------------------------------------------- Vektormathematik
+
+  function toRadians(d) { return d * Math.PI / 180; }
+  function add(a, b) { return { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z }; }
+  function subtract(a, b) { return { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z }; }
+  function multiply(v, f) { return { x: v.x * f, y: v.y * f, z: v.z * f }; }
+  function dot(a, b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+  function length(v) { return Math.sqrt(dot(v, v)); }
+
+  function normalize(v) {
+    const len = length(v);
+    if (len < 0.000001) return { x: 0, y: 0, z: 0 };
+    return multiply(v, 1 / len);
+  }
+
+  function cross(a, b) {
+    return {
+      x: a.y * b.z - a.z * b.y,
+      y: a.z * b.x - a.x * b.z,
+      z: a.x * b.y - a.y * b.x
+    };
+  }
+
+  function isParallel(a, b) {
+    return length(cross(a, b)) < 0.000001;
+  }
+
+  function angleBetween(a, b) {
+    const la = length(a);
+    const lb = length(b);
+    if (la < 0.000001 || lb < 0.000001) return null;
+    let c = dot(a, b) / (la * lb);
+    c = Math.max(-1, Math.min(1, c));
+    return Math.acos(c) * 180 / Math.PI;
+  }
+
+  // ---------------------------------------------------------------- Kamera
+
+  function cameraBasis() {
+    const a = toRadians(azimuth);
+    const e = toRadians(elevation);
+
+    const forward = {
+      x: Math.cos(e) * Math.cos(a),
+      y: Math.cos(e) * Math.sin(a),
+      z: Math.sin(e)
+    };
+
+    const right = { x: -Math.sin(a), y: Math.cos(a), z: 0 };
+    const up = cross(forward, right);
+
+    return { forward, right, up };
+  }
+
+  let camera = cameraBasis();
+
+  function toScreen(p) {
+    return {
+      x: origin.x + dot(p, camera.right) * scale,
+      y: origin.y - dot(p, camera.up) * scale
+    };
+  }
+
+  function depthOf(p) { return dot(p, camera.forward); }
+
+  function baseScale() {
+    return Math.max(26, Math.min(110, Math.min(width, height) / 14));
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+
+    width = rect.width;
+    height = rect.height;
+
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+
+    scale = baseScale() * zoomFactor;
+    origin = { x: width * 0.47, y: height * 0.55 };
+
+    draw();
+  }
+
+  // Zoom so setzen, dass alle uebergebenen Punkte im Bild liegen.
+  function fitView(points) {
+    camera = cameraBasis();
+
+    let maxExtent = 1;
+
+    // Das Achsenkreuz gehoert immer ins Bild. Ohne diese Punkte wuerde eine Achse,
+    // die fast in Blickrichtung liegt, den Zoom viel zu weit aufziehen.
+    const box = [
+      { x: AXIS_RANGE, y: 0, z: 0 }, { x: -AXIS_RANGE, y: 0, z: 0 },
+      { x: 0, y: AXIS_RANGE, z: 0 }, { x: 0, y: -AXIS_RANGE, z: 0 },
+      { x: 0, y: 0, z: AXIS_RANGE }, { x: 0, y: 0, z: -AXIS_RANGE }
+    ];
+
+    box.concat(points).forEach((p) => {
+      maxExtent = Math.max(
+        maxExtent,
+        Math.abs(dot(p, camera.right)),
+        Math.abs(dot(p, camera.up))
+      );
+    });
+
+    const wanted = 0.40 * Math.min(width, height) / maxExtent;
+
+    zoomFactor = Math.max(0.25, Math.min(3, wanted / baseScale()));
+    scale = baseScale() * zoomFactor;
+  }
+
+  // ---------------------------------------------------------------- Formatierung
+
+  function format(value, digits = 1) {
+    if (Math.abs(value) < 0.0000001) value = 0;
+    return Number(value).toFixed(digits).replace(".", ",").replace("-", "−");
+  }
+
+  function formatShort(value) {
+    if (Math.abs(value) < 0.0000001) value = 0;
+    const rounded = Math.round(value * 1000) / 1000;
+    return String(rounded).replace(".", ",").replace("-", "−");
+  }
+
+  function vecText(v) {
+    return "(" + formatShort(v.x) + " | " + formatShort(v.y) + " | " + formatShort(v.z) + ")";
+  }
+
+  // Koordinatenform als lesbarer Term, ohne Terme mit Koeffizient 0.
+  function koordText(n, d) {
+    const parts = [
+      { c: n.x, v: axisNames[0] },
+      { c: n.y, v: axisNames[1] },
+      { c: n.z, v: axisNames[2] }
+    ];
+
+    let out = "";
+
+    parts.forEach((p) => {
+      if (Math.abs(p.c) < 0.0000001) return;
+
+      const sign = p.c < 0 ? " − " : (out === "" ? "" : " + ");
+      const abs = Math.abs(p.c);
+      const num = Math.abs(abs - 1) < 0.0000001 ? "" : formatShort(abs);
+
+      out += sign + num + p.v;
+    });
+
+    if (out === "") out = "0";
+
+    return out + " = " + formatShort(d);
+  }
+
+  // Koordinatenform mit allen drei Koeffizienten - auch den Nullen. Genau die
+  // fehlt beim Ablesen am haeufigsten, deshalb steht diese Zeile ueber dem Ergebnis.
+  function koordTextFull(n, d) {
+    const parts = [n.x, n.y, n.z].map((c, index) => {
+      const value = c < 0 ? "(" + formatShort(c) + ")" : formatShort(c);
+      return value + " \u00b7 " + axisNames[index];
+    });
+
+    return parts.join(" + ") + " = " + formatShort(d);
+  }
+
+  function koordSchema() {
+    return "n\u2081" + axisNames[0]
+      + " + n\u2082" + axisNames[1]
+      + " + n\u2083" + axisNames[2]
+      + " = d";
+  }
+
+  function readVector(id1, id2, id3) {
+    return {
+      x: Number(document.getElementById(id1).value) || 0,
+      y: Number(document.getElementById(id2).value) || 0,
+      z: Number(document.getElementById(id3).value) || 0
+    };
+  }
+
+  function writeVector(id1, id2, id3, v) {
+    setInput(id1, v.x);
+    setInput(id2, v.y);
+    setInput(id3, v.z);
+  }
+
+  function setInput(id, value) {
+    const input = document.getElementById(id);
+    if (document.activeElement === input) return;
+    input.value = String(Math.round(value * 1000) / 1000);
+  }
+
+  // ---------------------------------------------------------------- Grundzeichnen
+
+  function clear() {
+    ctx.fillStyle = colors.background;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  function strokeSpaceLine(from, to, color, lineWidth, dash) {
+    const p1 = toScreen(from);
+    const p2 = toScreen(to);
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    if (dash) ctx.setLineDash(dash);
+
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawGroundGrid() {
+    for (let i = -AXIS_RANGE; i <= AXIS_RANGE; i++) {
+      const color = i < 0 ? colors.gridFar : colors.gridNear;
+
+      strokeSpaceLine({ x: i, y: -AXIS_RANGE, z: 0 }, { x: i, y: AXIS_RANGE, z: 0 }, color, 1);
+      strokeSpaceLine({ x: -AXIS_RANGE, y: i, z: 0 }, { x: AXIS_RANGE, y: i, z: 0 }, color, 1);
+    }
+  }
+
+  function drawArrowHead(tip, tail, color, size = 15) {
+    const angle = Math.atan2(tip.y - tail.y, tip.x - tail.x);
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(tip.x, tip.y);
+    ctx.lineTo(tip.x - size * Math.cos(angle - Math.PI / 6), tip.y - size * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(tip.x - size * Math.cos(angle + Math.PI / 6), tip.y - size * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function screenExtent(direction) {
+    return Math.hypot(dot(direction, camera.right), dot(direction, camera.up));
+  }
+
+  function drawAxis(direction, label) {
+    strokeSpaceLine({ x: 0, y: 0, z: 0 }, multiply(direction, -AXIS_RANGE), colors.axisNegative, 1.5);
+    strokeSpaceLine({ x: 0, y: 0, z: 0 }, multiply(direction, AXIS_RANGE + 0.9), colors.axis, 2);
+
+    const tip = toScreen(multiply(direction, AXIS_RANGE + 0.9));
+    const tail = toScreen(multiply(direction, AXIS_RANGE * 0.7));
+
+    if (Math.hypot(tip.x - tail.x, tip.y - tail.y) > 6) {
+      drawArrowHead(tip, tail, colors.axis, 12);
+    }
+
+    if (screenExtent(direction) < 0.2) return;
+
+    const labelPoint = toScreen(multiply(direction, AXIS_RANGE + 1.5));
+
+    ctx.save();
+    ctx.fillStyle = colors.labels;
+    ctx.font = "22px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, labelPoint.x, labelPoint.y);
+    ctx.restore();
+  }
+
+  function drawAxes() {
+    drawAxis({ x: 1, y: 0, z: 0 }, axisNames[0]);
+    drawAxis({ x: 0, y: 1, z: 0 }, axisNames[1]);
+    drawAxis({ x: 0, y: 0, z: 1 }, axisNames[2]);
+  }
+
+  function drawAxisNumbers() {
+    ctx.save();
+    ctx.fillStyle = colors.labels;
+    ctx.font = "15px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const entries = [
+      { direction: { x: 1, y: 0, z: 0 }, offset: { x: 15, y: 8 } },
+      { direction: { x: 0, y: 1, z: 0 }, offset: { x: 4, y: 17 } },
+      { direction: { x: 0, y: 0, z: 1 }, offset: { x: -16, y: 0 } }
+    ];
+
+    entries.forEach((entry) => {
+      if (screenExtent(entry.direction) < 0.2) return;
+
+      for (let i = 1; i <= AXIS_RANGE; i++) {
+        const point = toScreen(multiply(entry.direction, i));
+        ctx.fillText(String(i), point.x + entry.offset.x, point.y + entry.offset.y);
+      }
+    });
+
+    const zero = toScreen({ x: 0, y: 0, z: 0 });
+    ctx.fillText("0", zero.x - 16, zero.y + 16);
+    ctx.restore();
+  }
+
+  function drawVectorArrow(start, vector, color, label, lineWidth = 5) {
+    const end = add(start, vector);
+    const p1 = toScreen(start);
+    const p2 = toScreen(end);
+
+    strokeSpaceLine(start, end, color, lineWidth);
+
+    if (Math.hypot(p2.x - p1.x, p2.y - p1.y) > 8) {
+      drawArrowHead(p2, p1, color);
+    }
+
+    if (label) {
+      const mid = toScreen(add(start, multiply(vector, 0.55)));
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = "bold 23px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, mid.x + 20, mid.y - 16);
+      ctx.restore();
+    }
+  }
+
+  function drawPoint(p, color, label, radius = 7) {
+    const s = toScreen(p);
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (label) {
+      ctx.fillStyle = color;
+      ctx.font = "bold 20px Arial";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, s.x + 12, s.y - 14);
+    }
+
+    ctx.restore();
+  }
+
+  // Ortsvektor zum Stuetzpunkt: gestrichelt, aber mit Spitze - sonst sieht er
+  // wie eine Hilfslinie aus und nicht wie ein Vektor.
+  function drawPositionVector(target, label) {
+    const zero = { x: 0, y: 0, z: 0 };
+
+    strokeSpaceLine(zero, target, "rgba(255, 255, 255, 0.75)", 3, [8, 6]);
+
+    const tip = toScreen(target);
+    const tail = toScreen(zero);
+
+    if (Math.hypot(tip.x - tail.x, tip.y - tail.y) > 10) {
+      drawArrowHead(tip, tail, "rgba(255, 255, 255, 0.9)", 14);
+    }
+
+    if (label) {
+      // Unter die Spitze, nicht an den Schaft: u⃗, v⃗ und n⃗ setzen genau dort an
+      // und ihre Beschriftungen stehen darueber.
+      const point = toScreen(target);
+
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 22px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, point.x - 4, point.y + 28);
+      ctx.restore();
+    }
+  }
+
+  // Zwei Einheitsvektoren in der Ebene mit Normalenvektor n.
+  function planeBasis(n) {
+    const unit = normalize(n);
+
+    let helper = { x: 1, y: 0, z: 0 };
+    if (Math.abs(unit.x) > 0.9) helper = { x: 0, y: 1, z: 0 };
+
+    const e1 = normalize(cross(unit, helper));
+    const e2 = cross(unit, e1);
+
+    return { unit, e1, e2 };
+  }
+
+  // Rechteckiges Stueck der Ebene n o x = d, zentriert um den Fusspunkt vom Ursprung.
+  function drawPlane(n, d, fill, edge, showGrid, size = 3.2) {
+    const len = length(n);
+    if (len < 0.000001) return null;
+
+    const basis = planeBasis(n);
+    const center = multiply(basis.unit, d / len);
+
+    const corners = [
+      add(add(center, multiply(basis.e1, size)), multiply(basis.e2, size)),
+      add(add(center, multiply(basis.e1, -size)), multiply(basis.e2, size)),
+      add(add(center, multiply(basis.e1, -size)), multiply(basis.e2, -size)),
+      add(add(center, multiply(basis.e1, size)), multiply(basis.e2, -size))
+    ];
+
+    ctx.save();
+    ctx.beginPath();
+
+    corners.forEach((c, index) => {
+      const s = toScreen(c);
+      if (index === 0) ctx.moveTo(s.x, s.y);
+      else ctx.lineTo(s.x, s.y);
+    });
+
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    ctx.strokeStyle = edge;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    if (showGrid) {
+      for (let i = -size + 1; i <= size - 1; i += 1) {
+        const a1 = add(add(center, multiply(basis.e1, i)), multiply(basis.e2, size));
+        const a2 = add(add(center, multiply(basis.e1, i)), multiply(basis.e2, -size));
+        const b1 = add(add(center, multiply(basis.e2, i)), multiply(basis.e1, size));
+        const b2 = add(add(center, multiply(basis.e2, i)), multiply(basis.e1, -size));
+
+        strokeSpaceLine(a1, a2, edge, 1);
+        strokeSpaceLine(b1, b2, edge, 1);
+      }
+    }
+
+    return center;
+  }
+
+  // Winkelbogen zwischen zwei Richtungen, angesetzt im Punkt q.
+  function drawAngleArc(q, dirA, dirB, radius, color, text) {
+    const a = normalize(dirA);
+    const b = normalize(dirB);
+
+    if (length(a) < 0.5 || length(b) < 0.5) return;
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+
+    const steps = 48;
+
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const mixed = normalize(add(multiply(a, 1 - t), multiply(b, t)));
+
+      if (length(mixed) < 0.5) continue;
+
+      const s = toScreen(add(q, multiply(mixed, radius)));
+
+      if (i === 0) ctx.moveTo(s.x, s.y);
+      else ctx.lineTo(s.x, s.y);
+    }
+
+    ctx.stroke();
+
+    if (text) {
+      const middle = normalize(add(a, b));
+      const labelPoint = length(middle) < 0.5
+        ? add(q, multiply(a, radius))
+        : add(q, multiply(middle, radius * 1.35));
+
+      const s = toScreen(labelPoint);
+
+      ctx.fillStyle = color;
+      ctx.font = "bold 24px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, s.x, s.y);
+    }
+
+    ctx.restore();
+  }
+
+  // ---------------------------------------------------------------- Modus: Gerade
+
+  const geradeStart = { a: { x: 1, y: 2, z: 0 }, u: { x: 2, y: 3, z: 6 } };
+
+  let gA = { x: 1, y: 2, z: 0 };
+  let gU = { x: 2, y: 3, z: 6 };
+  let gR = 1;
+
+  let gRefA = { x: 1, y: 2, z: 0 };
+  let gRefU = { x: 2, y: 3, z: 6 };
+  let gEquations = [];
+
+  function gEquationText(a, u) {
+    return "x⃗ = " + vecText(a) + " + r · " + vecText(u);
+  }
+
+  function sameLine(a, u) {
+    if (!isParallel(u, gRefU)) return false;
+    return isParallel(subtract(a, gRefA), gRefU) || length(subtract(a, gRefA)) < 0.000001;
+  }
+
+  function gRegister() {
+    if (!sameLine(gA, gU)) {
+      gRefA = { ...gA };
+      gRefU = { ...gU };
+      gEquations = [];
+    }
+
+    const text = gEquationText(gA, gU);
+
+    if (!gEquations.includes(text)) gEquations.push(text);
+    if (gEquations.length > 6) gEquations.shift();
+  }
+
+  function drawGerade() {
+    const len = length(gU);
+
+    if (len < 0.000001) {
+      drawPositionVector(gA, "a\u20d7");
+      drawPoint(gA, colors.line, "", 5);
+      return;
+    }
+
+    const reach = (AXIS_RANGE * 2.2) / len;
+
+    strokeSpaceLine(
+      add(gA, multiply(gU, -reach)),
+      add(gA, multiply(gU, reach)),
+      colors.line,
+      3
+    );
+
+    drawPositionVector(gA, "a\u20d7");
+
+    const point = add(gA, multiply(gU, gR));
+
+    // Erst r·u⃗ als Balken, dann u⃗ darueber - sonst verdeckt der Balken den Pfeil.
+    strokeSpaceLine(gA, point, "rgba(255, 93, 143, 0.85)", 9);
+    drawPoint(point, colors.pink, "P");
+
+    drawVectorArrow(gA, gU, colors.green, "u⃗", 5);
+    drawPoint(gA, colors.line, "", 5);
+  }
+
+  function updateGerade() {
+    gA = readVector("ga1", "ga2", "ga3");
+    gU = readVector("gu1", "gu2", "gu3");
+    gR = Number(document.getElementById("gSlider").value);
+
+    document.getElementById("gRVal").textContent = formatShort(gR);
+
+    const point = add(gA, multiply(gU, gR));
+    document.getElementById("gPoint").textContent = vecText(point);
+
+    const list = document.getElementById("gList");
+    list.innerHTML = "";
+
+    if (gEquations.length > 1) {
+      const head = document.createElement("div");
+      head.style.borderBottom = "none";
+      head.style.color = "#888";
+      head.style.fontSize = "16px";
+      head.textContent = "Alle diese Gleichungen beschreiben dieselbe Gerade:";
+      list.appendChild(head);
+    }
+
+    gEquations.forEach((text, index) => {
+      const row = document.createElement("div");
+      row.textContent = text;
+      row.style.color = index === gEquations.length - 1 ? "#fff" : "#888";
+      list.appendChild(row);
+    });
+
+    document.getElementById("gNote").innerHTML = gEquations.length > 1
+      ? "Die Gleichung sieht anders aus, die Gerade ist unverändert. Genau deshalb "
+        + "darf der Winkel nicht davon abhängen, welchen Richtungsvektor jemand aufschreibt."
+      : "Drückt eine der Tasten und schaut auf die Gerade, nicht auf die Gleichung.";
+  }
+
+  // ---------------------------------------------------------------- Modus: Ebene
+
+  let eA = { x: 1, y: 0, z: 0 };
+  let eU = { x: 1, y: 1, z: 0 };
+  let eV = { x: 0, y: 1, z: 1 };
+  let eN = { x: 1, y: -1, z: 1 };
+  let eD = 1;
+
+  const eOptions = { normal: true, spanning: true, grid: true };
+
+  function eFromParameter() {
+    eA = readVector("ea1", "ea2", "ea3");
+    eU = readVector("eu1", "eu2", "eu3");
+    eV = readVector("ev1", "ev2", "ev3");
+
+    const n = cross(eU, eV);
+
+    if (length(n) < 0.000001) {
+      document.getElementById("eNote").textContent =
+        "u⃗ und v⃗ sind parallel – sie spannen keine Ebene auf.";
+      return;
+    }
+
+    eN = n;
+    eD = dot(eN, eA);
+
+    writeVector("en1", "en2", "en3", eN);
+    setInput("ed", eD);
+
+    document.getElementById("eNote").textContent = "";
+  }
+
+  function eFromKoordinaten() {
+    const n = readVector("en1", "en2", "en3");
+    eD = Number(document.getElementById("ed").value) || 0;
+
+    if (length(n) < 0.000001) {
+      document.getElementById("eNote").textContent =
+        "n⃗ = 0⃗ beschreibt keine Ebene.";
+      return;
+    }
+
+    eN = n;
+
+    const basis = planeBasis(eN);
+
+    eA = multiply(basis.unit, eD / length(eN));
+    eU = basis.e1;
+    eV = basis.e2;
+
+    // Ganzzahlige Spannvektoren sehen an der Tafel besser aus, wenn es sie gibt.
+    const nice = niceSpanning(eN);
+    if (nice) { eU = nice.u; eV = nice.v; }
+
+    writeVector("ea1", "ea2", "ea3", eA);
+    writeVector("eu1", "eu2", "eu3", eU);
+    writeVector("ev1", "ev2", "ev3", eV);
+
+    document.getElementById("eNote").textContent = "";
+  }
+
+  // Sucht zwei kurze ganzzahlige Vektoren senkrecht zu n, damit die
+  // Parameterform ablesbar bleibt statt Dezimalzahlen zu zeigen.
+  function niceSpanning(n) {
+    const found = [];
+
+    for (let x = -4; x <= 4; x++) {
+      for (let y = -4; y <= 4; y++) {
+        for (let z = -4; z <= 4; z++) {
+          if (x === 0 && y === 0 && z === 0) continue;
+
+          const v = { x, y, z };
+          if (Math.abs(dot(v, n)) > 0.000001) continue;
+
+          found.push(v);
+        }
+      }
+    }
+
+    if (found.length < 2) return null;
+
+    function ugliness(v) {
+      const negatives = [v.x, v.y, v.z].filter((c) => c < 0).length;
+      const leading = [v.x, v.y, v.z].find((c) => c !== 0);
+      return length(v) * 10 + negatives + (leading < 0 ? 0.5 : 0);
+    }
+
+    found.sort((one, other) => ugliness(one) - ugliness(other));
+
+    const u = found[0];
+
+    for (let i = 1; i < found.length; i++) {
+      if (!isParallel(u, found[i])) {
+        return { u, v: found[i] };
+      }
+    }
+
+    return null;
+  }
+
+  function drawEbene() {
+    drawPlane(
+      eN,
+      eD,
+      "rgba(255, 159, 28, 0.13)",
+      "rgba(255, 159, 28, 0.55)",
+      eOptions.grid
+    );
+
+    if (eOptions.spanning) {
+      drawVectorArrow(eA, eU, colors.green, "u⃗", 5);
+      drawVectorArrow(eA, eV, colors.green, "v⃗", 5);
+    }
+
+    if (eOptions.normal) {
+      const unit = normalize(eN);
+      const shown = multiply(unit, Math.min(3, Math.max(1.6, length(eN) / 2)));
+
+      drawVectorArrow(eA, shown, colors.orange, "n⃗", 6);
+    }
+
+    drawPositionVector(eA, "a\u20d7");
+    drawPoint(eA, "#ffffff", "", 5);
+  }
+
+  function updateEbene() {
+    document.getElementById("eKoordSchema").textContent = koordSchema();
+    document.getElementById("eKoordVoll").textContent = koordTextFull(eN, eD);
+
+    document.getElementById("eKoord").innerHTML =
+      "<span class='orange'>" + koordText(eN, eD) + "</span>";
+  }
+
+  // ---------------------------------------------------------------- Modus: Zwei Ebenen
+
+  let zN1 = { x: 4, y: 0, z: 3 };
+  let zD1 = 10;
+  let zN2 = { x: 0, y: 3, z: -4 };
+  let zD2 = 6;
+
+  const zOptions = { normals: true, section: true, arc: true };
+
+  function zRead() {
+    zN1 = readVector("zn11", "zn12", "zn13");
+    zN2 = readVector("zn21", "zn22", "zn23");
+    zD1 = Number(document.getElementById("zd1").value) || 0;
+    zD2 = Number(document.getElementById("zd2").value) || 0;
+  }
+
+  // Punkt auf der Schnittgeraden, der dem Ursprung am naechsten liegt.
+  function intersectionPoint() {
+    const w = cross(zN1, zN2);
+    const denominator = dot(w, w);
+
+    if (denominator < 0.000001) return null;
+
+    const n11 = dot(zN1, zN1);
+    const n22 = dot(zN2, zN2);
+    const n12 = dot(zN1, zN2);
+
+    const c1 = (zD1 * n22 - zD2 * n12) / denominator;
+    const c2 = (zD2 * n11 - zD1 * n12) / denominator;
+
+    return add(multiply(zN1, c1), multiply(zN2, c2));
+  }
+
+  function drawZwei() {
+    const planes = [
+      { n: zN1, d: zD1, fill: "rgba(255, 159, 28, 0.14)", edge: "rgba(255, 159, 28, 0.6)", color: colors.orange, label: "n⃗₁" },
+      { n: zN2, d: zD2, fill: "rgba(88, 185, 255, 0.14)", edge: "rgba(88, 185, 255, 0.6)", color: colors.blue, label: "n⃗₂" }
+    ];
+
+    // Die weiter hinten liegende Ebene zuerst zeichnen.
+    planes.sort((one, other) => {
+      const cOne = multiply(normalize(one.n), one.d / (length(one.n) || 1));
+      const cOther = multiply(normalize(other.n), other.d / (length(other.n) || 1));
+      return depthOf(cOne) - depthOf(cOther);
+    });
+
+    planes.forEach((plane) => {
+      drawPlane(plane.n, plane.d, plane.fill, plane.edge, false, 3.4);
+    });
+
+    const q = intersectionPoint();
+
+    if (q && zOptions.section) {
+      const w = normalize(cross(zN1, zN2));
+      const reach = AXIS_RANGE * 1.6;
+
+      strokeSpaceLine(add(q, multiply(w, -reach)), add(q, multiply(w, reach)), colors.pink, 3.5);
+
+      const labelPoint = toScreen(add(q, multiply(w, reach * 0.75)));
+
+      ctx.save();
+      ctx.fillStyle = colors.pink;
+      ctx.font = "bold 20px Arial";
+      ctx.textAlign = "center";
+
+      // Beschriftung im Bild halten, sonst haengt sie am Rand halb ausserhalb.
+      const labelX = Math.max(80, Math.min(width - 80, labelPoint.x));
+      const labelY = Math.max(24, Math.min(height - 24, labelPoint.y - 14));
+
+      ctx.fillText("Schnittgerade", labelX, labelY);
+      ctx.restore();
+    }
+
+    if (!q && zOptions.normals) {
+      planes.forEach((plane) => {
+        const len = length(plane.n);
+        if (len < 0.000001) return;
+
+        const foot = multiply(normalize(plane.n), plane.d / len);
+        drawVectorArrow(foot, multiply(normalize(plane.n), 2.6), plane.color, plane.label, 6);
+      });
+    }
+
+    if (q && zOptions.normals) {
+      planes.forEach((plane) => {
+        const shown = multiply(normalize(plane.n), 2.6);
+        drawVectorArrow(q, shown, plane.color, plane.label, 6);
+      });
+
+      if (zOptions.arc) {
+        // Gezeigt wird der spitze Winkel - also gegebenenfalls gegen -n2 gemessen.
+        // Sonst stuende am Bogen der Nebenwinkel und im Panel der Wert mit Betrag.
+        const flip = dot(zN1, zN2) < 0 ? -1 : 1;
+        const partner = multiply(zN2, flip);
+        const angle = angleBetween(zN1, partner);
+
+        if (flip === -1) {
+          const shown = multiply(normalize(partner), 2.6);
+
+          strokeSpaceLine(q, add(q, shown), "rgba(88, 185, 255, 0.45)", 3, [7, 6]);
+
+          const tip = toScreen(add(q, shown));
+          const tail = toScreen(q);
+
+          ctx.save();
+          ctx.fillStyle = "rgba(88, 185, 255, 0.7)";
+          ctx.font = "bold 19px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("−n⃗₂", tip.x + 24, tip.y - 10);
+          ctx.restore();
+        }
+
+        drawAngleArc(
+          q,
+          zN1,
+          partner,
+          1.5,
+          "#ffffff",
+          angle === null ? "" : format(angle, 1) + "°"
+        );
+      }
+
+      drawPoint(q, "#ffffff", "", 6);
+    }
+  }
+
+  function updateZwei() {
+    document.getElementById("zE1").innerHTML =
+      "E₁: <span class='orange'>" + koordText(zN1, zD1) + "</span>";
+    document.getElementById("zE2").innerHTML =
+      "E₂: <span class='blue'>" + koordText(zN2, zD2) + "</span>";
+
+    const product = dot(zN1, zN2);
+    const l1 = length(zN1);
+    const l2 = length(zN2);
+
+    document.getElementById("zDot").textContent = formatShort(product);
+    document.getElementById("zL1").textContent = format(l1, 2);
+    document.getElementById("zL2").textContent = format(l2, 2);
+
+    const raw = angleBetween(zN1, zN2);
+
+    if (raw === null) {
+      document.getElementById("zCos").textContent = "–";
+      document.getElementById("zAngle").textContent = "–";
+      document.getElementById("zRaw").textContent = "–";
+      document.getElementById("zNote").textContent = "Ein Normalenvektor ist der Nullvektor.";
+      return;
+    }
+
+    const cosValue = Math.abs(product) / (l1 * l2);
+    const angle = Math.acos(Math.max(-1, Math.min(1, cosValue))) * 180 / Math.PI;
+
+    document.getElementById("zCos").textContent = format(cosValue, 4);
+    document.getElementById("zAngle").textContent = format(angle, 1);
+    document.getElementById("zRaw").textContent = format(raw, 1);
+
+    let note = "";
+
+    if (isParallel(zN1, zN2)) {
+      note = "Die Normalenvektoren sind parallel – die Ebenen sind parallel oder identisch. "
+           + "Es gibt keine Schnittgerade.";
+    } else if (Math.abs(angle - 90) < 0.05) {
+      note = "n⃗₁ ∘ n⃗₂ = 0: Die Ebenen stehen senkrecht aufeinander.";
+    } else if (Math.abs(raw - angle) > 0.05) {
+      note = "Ohne Betrag käme hier der stumpfe Nebenwinkel heraus: "
+           + format(raw, 1) + "° + " + format(angle, 1) + "° = 180°.";
+    } else {
+      note = "Hier liefern beide Rechnungen dasselbe – die Betragsstriche fallen erst auf, "
+           + "wenn man eine Ebene umdreht.";
+    }
+
+    document.getElementById("zNote").textContent = note;
+  }
+
+  // ---------------------------------------------------------------- Zeichnen gesamt
+
+  function draw() {
+    camera = cameraBasis();
+
+    clear();
+    drawGroundGrid();
+    drawAxes();
+    drawAxisNumbers();
+
+    if (mode === "gerade") {
+      updateGerade();
+      drawGerade();
+    } else if (mode === "ebene") {
+      updateEbene();
+      drawEbene();
+    } else {
+      updateZwei();
+      drawZwei();
+    }
+  }
+
+  // ---------------------------------------------------------------- Bedienung
+
+  function getPointerPosition(event) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  }
+
+  canvas.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    orbiting = true;
+    lastPointer = getPointerPosition(event);
+    canvas.setPointerCapture(event.pointerId);
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (!orbiting) return;
+
+    event.preventDefault();
+
+    const pointer = getPointerPosition(event);
+
+    azimuth -= (pointer.x - lastPointer.x) * 0.4;
+    elevation += (pointer.y - lastPointer.y) * 0.4;
+    elevation = Math.max(-90, Math.min(90, elevation));
+
+    lastPointer = pointer;
+    draw();
+  });
+
+  function endPointer(event) {
+    orbiting = false;
+
+    try {
+      canvas.releasePointerCapture(event.pointerId);
+    } catch (error) {
+      // Pointer war nicht erfasst - nichts zu tun.
+    }
+  }
+
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+
+  canvas.addEventListener("wheel", (event) => {
+    event.preventDefault();
+
+    const step = event.deltaY < 0 ? 1.08 : 1 / 1.08;
+
+    zoomFactor = Math.max(0.25, Math.min(3, zoomFactor * step));
+    scale = baseScale() * zoomFactor;
+
+    draw();
+  }, { passive: false });
+
+  // -------- Modus umschalten
+
+  const sections = {
+    gerade: document.getElementById("secGerade"),
+    ebene: document.getElementById("secEbene"),
+    zwei: document.getElementById("secZwei")
+  };
+
+  const tabs = {
+    gerade: document.getElementById("tabGerade"),
+    ebene: document.getElementById("tabEbene"),
+    zwei: document.getElementById("tabZwei")
+  };
+
+  const headlines = {
+    gerade: "Geradengleichung",
+    ebene: "Ebenengleichung",
+    zwei: "Zwei Ebenen"
+  };
+
+  function setMode(next) {
+    mode = next;
+
+    Object.keys(sections).forEach((key) => {
+      sections[key].classList.toggle("hidden", key !== next);
+      tabs[key].classList.toggle("active", key === next);
+    });
+
+    document.getElementById("headline").textContent = headlines[next];
+
+    fitCurrent();
+    draw();
+  }
+
+  tabs.gerade.addEventListener("click", () => setMode("gerade"));
+  tabs.ebene.addEventListener("click", () => setMode("ebene"));
+  tabs.zwei.addEventListener("click", () => setMode("zwei"));
+
+  function fitCurrent() {
+    if (mode === "gerade") {
+      fitView([gA, add(gA, gU), add(gA, multiply(gU, -1)), { x: AXIS_RANGE, y: 0, z: 0 }]);
+    } else if (mode === "ebene") {
+      fitView([eA, add(eA, eU), add(eA, eV), { x: AXIS_RANGE, y: 0, z: 0 }]);
+    } else {
+      const q = intersectionPoint();
+      const points = [{ x: AXIS_RANGE, y: 0, z: 0 }, { x: 0, y: AXIS_RANGE, z: 0 }];
+      if (q) points.push(q, multiply(q, 1.6));
+      fitView(points);
+    }
+  }
+
+  // -------- Gerade
+
+  ["ga1", "ga2", "ga3", "gu1", "gu2", "gu3"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", () => {
+      gA = readVector("ga1", "ga2", "ga3");
+      gU = readVector("gu1", "gu2", "gu3");
+      gRegister();
+      draw();
+    });
+  });
+
+  document.getElementById("gSlider").addEventListener("input", draw);
+
+  function gApply(a, u) {
+    gA = a;
+    gU = u;
+
+    writeVector("ga1", "ga2", "ga3", gA);
+    writeVector("gu1", "gu2", "gu3", gU);
+
+    gRegister();
+    draw();
+  }
+
+  document.getElementById("gFlip").addEventListener("click", () => gApply(gA, multiply(gU, -1)));
+  document.getElementById("gDouble").addEventListener("click", () => gApply(gA, multiply(gU, 2)));
+  document.getElementById("gShift").addEventListener("click", () => gApply(add(gA, gU), gU));
+
+  document.getElementById("gReset").addEventListener("click", () => {
+    gRefA = { ...geradeStart.a };
+    gRefU = { ...geradeStart.u };
+    gEquations = [];
+
+    gApply({ ...geradeStart.a }, { ...geradeStart.u });
+    fitCurrent();
+    draw();
+  });
+
+  // -------- Ebene
+
+  ["ea1", "ea2", "ea3", "eu1", "eu2", "eu3", "ev1", "ev2", "ev3"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", () => {
+      eFromParameter();
+      draw();
+    });
+  });
+
+  ["en1", "en2", "en3", "ed"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", () => {
+      eFromKoordinaten();
+      draw();
+    });
+  });
+
+  function shiftD(delta) {
+    const input = document.getElementById("ed");
+    input.value = String(Number(input.value || 0) + delta);
+    eFromKoordinaten();
+    draw();
+  }
+
+  document.getElementById("eDm").addEventListener("click", () => shiftD(-1));
+  document.getElementById("eDp").addEventListener("click", () => shiftD(1));
+
+  document.querySelectorAll(".ePreset").forEach((button) => {
+    button.addEventListener("click", () => {
+      const kind = button.dataset.kind;
+      const parts = button.dataset.val.split("|");
+
+      if (kind === "par") {
+        const a = parts[0].split(",").map(Number);
+        const u = parts[1].split(",").map(Number);
+        const v = parts[2].split(",").map(Number);
+
+        writeVector("ea1", "ea2", "ea3", { x: a[0], y: a[1], z: a[2] });
+        writeVector("eu1", "eu2", "eu3", { x: u[0], y: u[1], z: u[2] });
+        writeVector("ev1", "ev2", "ev3", { x: v[0], y: v[1], z: v[2] });
+
+        eFromParameter();
+      } else {
+        const n = parts[0].split(",").map(Number);
+
+        writeVector("en1", "en2", "en3", { x: n[0], y: n[1], z: n[2] });
+        setInput("ed", Number(parts[1]));
+
+        eFromKoordinaten();
+      }
+
+      fitCurrent();
+      draw();
+    });
+  });
+
+  [["optN", "normal"], ["optUV", "spanning"], ["optGrid", "grid"]].forEach((entry) => {
+    document.getElementById(entry[0]).addEventListener("change", (event) => {
+      eOptions[entry[1]] = event.target.checked;
+      draw();
+    });
+  });
+
+  // -------- Zwei Ebenen
+
+  ["zn11", "zn12", "zn13", "zn21", "zn22", "zn23", "zd1", "zd2"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", () => {
+      zRead();
+      draw();
+    });
+  });
+
+  document.getElementById("zFlip").addEventListener("click", () => {
+    zRead();
+
+    writeVector("zn21", "zn22", "zn23", multiply(zN2, -1));
+    setInput("zd2", -zD2);
+
+    zRead();
+    draw();
+  });
+
+  document.querySelectorAll(".zPreset").forEach((button) => {
+    button.addEventListener("click", () => {
+      const parts = button.dataset.val.split("|");
+      const n1 = parts[0].split(",").map(Number);
+      const n2 = parts[2].split(",").map(Number);
+
+      writeVector("zn11", "zn12", "zn13", { x: n1[0], y: n1[1], z: n1[2] });
+      setInput("zd1", Number(parts[1]));
+      writeVector("zn21", "zn22", "zn23", { x: n2[0], y: n2[1], z: n2[2] });
+      setInput("zd2", Number(parts[3]));
+
+      zRead();
+      fitCurrent();
+      draw();
+    });
+  });
+
+  [["optZN", "normals"], ["optZS", "section"], ["optZArc", "arc"]].forEach((entry) => {
+    document.getElementById(entry[0]).addEventListener("change", (event) => {
+      zOptions[entry[1]] = event.target.checked;
+      draw();
+    });
+  });
+
+  // -------- Ansicht
+
+  document.querySelectorAll(".viewStd").forEach((button) => {
+    button.addEventListener("click", () => {
+      azimuth = START_AZIMUTH;
+      elevation = START_ELEVATION;
+      fitCurrent();
+      draw();
+    });
+  });
+
+  document.querySelectorAll(".viewTop").forEach((button) => {
+    button.addEventListener("click", () => {
+      azimuth = 0;
+      elevation = 89.9;
+      fitCurrent();
+      draw();
+    });
+  });
+
+  document.querySelectorAll(".viewFit").forEach((button) => {
+    button.addEventListener("click", () => {
+      fitCurrent();
+      draw();
+    });
+  });
+
+  document.querySelectorAll('input[name="axisNames"]').forEach((radio) => {
+    radio.addEventListener("change", (event) => {
+      axisNames = event.target.value === "xyz"
+        ? ["x", "y", "z"]
+        : ["x\u2081", "x\u2082", "x\u2083"];
+
+      draw();
+    });
+  });
+
+  window.addEventListener("resize", resizeCanvas);
+
+  // -------- Start
+
+  gRegister();
+  eFromParameter();
+  zRead();
+  resizeCanvas();
+  fitCurrent();
+  draw();
+</script>
+</body>
+</html>

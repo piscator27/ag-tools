@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tastatur-Jagd</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #1a1a1a; color: #f0f0f0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    overflow-x: hidden;
+  }
+  #buehne {
+    max-width: 1000px; margin: 0 auto; padding: 18px 16px 70px;
+    min-height: 100%;
+  }
+
+  h1 { font-size: 34px; margin: 6px 0 2px; letter-spacing: 0.5px; }
+  h2 { font-size: 24px; margin: 0 0 14px; font-weight: 500; color: #b8b8b8; }
+  p  { font-size: 17px; line-height: 1.5; color: #d0d0d0; }
+
+  .knopf {
+    display: inline-block; margin: 10px 8px 0 0;
+    padding: 13px 26px; font-size: 19px; font-weight: 600;
+    background: #e07b1f; color: #1a1a1a; border: none; border-radius: 7px;
+    cursor: pointer; font-family: inherit;
+  }
+  .knopf:hover { background: #f59433; }
+  .knopf.sekundaer { background: #3a3a3a; color: #e8e8e8; }
+  .knopf.sekundaer:hover { background: #4a4a4a; }
+
+  .warnkasten {
+    border-left: 5px solid #e07b1f; background: #262626;
+    padding: 12px 16px; margin: 18px 0; border-radius: 0 6px 6px 0;
+  }
+  .warnkasten strong { color: #f0a04b; }
+
+  /* ---------- Kopfzeile im Spiel ---------- */
+  #kopf { display: flex; justify-content: space-between; align-items: baseline;
+          border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
+  #levelname { font-size: 21px; font-weight: 600; color: #f0a04b; }
+  #punkte { font-size: 19px; color: #9a9a9a; }
+
+  /* ---------- Fortschrittspunkte ---------- */
+  #fortschritt { display: flex; gap: 7px; margin: 6px 0 14px; flex-wrap: wrap; }
+  .pkt { width: 15px; height: 15px; border-radius: 50%; background: #383838; }
+  .pkt.fertig { background: #5ab552; }
+  .pkt.aktiv  { background: #e07b1f; }
+
+  /* ---------- Zielanzeige ---------- */
+  #zielbox {
+    text-align: center; background: #232323; border-radius: 12px;
+    padding: 16px 10px 20px; margin-bottom: 6px; border: 2px solid #2f2f2f;
+  }
+  #zielbox.gut   { border-color: #5ab552; }
+  #zielbox.falsch{ border-color: #c94f4f; animation: wackel 0.3s; }
+  @keyframes wackel {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-9px); }
+    75% { transform: translateX(9px); }
+  }
+  #auftrag { font-size: 16px; color: #9a9a9a; margin-bottom: 4px; }
+  #ziel {
+    font-size: 84px; font-weight: 700; line-height: 1.05;
+    font-family: "Consolas", "DejaVu Sans Mono", monospace;
+  }
+  #ziel .weg  { color: #5a5a5a; }
+  #ziel .jetzt{ color: #e07b1f; text-decoration: underline; }
+  #ziel .rest { color: #f0f0f0; }
+  #hinweis { font-size: 19px; height: 26px; margin-top: 8px; color: #b8b8b8; }
+  #hinweis.gut { color: #5ab552; font-weight: 600; }
+  #hinweis.falsch { color: #e08080; font-weight: 600; }
+
+  /* ---------- Feststelltaste ---------- */
+  #caps {
+    display: none; background: #7a2323; color: #ffdede; text-align: center;
+    padding: 9px; border-radius: 6px; font-size: 18px; font-weight: 600;
+    margin-bottom: 10px;
+  }
+  #caps.an { display: block; }
+
+  /* ---------- Tastatur ---------- */
+  #tastatur { margin-top: 14px; user-select: none; }
+  .reihe { display: flex; gap: 4px; margin-bottom: 4px; }
+  .taste {
+    position: relative; flex: 1 1 0; min-width: 0;
+    height: 46px; background: #2c2c2c; border: 1px solid #3d3d3d;
+    border-radius: 5px; color: #cfcfcf;
+    font-size: 15px; font-family: "Consolas", "DejaVu Sans Mono", monospace;
+  }
+  .taste .mitte { position: absolute; inset: 0; display: flex;
+                  align-items: center; justify-content: center; font-size: 17px; }
+  .taste .lo { position: absolute; top: 3px;    left: 5px;  font-size: 12px; }
+  .taste .lu { position: absolute; bottom: 3px; left: 5px;  font-size: 15px; }
+  .taste .ru { position: absolute; bottom: 3px; right: 5px; font-size: 12px; color: #7fb0d8; }
+  .taste .beschriftung { position: absolute; inset: 0; display: flex;
+                  align-items: center; justify-content: center;
+                  font-size: 12px; color: #8a8a8a; font-family: inherit; }
+  .taste.hell { background: #e07b1f; border-color: #ffb066; color: #1a1a1a; }
+  .taste.hell .ru, .taste.hell .beschriftung { color: #1a1a1a; }
+  .taste.mod  { background: #2f5f86; border-color: #7fb0d8; color: #ffffff; }
+  .taste.mod .beschriftung { color: #ffffff; }
+  #tastatur.blass { opacity: 0.35; }
+
+  /* ---------- Abschluss ---------- */
+  #urkunde { text-align: center; padding-top: 10px; }
+  .stempel {
+    display: inline-block; border: 5px solid #5ab552; color: #5ab552;
+    border-radius: 14px; padding: 18px 34px; font-size: 30px; font-weight: 700;
+    transform: rotate(-4deg); margin: 16px 0; letter-spacing: 1px;
+  }
+  .grossziffer { font-size: 62px; font-weight: 700; color: #e07b1f; }
+
+  /* ---------- Fußzeile ---------- */
+  #fuss {
+    position: fixed; bottom: 8px; right: 14px; text-align: right;
+    color: #808080; opacity: 0.4; font-size: 12px; line-height: 1.3;
+  }
+  #fuss .fi { font-size: 20px; font-weight: 700; }
+  .verstecken { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="buehne">
+
+  <!-- ============ STARTSEITE ============ -->
+  <div id="seiteStart">
+    <h1>Tastatur-Jagd</h1>
+    <h2>Finde die Tasten, die du fürs Anmelden brauchst</h2>
+
+    <div class="warnkasten">
+      <strong>Wichtig:</strong> Tippe hier <strong>niemals</strong> dein echtes Passwort ein.
+      Alle Wörter in diesem Spiel sind erfunden.
+    </div>
+
+    <p>Auf dem Bildschirm erscheint ein Zeichen. Suche es auf der Tastatur und tippe es.
+       Wenn du es nicht findest, hilft dir nach kurzer Zeit die Tastatur unten.</p>
+
+    <p><b>Vier Stufen:</b> kleine Buchstaben &rarr; GROSSE Buchstaben &rarr; Zauberzeichen &rarr; Passwort-Profi.</p>
+
+    <button class="knopf" id="btnStart">Los geht's</button>
+    <button class="knopf sekundaer" id="btnFrei">Stufe frei wählen</button>
+
+    <div id="freiwahl" class="verstecken" style="margin-top:16px"></div>
+    <p id="bestleistung" style="margin-top:22px; color:#8a8a8a; font-size:15px"></p>
+  </div>
+
+  <!-- ============ SPIELSEITE ============ -->
+  <div id="seiteSpiel" class="verstecken">
+    <div id="kopf">
+      <div id="levelname">Stufe 1</div>
+      <div id="punkte">0 Punkte</div>
+    </div>
+    <div id="caps">Achtung: Die Feststelltaste ist AN. Drücke einmal auf &#8682; links.</div>
+    <div id="fortschritt"></div>
+    <div id="zielbox">
+      <div id="auftrag">Tippe dieses Zeichen:</div>
+      <div id="ziel">a</div>
+      <div id="hinweis"></div>
+    </div>
+    <div id="tastatur"></div>
+  </div>
+
+  <!-- ============ STUFE GESCHAFFT ============ -->
+  <div id="seiteStufe" class="verstecken">
+    <div id="urkunde">
+      <div class="grossziffer" id="stufeZiffer">1</div>
+      <h1 id="stufeTitel">Stufe geschafft!</h1>
+      <p id="stufeText"></p>
+      <div class="stempel" id="stufeStempel">GESCHAFFT</div>
+      <div>
+        <button class="knopf" id="btnWeiter">Nächste Stufe</button>
+        <button class="knopf sekundaer" id="btnNochmal">Stufe wiederholen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FÜHRERSCHEIN ============ -->
+  <div id="seiteEnde" class="verstecken">
+    <div id="urkunde">
+      <h1>Digitaler Führerschein</h1>
+      <h2>Stufe 1: Tastatur und Anmeldung</h2>
+      <div class="stempel">BESTANDEN</div>
+      <p id="endePunkte" style="font-size:21px"></p>
+      <p style="font-size:20px; color:#f0a04b"><b>Zeig deinen Bildschirm deiner Lehrkraft.</b></p>
+      <button class="knopf" id="btnNeu">Noch einmal von vorn</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="fuss"><div class="fi">Fi</div>FischerTools</div>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   TASTATUR-LAYOUT (deutsch, QWERTZ)
+   b = Grundzeichen, s = mit Umschalt, a = mit AltGr
+   l = feste Beschriftung (Sondertaste), w = Breitenfaktor
+   ===================================================================== */
+function bst(gross) { return { b: gross.toLowerCase(), s: gross, buchstabe: true }; }
+
+var REIHEN = [
+  [ {b:"^",s:"°"}, {b:"1",s:"!"}, {b:"2",s:"\"",a:"²"}, {b:"3",s:"§",a:"³"},
+    {b:"4",s:"$"}, {b:"5",s:"%"}, {b:"6",s:"&"}, {b:"7",s:"/",a:"{"},
+    {b:"8",s:"(",a:"["}, {b:"9",s:")",a:"]"}, {b:"0",s:"=",a:"}"},
+    {b:"ß",s:"?",a:"\\"}, {b:"´",s:"`"}, {l:"\u232B",w:2} ],
+
+  [ {l:"Tab",w:1.5}, bst("Q"), bst("W"), bst("E"), bst("R"), bst("T"), bst("Z"),
+    bst("U"), bst("I"), bst("O"), bst("P"), bst("Ü"), {b:"+",s:"*",a:"~"} ],
+
+  [ {l:"\u21EA",w:1.8,rolle:"caps"}, bst("A"), bst("S"), bst("D"), bst("F"), bst("G"),
+    bst("H"), bst("J"), bst("K"), bst("L"), bst("Ö"), bst("Ä"), {b:"#",s:"'"},
+    {l:"\u23CE",w:1.6} ],
+
+  [ {l:"\u21E7",w:2.4,rolle:"shift"}, {b:"<",s:">",a:"|"}, bst("Y"), bst("X"), bst("C"),
+    bst("V"), bst("B"), bst("N"), bst("M"), {b:",",s:";"}, {b:".",s:":"},
+    {b:"-",s:"_"}, {l:"\u21E7",w:2.4,rolle:"shift"} ],
+
+  [ {l:"Strg",w:1.5}, {l:"\u229E",w:1.2}, {l:"Alt",w:1.2},
+    {l:"Leertaste",w:6.6,b:" "}, {l:"AltGr",w:1.6,rolle:"altgr"},
+    {l:"Strg",w:1.5} ]
+];
+
+/* AltGr-Zeichen ergänzen, die auf Buchstabentasten liegen */
+(function ergaenzeAltGr() {
+  var zusatz = { "Q":"@", "E":"€", "M":"µ" };
+  REIHEN.forEach(function (reihe) {
+    reihe.forEach(function (t) {
+      if (t.buchstabe && zusatz[t.s]) { t.a = zusatz[t.s]; }
+    });
+  });
+})();
+
+/* Nachschlagetabelle: Zeichen -> { reihe, index, modifikator } */
+var FINDE = {};
+REIHEN.forEach(function (reihe, ri) {
+  reihe.forEach(function (t, ki) {
+    if (t.b !== undefined && FINDE[t.b] === undefined) FINDE[t.b] = {ri:ri, ki:ki, mod:null};
+    if (t.s !== undefined && FINDE[t.s] === undefined) FINDE[t.s] = {ri:ri, ki:ki, mod:"shift"};
+    if (t.a !== undefined && FINDE[t.a] === undefined) FINDE[t.a] = {ri:ri, ki:ki, mod:"altgr"};
+  });
+});
+
+/* =====================================================================
+   STUFEN
+   ===================================================================== */
+var STUFEN = [
+  { name: "Stufe 1 – Buchstaben finden",
+    auftrag: "Tippe diesen Buchstaben:",
+    tipp: "Einfach die Taste drücken.",
+    zeichen: "abcdefghijklmnopqrstuvwxyzäöü".split(""),
+    anzahl: 10 },
+
+  { name: "Stufe 2 – GROSSE Buchstaben",
+    auftrag: "Tippe diesen GROSSEN Buchstaben:",
+    tipp: "Umschalttaste \u21E7 festhalten, dann den Buchstaben.",
+    zeichen: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
+    anzahl: 10 },
+
+  { name: "Stufe 3 – Zauberzeichen",
+    auftrag: "Tippe dieses Zeichen:",
+    tipp: "Manche brauchen \u21E7, manche AltGr (unten rechts).",
+    zeichen: ["@","€","#","!","?","_","-",".",":",",",";","+","*","/","(",")","%","&","ß"],
+    anzahl: 10 },
+
+  { name: "Stufe 4 – Passwort-Profi",
+    auftrag: "Tippe dieses erfundene Wort:",
+    tipp: "Buchstabe für Buchstabe. Der orange Buchstabe ist dran.",
+    woerter: ["Tiger#5d", "Wolke_9!", "Mut@2026", "Turm-AG3", "Möwe€7x"],
+    anzahl: 4 }
+];
+
+/* =====================================================================
+   ZUSTAND
+   ===================================================================== */
+var stufeNr = 0;
+var aufgaben = [];
+var aufgabeNr = 0;
+var stelle = 0;          // Position innerhalb eines Wortes (Stufe 4)
+var punkte = 0;
+var serie = 0;
+var fehlerHier = 0;
+var hilfeTimer = null;
+var laeuft = false;
+
+var el = function (id) { return document.getElementById(id); };
+
+/* =====================================================================
+   TASTATUR ZEICHNEN
+   ===================================================================== */
+function zeichneTastatur() {
+  var wrap = el("tastatur");
+  wrap.innerHTML = "";
+  REIHEN.forEach(function (reihe, ri) {
+    var rd = document.createElement("div");
+    rd.className = "reihe";
+    reihe.forEach(function (t, ki) {
+      var kd = document.createElement("div");
+      kd.className = "taste";
+      kd.style.flexGrow = (t.w || 1);
+      kd.dataset.ri = ri; kd.dataset.ki = ki;
+      if (t.rolle) kd.dataset.rolle = t.rolle;
+
+      if (t.buchstabe) {
+        kd.innerHTML = '<span class="mitte">' + t.s + "</span>" +
+          (t.a ? '<span class="ru">' + esc(t.a) + "</span>" : "");
+      } else if (t.l && t.b === undefined) {
+        kd.innerHTML = '<span class="beschriftung">' + t.l + "</span>";
+      } else if (t.l) {
+        kd.innerHTML = '<span class="beschriftung">' + t.l + "</span>";
+      } else {
+        var h = "";
+        if (t.s !== undefined) h += '<span class="lo">' + esc(t.s) + "</span>";
+        if (t.b !== undefined) h += '<span class="lu">' + esc(t.b) + "</span>";
+        if (t.a !== undefined) h += '<span class="ru">' + esc(t.a) + "</span>";
+        kd.innerHTML = h;
+      }
+      rd.appendChild(kd);
+    });
+    wrap.appendChild(rd);
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function tastenElement(ri, ki) {
+  return document.querySelector('.taste[data-ri="' + ri + '"][data-ki="' + ki + '"]');
+}
+
+function loescheHervorhebung() {
+  document.querySelectorAll(".taste.hell, .taste.mod").forEach(function (k) {
+    k.classList.remove("hell", "mod");
+  });
+}
+
+function hebeHervor(zeichen) {
+  loescheHervorhebung();
+  var pos = FINDE[zeichen];
+  if (!pos) return;
+  var k = tastenElement(pos.ri, pos.ki);
+  if (k) k.classList.add("hell");
+  if (pos.mod === "shift") {
+    document.querySelectorAll('.taste[data-rolle="shift"]').forEach(function (m) {
+      m.classList.add("mod");
+    });
+  } else if (pos.mod === "altgr") {
+    document.querySelectorAll('.taste[data-rolle="altgr"]').forEach(function (m) {
+      m.classList.add("mod");
+    });
+  }
+}
+
+/* =====================================================================
+   AUFGABEN ERZEUGEN
+   ===================================================================== */
+function mische(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function baueAufgaben(nr) {
+  var s = STUFEN[nr];
+  if (s.woerter) return mische(s.woerter).slice(0, s.anzahl);
+  var pool = mische(s.zeichen);
+  var liste = [];
+  while (liste.length < s.anzahl) {
+    if (pool.length === 0) pool = mische(s.zeichen);
+    liste.push(pool.pop());
+  }
+  return liste;
+}
+
+/* =====================================================================
+   ANZEIGE
+   ===================================================================== */
+function zeigeSeite(id) {
+  ["seiteStart", "seiteSpiel", "seiteStufe", "seiteEnde"].forEach(function (s) {
+    el(s).classList.add("verstecken");
+  });
+  el(id).classList.remove("verstecken");
+}
+
+function zeichneFortschritt() {
+  var f = el("fortschritt");
+  f.innerHTML = "";
+  for (var i = 0; i < aufgaben.length; i++) {
+    var d = document.createElement("div");
+    d.className = "pkt" + (i < aufgabeNr ? " fertig" : (i === aufgabeNr ? " aktiv" : ""));
+    f.appendChild(d);
+  }
+}
+
+function aktuellesZiel() {
+  var a = aufgaben[aufgabeNr];
+  return (a.length > 1) ? a.charAt(stelle) : a;
+}
+
+function zeigeAufgabe() {
+  var s = STUFEN[stufeNr];
+  var a = aufgaben[aufgabeNr];
+  el("auftrag").textContent = s.auftrag;
+
+  if (a.length > 1) {
+    var h = "";
+    for (var i = 0; i < a.length; i++) {
+      var cls = i < stelle ? "weg" : (i === stelle ? "jetzt" : "rest");
+      h += '<span class="' + cls + '">' + esc(a.charAt(i)) + "</span>";
+    }
+    el("ziel").innerHTML = h;
+  } else {
+    el("ziel").textContent = a;
+  }
+
+  el("punkte").textContent = punkte + " Punkte";
+  zeichneFortschritt();
+  loescheHervorhebung();
+  el("tastatur").classList.add("blass");
+  starteHilfeTimer();
+}
+
+function starteHilfeTimer() {
+  if (hilfeTimer) clearTimeout(hilfeTimer);
+  hilfeTimer = setTimeout(function () {
+    el("tastatur").classList.remove("blass");
+    hebeHervor(aktuellesZiel());
+    if (el("hinweis").textContent === "") {
+      el("hinweis").className = "";
+      el("hinweis").textContent = STUFEN[stufeNr].tipp;
+    }
+  }, 3000);
+}
+
+function sofortHilfe() {
+  if (hilfeTimer) clearTimeout(hilfeTimer);
+  el("tastatur").classList.remove("blass");
+  hebeHervor(aktuellesZiel());
+}
+
+/* =====================================================================
+   SPIELSTEUERUNG
+   ===================================================================== */
+function starteStufe(nr) {
+  stufeNr = nr;
+  aufgaben = baueAufgaben(nr);
+  aufgabeNr = 0;
+  stelle = 0;
+  serie = 0;
+  fehlerHier = 0;
+  laeuft = true;
+  el("levelname").textContent = STUFEN[nr].name;
+  el("hinweis").textContent = "";
+  el("hinweis").className = "";
+  el("zielbox").className = "";
+  zeigeSeite("seiteSpiel");
+  zeigeAufgabe();
+}
+
+function pruefe(zeichen) {
+  if (!laeuft) return;
+  var ziel = aktuellesZiel();
+
+  if (zeichen === ziel) {
+    punkte += 10 + Math.min(serie, 5) * 2;
+    serie++;
+    el("zielbox").className = "gut";
+    el("hinweis").className = "gut";
+    el("hinweis").textContent = "Richtig!";
+    setTimeout(weiter, 260);
+  } else {
+    serie = 0;
+    fehlerHier++;
+    el("zielbox").className = "falsch";
+    el("hinweis").className = "falsch";
+    el("hinweis").textContent = "Das war „" + zeichen + "\u201C. Gesucht ist „" + ziel + "\u201C.";
+    if (fehlerHier >= 1) sofortHilfe();
+    setTimeout(function () { el("zielbox").className = ""; }, 320);
+  }
+}
+
+function weiter() {
+  if (hilfeTimer) clearTimeout(hilfeTimer);
+  fehlerHier = 0;
+  el("hinweis").textContent = "";
+  el("hinweis").className = "";
+  el("zielbox").className = "";
+
+  var a = aufgaben[aufgabeNr];
+  if (a.length > 1 && stelle < a.length - 1) {
+    stelle++;
+    zeigeAufgabe();
+    return;
+  }
+  stelle = 0;
+  aufgabeNr++;
+  if (aufgabeNr >= aufgaben.length) { stufeFertig(); return; }
+  zeigeAufgabe();
+}
+
+function stufeFertig() {
+  laeuft = false;
+  merkeFortschritt(stufeNr + 1);
+  el("stufeZiffer").textContent = (stufeNr + 1);
+  el("stufeTitel").textContent = "Stufe " + (stufeNr + 1) + " geschafft!";
+  el("stufeText").textContent = "Du hast jetzt " + punkte + " Punkte.";
+  el("btnWeiter").classList.toggle("verstecken", stufeNr >= STUFEN.length - 1);
+  if (stufeNr >= STUFEN.length - 1) {
+    setTimeout(function () {
+      el("endePunkte").textContent = "Dein Ergebnis: " + punkte + " Punkte.";
+      zeigeSeite("seiteEnde");
+    }, 1400);
+  }
+  zeigeSeite("seiteStufe");
+}
+
+/* =====================================================================
+   SPEICHERN (nur bestandene Stufe, kein Name, keine Daten)
+   ===================================================================== */
+function merkeFortschritt(stufe) {
+  try {
+    var alt = parseInt(localStorage.getItem("tastaturjagd_stufe") || "0", 10);
+    if (stufe > alt) localStorage.setItem("tastaturjagd_stufe", String(stufe));
+  } catch (e) { /* localStorage gesperrt: egal */ }
+}
+
+function zeigeBestleistung() {
+  var s = 0;
+  try { s = parseInt(localStorage.getItem("tastaturjagd_stufe") || "0", 10); } catch (e) {}
+  el("bestleistung").textContent = s > 0
+    ? "An diesem Rechner wurde zuletzt Stufe " + s + " geschafft."
+    : "";
+}
+
+/* =====================================================================
+   TASTATUR-EREIGNISSE
+   ===================================================================== */
+document.addEventListener("keydown", function (e) {
+  /* Feststelltaste beobachten */
+  try {
+    el("caps").classList.toggle("an", e.getModifierState && e.getModifierState("CapsLock"));
+  } catch (err) {}
+
+  /* Startseite: Enter startet */
+  if (!el("seiteStart").classList.contains("verstecken") && e.key === "Enter") {
+    starteStufe(0); e.preventDefault(); return;
+  }
+  /* Zwischenseite: Enter geht weiter */
+  if (!el("seiteStufe").classList.contains("verstecken") && e.key === "Enter") {
+    if (stufeNr < STUFEN.length - 1) starteStufe(stufeNr + 1);
+    e.preventDefault(); return;
+  }
+  if (!laeuft) return;
+
+  /* Tabulator = sofortige Hilfe */
+  if (e.key === "Tab") { sofortHilfe(); e.preventDefault(); return; }
+
+  /* echte Strg-Kürzel durchlassen (AltGr meldet sich als Strg+Alt) */
+  if (e.ctrlKey && !e.altKey) return;
+  if (e.metaKey) return;
+
+  if (e.key.length === 1) {
+    pruefe(e.key);
+    e.preventDefault();
+  }
+});
+
+/* =====================================================================
+   KNÖPFE
+   ===================================================================== */
+el("btnStart").addEventListener("click", function () { starteStufe(0); });
+el("btnNochmal").addEventListener("click", function () { punkte = 0; starteStufe(stufeNr); });
+el("btnWeiter").addEventListener("click", function () {
+  if (stufeNr < STUFEN.length - 1) starteStufe(stufeNr + 1);
+});
+el("btnNeu").addEventListener("click", function () {
+  punkte = 0; zeigeSeite("seiteStart"); zeigeBestleistung();
+});
+el("btnFrei").addEventListener("click", function () {
+  var box = el("freiwahl");
+  box.classList.remove("verstecken");
+  box.innerHTML = "";
+  STUFEN.forEach(function (s, i) {
+    var b = document.createElement("button");
+    b.className = "knopf sekundaer";
+    b.textContent = "Stufe " + (i + 1);
+    b.addEventListener("click", function () { punkte = 0; starteStufe(i); });
+    box.appendChild(b);
+  });
+});
+
+/* =====================================================================
+   START
+   ===================================================================== */
+zeichneTastatur();
+zeigeBestleistung();
+zeigeSeite("seiteStart");
+</script>
+</body>
+</html>

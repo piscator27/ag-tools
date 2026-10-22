@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Würfelsimulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+body{
+margin:0;
+padding:12px 20px;
+font-family:Arial,sans-serif;
+background:#181818;
+color:#f0f0f0;
+}
+h2{
+margin-top:0;
+font-size:1.6em;
+color:#6fb8ff;
+}
+label{font-size:1em;}
+select,input,button{
+font-size:0.98em;
+background:#2a2a2a;
+color:#eee;
+border:1px solid #666;
+border-radius:6px;
+padding:8px 10px;
+}
+button{
+cursor:pointer;
+margin-top:2px;
+}
+button:hover{background:#3a3a3a;}
+#simRange{width:480px;}
+.chart-container{
+max-width:1000px;
+margin-top:12px;
+background:#202020;
+padding:10px;
+border-radius:12px;
+}
+.watermark{
+position:fixed;
+right:16px;
+bottom:6px;
+font-size:30px;
+font-weight:bold;
+color:#666;
+user-select:none;
+}
+</style>
+</head>
+<body>
+
+    <h2>Würfelsimulation</h2>
+    
+    <label>Anzahl Würfel: </label>
+    <select id="diceCount" onchange="startSimulation()">
+        <option value="1">1 Würfel</option>
+        <option value="2">2 Würfel (Summe)</option>
+    </select>
+    <br>
+
+    <label>Anzahl Würfe (bis 100.000): </label>
+    <input type="range" id="simRange" min="10" max="100000" value="1000" step="10">
+    <span id="rangeVal">1000</span>
+    <br>
+    
+    <button onclick="runMillion()">1.000.000 Würfe simulieren</button>
+    <br>
+
+    <div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+Chart.defaults.color='#f0f0f0';
+Chart.defaults.borderColor='#444';
+</script>
+<script>
+        Chart.register(ChartDataLabels);
+
+        const rangeInput = document.getElementById('simRange');
+        const rangeVal = document.getElementById('rangeVal');
+        const diceCountSelect = document.getElementById('diceCount');
+
+        rangeInput.oninput = () => {
+            rangeVal.textContent = rangeInput.value;
+            startSimulation();
+        };
+
+        function runMillion() {
+            rangeVal.textContent = "1000000";
+            startSimulation(1000000);
+        }
+
+        let myChart;
+
+        function startSimulation(overrideCount = null) {
+            const count = parseInt(diceCountSelect.value);
+            const n = overrideCount || parseInt(rangeInput.value);
+            const results = count === 1 ? new Array(6).fill(0) : new Array(11).fill(0);
+
+            for (let i = 0; i < n; i++) {
+                let roll = count === 1 ? Math.floor(Math.random() * 6) : 
+                          (Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6));
+                results[roll]++;
+            }
+
+            const labels = count === 1 ? ['1', '2', '3', '4', '5', '6'] : ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+            renderChart(labels, results, n);
+        }
+
+        function renderChart(labels, data, total) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Absolute Häufigkeit',
+                        data: data,
+                        backgroundColor:'rgba(80,170,255,0.85)'
+                    }]
+                },
+                options:{responsive:true,
+                    plugins: {
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => ((value / total) * 100).toFixed(1) + '%'
+                        }
+                    },
+                    scales:{
+x:{ticks:{color:'#eee'},grid:{color:'#444'}},
+y:{beginAtZero:true,ticks:{color:'#eee'},grid:{color:'#444'}}
+}
+                }
+            });
+        }
+
+        startSimulation();
+    </script>
+<div class='watermark'>Fi</div></body>
+</html>

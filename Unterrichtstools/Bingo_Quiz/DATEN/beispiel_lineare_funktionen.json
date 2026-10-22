@@ -1,0 +1,519 @@
+{
+  "meta": {
+    "titel": "Lineare Funktionen",
+    "version": 1,
+    "kartenfeld": "antwort"
+  },
+  "eintraege": [
+    {
+      "id": 1,
+      "frage": {
+        "typ": "graph",
+        "term": "2*x+1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=2x+1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 2,
+      "frage": {
+        "typ": "graph",
+        "term": "2*x-1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=2x-1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 3,
+      "frage": {
+        "typ": "graph",
+        "term": "2*x+3",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=2x+3"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 4,
+      "frage": {
+        "typ": "graph",
+        "term": "2*x",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=2x"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 5,
+      "frage": {
+        "typ": "graph",
+        "term": "-2*x+1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-2x+1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 6,
+      "frage": {
+        "typ": "graph",
+        "term": "-2*x-1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-2x-1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 7,
+      "frage": {
+        "typ": "graph",
+        "term": "-2*x+3",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-2x+3"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 8,
+      "frage": {
+        "typ": "graph",
+        "term": "-x+2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-x+2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 1
+    },
+    {
+      "id": 9,
+      "frage": {
+        "typ": "graph",
+        "term": "-x-2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-x-2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 1
+    },
+    {
+      "id": 10,
+      "frage": {
+        "typ": "graph",
+        "term": "-x",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-x"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 1
+    },
+    {
+      "id": 11,
+      "frage": {
+        "typ": "graph",
+        "term": "x+2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=x+2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 1
+    },
+    {
+      "id": 12,
+      "frage": {
+        "typ": "graph",
+        "term": "x-2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=x-2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 1
+    },
+    {
+      "id": 13,
+      "frage": {
+        "typ": "graph",
+        "term": "x",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=x"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 1
+    },
+    {
+      "id": 14,
+      "frage": {
+        "typ": "graph",
+        "term": "3*x-2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=3x-2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 15,
+      "frage": {
+        "typ": "graph",
+        "term": "3*x+1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=3x+1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 16,
+      "frage": {
+        "typ": "graph",
+        "term": "3*x",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=3x"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 17,
+      "frage": {
+        "typ": "graph",
+        "term": "-3*x+2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-3x+2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 18,
+      "frage": {
+        "typ": "graph",
+        "term": "-3*x-1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-3x-1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 19,
+      "frage": {
+        "typ": "graph",
+        "term": "-3*x",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-3x"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 2
+    },
+    {
+      "id": 20,
+      "frage": {
+        "typ": "graph",
+        "term": "0.5*x+1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=0{,}5x+1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 21,
+      "frage": {
+        "typ": "graph",
+        "term": "0.5*x-3",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=0{,}5x-3"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 22,
+      "frage": {
+        "typ": "graph",
+        "term": "0.5*x",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=0{,}5x"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 23,
+      "frage": {
+        "typ": "graph",
+        "term": "-0.5*x+2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-0{,}5x+2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 24,
+      "frage": {
+        "typ": "graph",
+        "term": "-0.5*x-2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-0{,}5x-2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 25,
+      "frage": {
+        "typ": "graph",
+        "term": "1.5*x-1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=1{,}5x-1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 26,
+      "frage": {
+        "typ": "graph",
+        "term": "-1.5*x+1",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-1{,}5x+1"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 27,
+      "frage": {
+        "typ": "graph",
+        "term": "2.5*x",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=2{,}5x"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 28,
+      "frage": {
+        "typ": "graph",
+        "term": "-2.5*x+3",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-2{,}5x+3"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 3
+    },
+    {
+      "id": 29,
+      "frage": {
+        "typ": "graph",
+        "term": "3",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=3"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 1
+    },
+    {
+      "id": 30,
+      "frage": {
+        "typ": "graph",
+        "term": "-2",
+        "xmin": -5,
+        "xmax": 5,
+        "ymin": -6,
+        "ymax": 6
+      },
+      "antwort": {
+        "typ": "latex",
+        "text": "f(x)=-2"
+      },
+      "thema": "Lineare Funktionen",
+      "niveau": 1
+    }
+  ]
+}

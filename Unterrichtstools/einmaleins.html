@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Einmaleins-Aufgaben</title>
+
+<style>
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    margin:30px;
+    background:#f8f8f8;
+}
+
+h1{
+    margin-top:0;
+}
+
+button{
+    font-size:18px;
+    padding:8px 18px;
+    margin:8px 4px;
+}
+
+input{
+    width:60px;
+    font-size:18px;
+    text-align:center;
+}
+
+.block{
+    background:white;
+    padding:15px;
+    margin-top:20px;
+    border-radius:8px;
+    box-shadow:0 0 8px rgba(0,0,0,.15);
+}
+
+pre{
+    font-size:20px;
+    white-space:pre-wrap;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Einmaleins-Aufgaben</h1>
+
+<div class="block">
+
+Kleinste Reihe
+<input id="von" type="number" value="8" min="2" max="20">
+
+&nbsp;&nbsp;
+
+Größte Reihe
+<input id="bis" type="number" value="14" min="2" max="20">
+
+<br><br>
+
+<button onclick="erzeuge()">Aufgaben erzeugen</button>
+
+<button onclick="teile()">Teilen</button>
+
+<button onclick="kopieren()">Kopieren</button>
+
+</div>
+
+
+<div class="block">
+
+<h2>Vorwärts</h2>
+
+<pre id="vor"></pre>
+
+</div>
+
+
+<div class="block">
+
+<h2>Rückwärts</h2>
+
+<pre id="rueck"></pre>
+
+</div>
+
+<script>
+let vorwaerts = [];
+let rueckwaerts = [];
+let liste = [];
+
+function add(){
+
+    while(true){
+
+        let a=Math.floor(Math.random()*liste.length);
+
+        while(liste[a].length===0){
+            a=Math.floor(Math.random()*liste.length);
+        }
+
+        // Reihennummer bestimmen
+        let reihe = parseInt(liste[a][0].text.split(" × ")[1]);
+
+        // 10er und 11er etwas seltener
+        if((reihe==10 || reihe==11) && Math.random()<0.5){
+            continue;
+        }
+
+        let b=Math.floor(Math.random()*liste[a].length);
+
+        return liste[a][b];
+    }
+
+}
+function erzeuge(){
+
+    let start=parseInt(document.getElementById("von").value);
+    let ziel=parseInt(document.getElementById("bis").value);
+
+    if(start>ziel){
+        alert("Die kleinste Reihe muss kleiner oder gleich der größten sein.");
+        return;
+    }
+
+    liste=[];
+
+    // Aufgaben erzeugen
+    for(let i=start;i<=ziel;i++){
+        liste.push([]);
+    }
+
+    for(let i=start;i<=ziel;i++){
+        for(let j=2;j<=10;j++){
+            liste[i-start].push({
+                text:j+" × "+i,
+                loesung:j*i
+            });
+        }
+    }
+
+    // ---------------- Vorwärts ----------------
+
+    vorwaerts=[];
+
+    while(vorwaerts.length<10){
+
+        let neu=add();
+
+        let vorhanden=vorwaerts.some(a =>
+            a.text===neu.text
+        );
+
+        if(!vorhanden){
+            vorwaerts.push(neu);
+        }
+    }
+
+    let txt="";
+
+    txt="";
+
+let nr=1;
+
+for(let a of vorwaerts){
+    txt+=nr+". "+a.text+" = "+a.loesung+"\n";
+    nr++;
+}
+
+    document.getElementById("vor").textContent=txt;
+
+    // ---------------- Rückwärts ----------------
+
+    rueckwaerts=[];
+
+    while(rueckwaerts.length<10){
+
+        let neu=add();
+
+        let vorhanden=rueckwaerts.some(a =>
+            a.loesung===neu.loesung
+        );
+
+        if(!vorhanden){
+
+            let alle=[];
+
+            for(let reihe of liste){
+                for(let aufgabe of reihe){
+
+                    if(aufgabe.loesung==neu.loesung){
+                        alle.push(aufgabe.text);
+                    }
+
+                }
+            }
+
+            rueckwaerts.push({
+                loesung:neu.loesung,
+                text:alle.join(" oder ")
+            });
+
+        }
+
+    }
+
+    txt="";
+
+nr=1;
+
+for(let a of rueckwaerts){
+    txt+=nr+". "+a.loesung+" = "+a.text+"\n";
+    nr++;
+}
+
+    document.getElementById("rueck").textContent=txt;
+
+}
+
+
+// ---------- Kopieren ----------
+
+function gesamterText(){
+
+    return "Einmaleins\n\n"+
+           "Vorwärts\n\n"+
+           document.getElementById("vor").textContent+
+           "\n\nRückwärts\n\n"+
+           document.getElementById("rueck").textContent;
+
+}
+
+function kopieren(){
+
+    navigator.clipboard.writeText(gesamterText());
+
+    alert("In die Zwischenablage kopiert.");
+
+}
+
+
+// ---------- Teilen ----------
+
+function teile(){
+
+    let text=gesamterText();
+
+    if(navigator.share){
+
+        navigator.share({
+            title:"Einmaleins",
+            text:text
+        });
+
+    }else{
+
+        let blob=new Blob([text],{type:"text/plain"});
+
+        let a=document.createElement("a");
+
+        a.href=URL.createObjectURL(blob);
+
+        a.download="einmaleins.txt";
+
+        a.click();
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

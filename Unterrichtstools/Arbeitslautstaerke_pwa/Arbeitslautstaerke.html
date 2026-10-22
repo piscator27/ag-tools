@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arbeitslautstärke V0.6</title>
+<style>
+body{margin:0;background:#111;color:#eee;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh}
+.main{width:min(900px,94vw);text-align:center}
+h1{font-weight:500;margin-bottom:28px}
+canvas{width:100%;height:250px;background:#0d0d0d;border:1px solid #333;border-radius:14px;display:block}
+.controls{margin-top:22px}
+label{display:block;margin-bottom:8px}
+input[type=range]{appearance:none;-webkit-appearance:none;width:360px;height:4px;background:#777;border-radius:3px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #444}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #444}
+input[type=range]::-moz-range-track{height:4px;background:#777}
+input[type=range]:disabled{opacity:.3}
+.small{font-size:15px;color:#bbb;margin-top:10px}
+#fi{position:fixed;right:16px;bottom:12px;color:#666}
+
+.microw{margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:8px}
+#micBtn{background:#2a2a2a;color:#eee;border:1px solid #555;border-radius:20px;padding:10px 22px;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:8px}
+#micBtn:hover{background:#333}
+#micBtn.active{background:#1f3d1f;border-color:#4a7a4a}
+.dot{width:9px;height:9px;border-radius:50%;background:#666;display:inline-block}
+#micBtn.active .dot{background:#5fd35f;box-shadow:0 0 6px #5fd35f}
+#micStatus{font-size:13px;color:#888;min-height:16px}
+</style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+</head>
+<body>
+<div class="main">
+<h1>Arbeitslautstärke</h1>
+<canvas id="cv"></canvas>
+<div class="controls">
+<label>Grenzwert <input id="limit" type="range" min="0" max="40" value="24"></label>
+<input id="level" type="range" min="0" max="40" value="10" style="display:none">
+<div class="small">Überschreitungen: <span id="count">0</span>
+<button id="resetBtn" style="margin-left:18px;padding:4px 12px;border-radius:8px;border:1px solid #555;background:#2a2a2a;color:#eee;cursor:pointer;">Reset</button>
+</div>
+</div>
+<div class="microw">
+<button id="micBtn"><span class="dot"></span><span id="micBtnText">Mikrofon starten</span></button>
+<div id="micStatus"></div>
+</div>
+</div>
+<div id="fi">Fi</div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const level=document.getElementById('level'),limit=document.getElementById('limit');
+const count=document.getElementById('count');
+const micBtn=document.getElementById('micBtn'),micBtnText=document.getElementById('micBtnText'),micStatus=document.getElementById('micStatus');
+let c=0;
+const resetBtn=document.getElementById('resetBtn');
+
+function resize(){
+ const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;
+ cv.width=r.width*d;cv.height=r.height*d;
+ ctx.setTransform(d,0,0,d,0,0);draw();
+}
+addEventListener('resize',resize);
+
+function color(t){
+ if(t<0.5){let k=t/.5;return`rgb(${70+180*k|0},${170+40*k|0},65)`;}
+ let k=(t-.5)/.5;return`rgb(245,${210-120*k|0},${70-30*k|0})`;
+}
+
+function draw(){
+ const w=cv.getBoundingClientRect().width,h=cv.getBoundingClientRect().height;
+ ctx.clearRect(0,0,w,h);
+ const N=40,gap=4,bw=(w-gap*(N+1))/N;
+ const active=+level.value,lim=+limit.value;
+ const base=h-42;
+ for(let i=0;i<N;i++){
+   const hh=25+Math.floor(i/3)*13;
+   const x=gap+i*(bw+gap);
+   const y=base-hh;
+   ctx.globalAlpha=i<active?1:0.12;
+   ctx.fillStyle=color(i/(N-1));
+   ctx.fillRect(x,y,bw,hh);
+ }
+ // großes Dreieck vollständig im Canvas
+ const tx=gap+lim*(bw+gap)+bw/2;
+ const top=base+8;
+ ctx.globalAlpha=1;
+ ctx.fillStyle="#fff";
+ ctx.beginPath();
+ ctx.moveTo(tx,top);
+ ctx.lineTo(tx-14,top+20);
+ ctx.lineTo(tx+14,top+20);
+ ctx.closePath();
+ ctx.fill();
+}
+
+/* ---------- Überschreitungs-Logik (zeitbasiert, >1s) ---------- */
+let overSince=null, alreadyCounted=false;
+function checkThreshold(){
+ const active=+level.value,lim=+limit.value;
+ const now=performance.now();
+ if(active>lim){
+   if(overSince===null) overSince=now;
+   if(!alreadyCounted && (now-overSince)>=1000){
+     c++;count.textContent=c;
+     alreadyCounted=true;
+     playGong();
+   }
+ } else {
+   overSince=null;
+   alreadyCounted=false;
+ }
+}
+
+/* ---------- Dezenter Gong (Web Audio, synthetisiert) ---------- */
+let actx=null;
+function ensureActx(){
+ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+ return actx;
+}
+function playGong(){
+ const a=ensureActx();
+ const t0=a.currentTime;
+ const master=a.createGain();
+ master.gain.setValueAtTime(0,t0);
+ master.gain.linearRampToValueAtTime(0.16,t0+0.06);
+ master.gain.exponentialRampToValueAtTime(0.0001,t0+1.7);
+ const lp=a.createBiquadFilter();
+ lp.type='lowpass';lp.frequency.value=1800;
+ master.connect(lp);lp.connect(a.destination);
+ [523.25,659.25].forEach((f,i)=>{
+   const osc=a.createOscillator();
+   osc.type='sine';osc.frequency.value=f;
+   const g=a.createGain();g.gain.value=i===0?1:0.35;
+   osc.connect(g);g.connect(master);
+   osc.start(t0);osc.stop(t0+1.7);
+ });
+}
+
+/* ---------- Mikrofon: grobe, geglättete Pegelmessung ---------- */
+let stream=null,analyser=null,dataArray=null,micInterval=null,micActive=false;
+let smoothed=0; // geglätteter Pegel 0..1
+const MIN_DB=-55, MAX_DB=-8;   // Kalibrierbereich, nicht wissenschaftlich exakt
+const SMOOTHING=0.25;          // je kleiner, desto ruhiger/träger
+const SAMPLE_MS=250;           // grobe Abtastrate statt jedem Frame
+
+function rmsFromAnalyser(){
+ analyser.getByteTimeDomainData(dataArray);
+ let sum=0;
+ for(let i=0;i<dataArray.length;i++){
+   const v=(dataArray[i]-128)/128;
+   sum+=v*v;
+ }
+ return Math.sqrt(sum/dataArray.length);
+}
+
+async function startMic(){
+ try{
+   micStatus.textContent='Mikrofonzugriff wird angefragt …';
+   stream=await navigator.mediaDevices.getUserMedia({audio:true});
+   const a=ensureActx();
+   if(a.state==='suspended') await a.resume();
+   const source=a.createMediaStreamSource(stream);
+   analyser=a.createAnalyser();
+   analyser.fftSize=1024;
+   dataArray=new Uint8Array(analyser.fftSize);
+   source.connect(analyser);
+
+   
+   micActive=true;
+   micBtn.classList.add('active');
+   micBtnText.textContent='Mikrofon stoppen';
+   micStatus.textContent='Mikrofon aktiv – Messung läuft (grob, geglättet)';
+
+   micInterval=setInterval(()=>{
+     const rms=rmsFromAnalyser();
+     let db=20*Math.log10(Math.max(rms,1e-4));
+     db=Math.max(MIN_DB,Math.min(MAX_DB,db));
+     const norm=(db-MIN_DB)/(MAX_DB-MIN_DB);
+     smoothed=smoothed*(1-SMOOTHING)+norm*SMOOTHING;
+     const lvl=Math.round(smoothed*40);
+     level.value=lvl;
+     draw();
+   },SAMPLE_MS);
+ }catch(err){
+   micStatus.textContent='Zugriff verweigert oder nicht verfügbar.';
+   console.error(err);
+ }
+}
+
+function stopMic(){
+ if(micInterval) clearInterval(micInterval);
+ micInterval=null;
+ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+ analyser=null;
+ micActive=false;
+ 
+ micBtn.classList.remove('active');
+ micBtnText.textContent='Mikrofon starten';
+ micStatus.textContent='Mikrofon gestoppt.';
+}
+
+micBtn.onclick=()=>{ micActive?stopMic():startMic(); };
+resetBtn.onclick=()=>{c=0;count.textContent='0';overSince=null;alreadyCounted=false;};
+
+/* ---------- zentrale Zeitschleife: prüft Grenzwertüberschreitung ---------- */
+/* läuft unabhängig davon, ob Test-Regler oder Mikrofon den Pegel liefert,
+   damit die "länger als 1 Sekunde"-Regel in beiden Modi gilt */
+setInterval(checkThreshold,150);
+
+level.oninput=draw;
+limit.oninput=draw;
+resize();
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}
+</script>
+</body>
+</html>

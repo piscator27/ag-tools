@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Winkel-Schätzer V3</title>
+<style>
+html,body{margin:0;height:100%;background:#000;font-family:Arial,sans-serif;color:#fff}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+svg{width:min(92vw,92vh);height:min(78vh,78vw)}
+button{font-size:1.25rem;padding:.7rem 1.4rem;margin:.5rem;border:none;border-radius:10px;background:#333;color:#fff;cursor:pointer}
+button:hover{background:#555}
+#value{position:absolute;top:18px;left:50%;transform:translateX(-50%);
+font-size:3.3rem;font-weight:bold;color:#ffd400;display:none}
+#fi{position:absolute;right:15px;bottom:10px;color:#666}
+</style>
+</head>
+<body>
+<div id="value"></div>
+
+<svg viewBox="-260 -260 520 520">
+<g id="scene">
+  <path id="sector" fill="#ffd400" fill-opacity="0.22"></path>
+  <path id="arc" fill="none" stroke="#ffd400" stroke-width="8" display="none"></path>
+  <line x1="0" y1="0" x2="190" y2="0" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <line id="arm" x1="0" y1="0" x2="190" y2="0" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="0" cy="0" r="5" fill="white"/>
+</g>
+</svg>
+
+<div>
+<button id="show">Auflösen</button>
+<button id="next">Neuer Winkel</button>
+</div>
+
+<div id="fi">Fi</div>
+
+<script>
+const scene=document.getElementById("scene");
+const arm=document.getElementById("arm");
+const sector=document.getElementById("sector");
+const arc=document.getElementById("arc");
+const value=document.getElementById("value");
+
+function pt(r,a){
+ const t=a*Math.PI/180;
+ return {x:r*Math.cos(t),y:r*Math.sin(t)};
+}
+
+let angle=0;
+
+function drawSector(a){
+ const r=110;
+ if(a===0){
+   sector.setAttribute("d","");
+   arc.setAttribute("d","");
+   return;
+ }
+ if(a===360){
+   sector.setAttribute("d",
+     `M0 0
+      m ${r} 0
+      A ${r} ${r} 0 1 1 ${-r} 0
+      A ${r} ${r} 0 1 1 ${r} 0 Z`);
+   arc.setAttribute("d",
+     `M ${r} 0
+      A ${r} ${r} 0 1 1 ${-r} 0
+      A ${r} ${r} 0 1 1 ${r} 0`);
+   return;
+ }
+ const e=pt(r,a);
+ const large=a>180?1:0;
+ sector.setAttribute("d",
+   `M0 0 L${r} 0 A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y} Z`);
+ arc.setAttribute("d",
+   `M${r} 0 A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`);
+}
+
+function neu(){
+ angle=Math.floor(Math.random()*361);
+ const rot=Math.floor(Math.random()*360);
+
+ arm.setAttribute("transform","rotate("+angle+")");
+ scene.setAttribute("transform","rotate("+rot+")");
+
+ drawSector(angle);
+
+ value.textContent=angle+"°";
+ value.style.display="none";
+ arc.setAttribute("display","none");
+ sector.setAttribute("fill-opacity","0.22");
+}
+
+document.getElementById("show").addEventListener("click",()=>{
+ value.style.display="block";
+ sector.setAttribute("fill-opacity","0.42");
+ arc.setAttribute("display","inline");
+});
+
+document.getElementById("next").addEventListener("click",neu);
+document.addEventListener("keydown",e=>{
+ if(e.code==="Space"){e.preventDefault();neu();}
+ if(e.code==="Enter"){document.getElementById("show").click();}
+});
+neu();
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Klassenrekord</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#1e1f22;color:#eee;font-family:Arial,sans-serif}
+.wrapper{max-width:1800px;margin:auto;padding:10px 20px}
+h1{margin:0;text-align:center;font-size:52px}
+.sub{text-align:center;color:#ccc;font-size:22px;margin:4px 0 14px}
+.grid{display:grid;grid-template-columns:220px 1fr 140px;gap:28px;align-items:start}
+table{border-collapse:collapse;width:100%}
+th{font-size:22px;text-align:left;padding-bottom:6px}
+td{padding:2px 0;font-size:20px}
+input{width:60px;height:26px;text-align:center;font-size:18px;background:#333;color:#fff;border:1px solid #666;border-radius:4px}
+.mid{text-align:center}
+.label{font-size:24px;color:#ddd;margin-top:6px}
+.big{font-size:64px;font-weight:bold;color:#5ccc5c;line-height:1}
+.small{font-size:46px;font-weight:bold;color:#5ccc5c;line-height:1}
+#msg{height:36px;color:gold;font-size:28px;margin:6px}
+.actions{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:10px}
+button{width:280px;padding:10px;border:none;border-radius:8px;color:#fff;font-size:20px;cursor:pointer}
+.ok{background:#2d9146}.new{background:#3b6db4}.del{background:#963737}
+.thermo{width:80px;height:430px;border:4px solid #fff;border-radius:40px;background:#333;position:relative;overflow:hidden}
+.fill{position:absolute;left:0;bottom:0;width:100%;height:0;background:#5ccc5c;transition:.25s}
+.scale{margin-left:10px;height:430px;display:flex;flex-direction:column;justify-content:space-between;font-size:18px;color:#ddd}
+.right{display:flex}
+.record{margin-top:14px;border:1px solid #555;border-radius:10px;padding:12px 18px;font-size:30px}
+.gold{color:gold}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<h1>🏆 Klassenrekord</h1>
+<div class="sub">Wie viele Kopfrechenpunkte haben wir heute gemeinsam erreicht?</div>
+
+<div class="grid">
+<div>
+<table>
+<tr><th>Punkte</th><th>Anzahl</th></tr>
+<script>
+for(let p=20;p>=0;p--){
+document.write(`<tr><td>${p}</td><td><input id="p${p}" type="number" min="0" value="0" oninput="calc()"></td></tr>`);
+}
+</script>
+</table>
+</div>
+
+<div class="mid">
+<div class="label">👥 Anwesend</div>
+<div class="big" id="kids">0</div>
+
+<div class="label" style="margin-top:20px">🧮 Gemeinsam erreichte Kopfrechenpunkte</div>
+<div class="big" id="sum">0</div>
+
+<div class="label" style="margin-top:20px">📊 Durchschnitt</div>
+<div class="small" id="avg">0,00</div>
+
+<div id="msg"></div>
+
+<div class="actions">
+<button class="ok" onclick="abschliessen()">Runde abschließen</button>
+<button class="new" onclick="neu()">Neue Stunde</button>
+<button class="del" onclick="resetRec()">Rekord löschen</button>
+</div>
+</div>
+
+<div class="right">
+<div class="thermo"><div class="fill" id="fill"></div></div>
+<div class="scale">
+<span id="top">500</span><span>400</span><span>300</span><span>200</span><span>100</span><span>0</span>
+</div>
+</div>
+</div>
+
+<div class="record">🏆 Klassenrekord: <span id="record" class="gold">0</span></div>
+</div>
+
+<script>
+let rekord=parseInt(localStorage.getItem("klassenrekord")||"0");
+record.textContent=rekord;
+
+function calc(){
+ let k=0,s=0;
+ for(let p=0;p<=20;p++){
+   let n=parseInt(document.getElementById("p"+p).value);
+   if(isNaN(n)||n<0)n=0;
+   k+=n; s+=n*p;
+ }
+ kids.textContent=k;
+ sum.textContent=s;
+ avg.textContent=k?(s/k).toFixed(2).replace(".",","):"0,00";
+ let sc=Math.max(500,Math.ceil(Math.max(s,rekord)/100)*100);
+ top.textContent=sc;
+ fill.style.height=(100*s/sc)+"%";
+ msg.textContent="";
+}
+function abschliessen(){
+ let s=parseInt(sum.textContent);
+ if(s>rekord){
+   rekord=s;
+   localStorage.setItem("klassenrekord",rekord);
+   record.textContent=rekord;
+   msg.textContent="🏆 Neuer Klassenrekord!";
+ }
+}
+function neu(){
+ for(let p=0;p<=20;p++)document.getElementById("p"+p).value=0;
+ calc();
+}
+function resetRec(){
+ if(confirm("Klassenrekord löschen?")){
+   rekord=0;
+   localStorage.removeItem("klassenrekord");
+   record.textContent=0;
+   calc();
+ }
+}
+calc();
+</script>
+</body>
+</html>

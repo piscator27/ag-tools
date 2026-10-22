@@ -1,0 +1,729 @@
+{
+  "meta": {
+    "titel": "Zahlen-Bingo 1-60",
+    "version": 1,
+    "kartenfeld": "antwort"
+  },
+  "eintraege": [
+    {
+      "id": 1,
+      "frage": {
+        "typ": "text",
+        "text": "1"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "1"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 2,
+      "frage": {
+        "typ": "text",
+        "text": "2"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "2"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 3,
+      "frage": {
+        "typ": "text",
+        "text": "3"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "3"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 4,
+      "frage": {
+        "typ": "text",
+        "text": "4"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "4"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 5,
+      "frage": {
+        "typ": "text",
+        "text": "5"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "5"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 6,
+      "frage": {
+        "typ": "text",
+        "text": "6"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "6"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 7,
+      "frage": {
+        "typ": "text",
+        "text": "7"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "7"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 8,
+      "frage": {
+        "typ": "text",
+        "text": "8"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "8"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 9,
+      "frage": {
+        "typ": "text",
+        "text": "9"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "9"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 10,
+      "frage": {
+        "typ": "text",
+        "text": "10"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "10"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 11,
+      "frage": {
+        "typ": "text",
+        "text": "11"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "11"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 12,
+      "frage": {
+        "typ": "text",
+        "text": "12"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "12"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 13,
+      "frage": {
+        "typ": "text",
+        "text": "13"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "13"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 14,
+      "frage": {
+        "typ": "text",
+        "text": "14"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "14"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 15,
+      "frage": {
+        "typ": "text",
+        "text": "15"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "15"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 16,
+      "frage": {
+        "typ": "text",
+        "text": "16"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "16"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 17,
+      "frage": {
+        "typ": "text",
+        "text": "17"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "17"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 18,
+      "frage": {
+        "typ": "text",
+        "text": "18"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "18"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 19,
+      "frage": {
+        "typ": "text",
+        "text": "19"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "19"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 20,
+      "frage": {
+        "typ": "text",
+        "text": "20"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "20"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 21,
+      "frage": {
+        "typ": "text",
+        "text": "21"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "21"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 22,
+      "frage": {
+        "typ": "text",
+        "text": "22"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "22"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 23,
+      "frage": {
+        "typ": "text",
+        "text": "23"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "23"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 24,
+      "frage": {
+        "typ": "text",
+        "text": "24"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "24"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 25,
+      "frage": {
+        "typ": "text",
+        "text": "25"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "25"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 26,
+      "frage": {
+        "typ": "text",
+        "text": "26"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "26"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 27,
+      "frage": {
+        "typ": "text",
+        "text": "27"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "27"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 28,
+      "frage": {
+        "typ": "text",
+        "text": "28"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "28"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 29,
+      "frage": {
+        "typ": "text",
+        "text": "29"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "29"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 30,
+      "frage": {
+        "typ": "text",
+        "text": "30"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "30"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 31,
+      "frage": {
+        "typ": "text",
+        "text": "31"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "31"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 32,
+      "frage": {
+        "typ": "text",
+        "text": "32"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "32"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 33,
+      "frage": {
+        "typ": "text",
+        "text": "33"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "33"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 34,
+      "frage": {
+        "typ": "text",
+        "text": "34"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "34"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 35,
+      "frage": {
+        "typ": "text",
+        "text": "35"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "35"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 36,
+      "frage": {
+        "typ": "text",
+        "text": "36"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "36"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 37,
+      "frage": {
+        "typ": "text",
+        "text": "37"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "37"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 38,
+      "frage": {
+        "typ": "text",
+        "text": "38"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "38"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 39,
+      "frage": {
+        "typ": "text",
+        "text": "39"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "39"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 40,
+      "frage": {
+        "typ": "text",
+        "text": "40"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "40"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 41,
+      "frage": {
+        "typ": "text",
+        "text": "41"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "41"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 42,
+      "frage": {
+        "typ": "text",
+        "text": "42"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "42"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 43,
+      "frage": {
+        "typ": "text",
+        "text": "43"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "43"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 44,
+      "frage": {
+        "typ": "text",
+        "text": "44"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "44"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 45,
+      "frage": {
+        "typ": "text",
+        "text": "45"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "45"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 46,
+      "frage": {
+        "typ": "text",
+        "text": "46"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "46"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 47,
+      "frage": {
+        "typ": "text",
+        "text": "47"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "47"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 48,
+      "frage": {
+        "typ": "text",
+        "text": "48"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "48"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 49,
+      "frage": {
+        "typ": "text",
+        "text": "49"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "49"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 50,
+      "frage": {
+        "typ": "text",
+        "text": "50"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "50"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 51,
+      "frage": {
+        "typ": "text",
+        "text": "51"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "51"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 52,
+      "frage": {
+        "typ": "text",
+        "text": "52"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "52"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 53,
+      "frage": {
+        "typ": "text",
+        "text": "53"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "53"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 54,
+      "frage": {
+        "typ": "text",
+        "text": "54"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "54"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 55,
+      "frage": {
+        "typ": "text",
+        "text": "55"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "55"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 56,
+      "frage": {
+        "typ": "text",
+        "text": "56"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "56"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 57,
+      "frage": {
+        "typ": "text",
+        "text": "57"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "57"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 58,
+      "frage": {
+        "typ": "text",
+        "text": "58"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "58"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 59,
+      "frage": {
+        "typ": "text",
+        "text": "59"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "59"
+      },
+      "thema": "BINGO"
+    },
+    {
+      "id": 60,
+      "frage": {
+        "typ": "text",
+        "text": "60"
+      },
+      "antwort": {
+        "typ": "text",
+        "text": "60"
+      },
+      "thema": "BINGO"
+    }
+  ]
+}

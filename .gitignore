@@ -1,0 +1,19 @@
+# --- Personenbezogene Daten: NIEMALS ins (oeffentliche) Repo ---
+*kursliste*
+*klassenliste*
+*.csv
+*.xls
+*.xlsx
+*.ods
+*.js.txt
+klassen.js
+*/klassen.js
+
+# --- Build-Artefakte / Verpacktes ---
+*.zip
+*.bak*
+
+# --- Betriebssystem ---
+.DS_Store
+Thumbs.db
+*~
