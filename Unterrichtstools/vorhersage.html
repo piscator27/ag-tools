@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wetter Flensburg</title>
+<style>
+:root {
+  color-scheme: light;
+  --seite: #f3f2ee;
+  --karte: #fcfcfb;
+  --linie: #e4e2dc;
+  --text: #0b0b0b;
+  --text-2: #52514e;
+  --text-3: #7a7974;
+  --temp: #eb6834;
+  --regen: #2a78d6;
+  --akzent: #2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --seite: #111110;
+    --karte: #1a1a19;
+    --linie: #2e2e2c;
+    --text: #f0efec;
+    --text-2: #c3c2b7;
+    --text-3: #8f8e86;
+    --temp: #d95926;
+    --regen: #3987e5;
+    --akzent: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --seite: #111110; --karte: #1a1a19; --linie: #2e2e2c;
+  --text: #f0efec; --text-2: #c3c2b7; --text-3: #8f8e86;
+  --temp: #d95926; --regen: #3987e5; --akzent: #3987e5;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--seite); color: var(--text);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Ubuntu, sans-serif;
+}
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 48px; }
+header h1 { margin: 0; font-size: 1.9rem; letter-spacing: -0.01em; }
+header p { margin: 4px 0 0; color: var(--text-2); }
+.tage { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 20px; }
+.tag, .block { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 18px; }
+.tag h2 { margin: 0 0 8px; font-size: 1.15rem; }
+.tag h2 span { color: var(--text-3); font-weight: 400; margin-left: 4px; }
+.kopf { display: flex; align-items: center; gap: 14px; }
+.gross-symbol { font-size: 3.4rem; line-height: 1; }
+.temp { font-size: 2.6rem; font-weight: 650; line-height: 1; font-variant-numeric: tabular-nums; }
+.tmin { font-size: 1.6rem; color: var(--text-3); font-weight: 500; }
+.lage { color: var(--text-2); margin-top: 4px; }
+.werte { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 14px 0 0; }
+.werte dt { font-size: .78rem; color: var(--text-3); }
+.werte dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.zeiten { list-style: none; padding: 0; margin: 16px 0 0; display: grid;
+  grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.zeit { border-top: 1px solid var(--linie); padding-top: 10px; text-align: center; }
+.zeit-name { font-weight: 600; font-size: .92rem; }
+.zeit-name small { display: block; font-weight: 400; color: var(--text-3); font-size: .74rem; }
+.zeit-symbol { font-size: 1.8rem; margin: 4px 0 0; }
+.zeit-lage { font-size: .78rem; color: var(--text-2); }
+.zeit-temp { font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.zeit-detail { font-size: .8rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.block { margin-top: 16px; }
+.block h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.block .unter { color: var(--text-3); font-size: .85rem; margin: 0 0 10px; }
+.diagramm { position: relative; }
+.diagramm h3 { margin: 14px 0 2px; font-size: .9rem; color: var(--text-2); font-weight: 600; }
+.diagramm svg { display: block; width: 100%; overflow: visible; }
+.achse text { fill: var(--text-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+.gitter { stroke: var(--linie); stroke-width: 1; }
+.tagesgrenze { stroke: var(--text-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.tageslabel { fill: var(--text-2); font-size: 11px; font-weight: 600; }
+.fadenkreuz { stroke: var(--text-2); stroke-width: 1; }
+.tooltip { position: absolute; pointer-events: none; background: var(--karte); color: var(--text);
+  border: 1px solid var(--linie); border-radius: 8px; padding: 8px 10px; font-size: .82rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12); white-space: nowrap; display: none; z-index: 2;
+  font-variant-numeric: tabular-nums; }
+.tooltip b { display: block; margin-bottom: 2px; }
+.tooltip .muted { color: var(--text-3); }
+details { margin-top: 16px; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; }
+summary { cursor: pointer; padding: 14px 18px; font-weight: 600; }
+.tabelle { overflow-x: auto; padding: 0 18px 16px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--linie); white-space: nowrap; }
+thead th { color: var(--text-3); font-weight: 500; }
+tbody th { font-weight: 500; }
+tr.gruppe th { padding-top: 14px; font-weight: 650; border-bottom-color: var(--text-3); }
+tr.mittel th, tr.mittel td { font-weight: 650; }
+footer { margin-top: 20px; color: var(--text-3); font-size: .82rem; }
+footer ul { padding-left: 18px; margin: 6px 0; }
+.hinweis { color: var(--text-3); font-size: .85rem; }
+@media (max-width: 520px) {
+  .zeiten { grid-template-columns: repeat(2, 1fr); row-gap: 14px; }
+  .temp { font-size: 2.2rem; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Wetter Flensburg</h1>
+    <p>Gemittelt aus 4 Quellen · Stand 20.10.2026, 15:23 Uhr</p>
+  </header>
+
+  <div class="tage">
+    <section class="tag">
+      <h2>Heute <span>Di, 20.10.</span></h2>
+      <div class="kopf">
+        <div class="gross-symbol">☁️</div>
+        <div>
+          <div class="temp">10°<span class="tmin"> / 8°</span></div>
+          <div class="lage">bedeckt</div>
+        </div>
+      </div>
+      <dl class="werte">
+        <div><dt>Niederschlag</dt><dd>0,4 mm</dd></div>
+        <div><dt>Regenrisiko</dt><dd>76 %</dd></div>
+        <div><dt>Wind</dt><dd>15 km/h OSO</dd></div>
+      </dl>
+      <ul class="zeiten">
+        <li class="zeit">
+          <div class="zeit-name">Mittags<small>12–18 Uhr</small></div>
+          <div class="zeit-symbol" title="bedeckt">☁️</div>
+          <div class="zeit-lage">bedeckt</div>
+          <div class="zeit-temp">10° – 10°</div>
+          <div class="zeit-detail">0,1 mm</div>
+          <div class="zeit-detail">17 km/h OSO</div>
+        </li>
+        <li class="zeit">
+          <div class="zeit-name">Abends<small>18–24 Uhr</small></div>
+          <div class="zeit-symbol" title="bedeckt">☁️</div>
+          <div class="zeit-lage">bedeckt</div>
+          <div class="zeit-temp">8° – 9°</div>
+          <div class="zeit-detail">0,1 mm</div>
+          <div class="zeit-detail">14 km/h OSO</div>
+        </li></ul>
+    </section>
+    <section class="tag">
+      <h2>Morgen <span>Mi, 21.10.</span></h2>
+      <div class="kopf">
+        <div class="gross-symbol">🌧️</div>
+        <div>
+          <div class="temp">10°<span class="tmin"> / 6°</span></div>
+          <div class="lage">Regen</div>
+        </div>
+      </div>
+      <dl class="werte">
+        <div><dt>Niederschlag</dt><dd>7,7 mm</dd></div>
+        <div><dt>Regenrisiko</dt><dd>97 %</dd></div>
+        <div><dt>Wind</dt><dd>11 km/h SSO</dd></div>
+      </dl>
+      <ul class="zeiten">
+        <li class="zeit">
+          <div class="zeit-name">Nacht<small>00–06 Uhr</small></div>
+          <div class="zeit-symbol" title="Regen">🌧️</div>
+          <div class="zeit-lage">Regen</div>
+          <div class="zeit-temp">7° – 8°</div>
+          <div class="zeit-detail">0,0 mm</div>
+          <div class="zeit-detail">10 km/h OSO</div>
+        </li>
+        <li class="zeit">
+          <div class="zeit-name">Morgens<small>06–12 Uhr</small></div>
+          <div class="zeit-symbol" title="Regen">🌧️</div>
+          <div class="zeit-lage">Regen</div>
+          <div class="zeit-temp">7° – 8°</div>
+          <div class="zeit-detail">0,8 mm</div>
+          <div class="zeit-detail">14 km/h SO</div>
+        </li>
+        <li class="zeit">
+          <div class="zeit-name">Mittags<small>12–18 Uhr</small></div>
+          <div class="zeit-symbol" title="Regen">🌧️</div>
+          <div class="zeit-lage">Regen</div>
+          <div class="zeit-temp">9° – 9°</div>
+          <div class="zeit-detail">2,0 mm</div>
+          <div class="zeit-detail">12 km/h SO</div>
+        </li>
+        <li class="zeit">
+          <div class="zeit-name">Abends<small>18–24 Uhr</small></div>
+          <div class="zeit-symbol" title="Regen">🌧️</div>
+          <div class="zeit-lage">Regen</div>
+          <div class="zeit-temp">9° – 9°</div>
+          <div class="zeit-detail">5,0 mm</div>
+          <div class="zeit-detail">10 km/h SSO</div>
+        </li></ul>
+    </section></div>
+
+  <section class="block" id="verlauf">
+    <h2>Stündlicher Verlauf</h2>
+    <p class="unter">Mittel aus yr.no, DMI und DWD. Die helle Fläche zeigt, wie weit die Quellen auseinanderliegen.</p>
+    <div class="diagramm" id="d-temp"><h3>Temperatur (°C)</h3></div>
+    <div class="diagramm" id="d-regen"><h3>Niederschlag (mm pro Stunde)</h3></div>
+    <div class="tooltip" id="tooltip" role="status"></div>
+  </section>
+
+  <details>
+    <summary>Stündliche Werte als Tabelle</summary>
+    <div class="tabelle">
+    <table>
+      <thead><tr><th>Zeit</th><th>Wetter</th><th>°C</th><th>Spanne °C</th>
+        <th>Regen mm</th><th>Wind</th></tr></thead>
+      <tbody><tr class="gruppe"><th colspan="6">Di, 20.10.2026</th></tr><tr><th>15 Uhr</th><td>☁️ bedeckt</td><td>9,8</td><td>9,4 – 10,2</td><td>0,1</td><td>16 km/h SO</td></tr><tr><th>16 Uhr</th><td>☁️ bedeckt</td><td>9,8</td><td>9,4 – 10,2</td><td>0,0</td><td>17 km/h OSO</td></tr><tr><th>17 Uhr</th><td>☁️ bedeckt</td><td>9,7</td><td>9,2 – 10,1</td><td>0,0</td><td>19 km/h OSO</td></tr><tr><th>18 Uhr</th><td>🌧️ Regen</td><td>9,3</td><td>8,8 – 9,6</td><td>0,0</td><td>15 km/h OSO</td></tr><tr><th>19 Uhr</th><td>☁️ bedeckt</td><td>9,2</td><td>8,6 – 9,5</td><td>0,0</td><td>12 km/h OSO</td></tr><tr><th>20 Uhr</th><td>☁️ bedeckt</td><td>9,1</td><td>8,2 – 9,7</td><td>0,0</td><td>14 km/h OSO</td></tr><tr><th>21 Uhr</th><td>☁️ bedeckt</td><td>8,5</td><td>7,8 – 9,0</td><td>0,1</td><td>16 km/h SO</td></tr><tr><th>22 Uhr</th><td>☁️ bedeckt</td><td>8,2</td><td>7,7 – 8,7</td><td>0,0</td><td>14 km/h SO</td></tr><tr><th>23 Uhr</th><td>☁️ bedeckt</td><td>8,0</td><td>7,5 – 8,5</td><td>0,0</td><td>11 km/h OSO</td></tr><tr class="gruppe"><th colspan="6">Mi, 21.10.2026</th></tr><tr><th>00 Uhr</th><td>🌧️ Regen</td><td>7,6</td><td>7,3 – 8,0</td><td>0,0</td><td>10 km/h OSO</td></tr><tr><th>01 Uhr</th><td>🌧️ Regen</td><td>7,3</td><td>7,0 – 7,6</td><td>0,0</td><td>10 km/h OSO</td></tr><tr><th>02 Uhr</th><td>🌧️ Regen</td><td>7,0</td><td>6,8 – 7,3</td><td>0,0</td><td>11 km/h OSO</td></tr><tr><th>03 Uhr</th><td>🌧️ Regen</td><td>6,6</td><td>6,2 – 7,0</td><td>0,0</td><td>10 km/h OSO</td></tr><tr><th>04 Uhr</th><td>🌧️ Regen</td><td>6,5</td><td>6,5 – 6,6</td><td>0,0</td><td>10 km/h OSO</td></tr><tr><th>05 Uhr</th><td>🌙 klar</td><td>6,5</td><td>6,2 – 6,7</td><td>0,0</td><td>11 km/h OSO</td></tr><tr><th>06 Uhr</th><td>🌧️ Regen</td><td>6,8</td><td>6,4 – 7,0</td><td>0,0</td><td>11 km/h OSO</td></tr><tr><th>07 Uhr</th><td>☁️ bedeckt</td><td>7,4</td><td>7,2 – 7,6</td><td>0,0</td><td>13 km/h OSO</td></tr><tr><th>08 Uhr</th><td>🌧️ Regen</td><td>7,8</td><td>7,6 – 8,0</td><td>0,1</td><td>13 km/h SO</td></tr><tr><th>09 Uhr</th><td>🌧️ Regen</td><td>8,1</td><td>7,7 – 8,6</td><td>0,2</td><td>14 km/h SO</td></tr><tr><th>10 Uhr</th><td>🌧️ Regen</td><td>8,3</td><td>7,9 – 8,8</td><td>0,2</td><td>15 km/h SO</td></tr><tr><th>11 Uhr</th><td>🌧️ Regen</td><td>8,5</td><td>8,3 – 8,8</td><td>0,2</td><td>15 km/h SSO</td></tr><tr><th>12 Uhr</th><td>🌧️ Regen</td><td>8,6</td><td>8,5 – 8,8</td><td>0,2</td><td>14 km/h SSO</td></tr><tr><th>13 Uhr</th><td>🌧️ Regen</td><td>8,8</td><td>8,7 – 9,0</td><td>0,2</td><td>13 km/h SSO</td></tr><tr><th>14 Uhr</th><td>🌧️ Regen</td><td>8,9</td><td>8,7 – 9,1</td><td>0,3</td><td>13 km/h SSO</td></tr><tr><th>15 Uhr</th><td>🌧️ Regen</td><td>9,1</td><td>8,7 – 9,4</td><td>0,4</td><td>11 km/h SO</td></tr><tr><th>16 Uhr</th><td>🌧️ Regen</td><td>9,2</td><td>8,7 – 9,5</td><td>0,3</td><td>10 km/h SO</td></tr><tr><th>17 Uhr</th><td>🌧️ Regen</td><td>9,4</td><td>8,8 – 9,8</td><td>0,5</td><td>9 km/h SO</td></tr><tr><th>18 Uhr</th><td>🌧️ Regen</td><td>9,4</td><td>8,8 – 9,8</td><td>0,7</td><td>9 km/h SO</td></tr><tr><th>19 Uhr</th><td>🌧️ Regen</td><td>9,3</td><td>8,7 – 9,7</td><td>1,1</td><td>10 km/h SO</td></tr><tr><th>20 Uhr</th><td>🌧️ Regen</td><td>9,2</td><td>8,6 – 9,5</td><td>1,2</td><td>11 km/h SSO</td></tr><tr><th>21 Uhr</th><td>🌧️ Regen</td><td>9,2</td><td>8,6 – 9,6</td><td>1,1</td><td>10 km/h SSO</td></tr><tr><th>22 Uhr</th><td>🌧️ Regen</td><td>9,1</td><td>8,5 – 9,6</td><td>0,6</td><td>10 km/h SSO</td></tr><tr><th>23 Uhr</th><td>🌧️ Regen</td><td>9,1</td><td>8,4 – 9,6</td><td>0,3</td><td>10 km/h S</td></tr></tbody>
+    </table></div>
+  </details>
+
+  <details>
+    <summary>Tageswerte der einzelnen Quellen</summary>
+    <div class="tabelle">
+    <table>
+      <thead><tr><th>Quelle</th><th>Min °C</th><th>Max °C</th><th>Regen mm</th>
+        <th>Risiko</th><th>Wind</th><th>Wetter</th></tr></thead>
+      <tbody><tr class="gruppe"><th colspan="7">Heute, 20.10.2026</th></tr><tr><th>yr.no (MET Norwegen)</th><td>8,0</td><td>10,2</td><td>0,0</td><td>–</td><td>15 km/h OSO</td><td>bedeckt</td></tr><tr><th>DMI</th><td>8,5</td><td>10,2</td><td>0,3</td><td>–</td><td>14 km/h OSO</td><td>bedeckt</td></tr><tr><th>NDR</th><td>9,0</td><td>11,0</td><td>–</td><td>76 %</td><td>19 km/h OSO</td><td>wolkig</td></tr><tr><th>DWD (Station Schleswig)</th><td>7,5</td><td>10,2</td><td>0,8</td><td>–</td><td>13 km/h O</td><td>Regen</td></tr><tr class="mittel"><th>Mittel</th><td>8,3</td><td>10,4</td><td>0,4</td><td>76 %</td><td>15 km/h OSO</td><td>bedeckt</td></tr><tr class="gruppe"><th colspan="7">Morgen, 21.10.2026</th></tr><tr><th>yr.no (MET Norwegen)</th><td>6,2</td><td>9,8</td><td>8,4</td><td>–</td><td>11 km/h SO</td><td>Regen</td></tr><tr><th>DMI</th><td>6,2</td><td>8,8</td><td>5,8</td><td>–</td><td>12 km/h SO</td><td>bedeckt</td></tr><tr><th>NDR</th><td>7,0</td><td>11,0</td><td>–</td><td>97 %</td><td>13 km/h S</td><td>Regen</td></tr><tr><th>DWD (Station Schleswig)</th><td>6,6</td><td>9,6</td><td>9,0</td><td>–</td><td>7 km/h SSO</td><td>Regen</td></tr><tr class="mittel"><th>Mittel</th><td>6,5</td><td>9,8</td><td>7,7</td><td>97 %</td><td>11 km/h SSO</td><td>Regen</td></tr></tbody>
+    </table></div>
+  </details>
+
+  <footer>
+    <ul>
+      <li>Quellen: yr.no (MET Norwegen), DMI, NDR, DWD (Station Schleswig).</li>
+      <li>Tageswerte: Mittel aller Quellen. Tageszeiten und Stunden: Mittel aus yr.no, DMI und DWD
+        (der NDR liefert nur Tageswerte, der DWD stündlich keinen Wind).</li>
+      <li>Für heute decken yr.no und DMI nur die restlichen Stunden ab.</li>
+    </ul>
+  </footer>
+</main>
+
+<script>
+const DATEN = [{"t": "2026-10-20T15:00:00+02:00", "h": 15, "temp": 9.8, "tmin": 9.4, "tmax": 10.2, "regen": 0.05, "wind": 16, "richtung": "SO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-20T16:00:00+02:00", "h": 16, "temp": 9.8, "tmin": 9.4, "tmax": 10.2, "regen": 0.0, "wind": 17, "richtung": "OSO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-20T17:00:00+02:00", "h": 17, "temp": 9.7, "tmin": 9.2, "tmax": 10.1, "regen": 0.0, "wind": 19, "richtung": "OSO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-20T18:00:00+02:00", "h": 18, "temp": 9.3, "tmin": 8.8, "tmax": 9.6, "regen": 0.0, "wind": 15, "richtung": "OSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-20T19:00:00+02:00", "h": 19, "temp": 9.2, "tmin": 8.6, "tmax": 9.5, "regen": 0.01, "wind": 12, "richtung": "OSO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-20T20:00:00+02:00", "h": 20, "temp": 9.1, "tmin": 8.2, "tmax": 9.7, "regen": 0.0, "wind": 14, "richtung": "OSO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-20T21:00:00+02:00", "h": 21, "temp": 8.5, "tmin": 7.8, "tmax": 9.0, "regen": 0.07, "wind": 16, "richtung": "SO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-20T22:00:00+02:00", "h": 22, "temp": 8.2, "tmin": 7.7, "tmax": 8.7, "regen": 0.0, "wind": 14, "richtung": "SO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-20T23:00:00+02:00", "h": 23, "temp": 8.0, "tmin": 7.5, "tmax": 8.5, "regen": 0.0, "wind": 11, "richtung": "OSO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-21T00:00:00+02:00", "h": 0, "temp": 7.6, "tmin": 7.3, "tmax": 8.0, "regen": 0.0, "wind": 10, "richtung": "OSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T01:00:00+02:00", "h": 1, "temp": 7.3, "tmin": 7.0, "tmax": 7.6, "regen": 0.0, "wind": 10, "richtung": "OSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T02:00:00+02:00", "h": 2, "temp": 7.0, "tmin": 6.8, "tmax": 7.3, "regen": 0.0, "wind": 11, "richtung": "OSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T03:00:00+02:00", "h": 3, "temp": 6.6, "tmin": 6.2, "tmax": 7.0, "regen": 0.0, "wind": 10, "richtung": "OSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T04:00:00+02:00", "h": 4, "temp": 6.5, "tmin": 6.5, "tmax": 6.6, "regen": 0.0, "wind": 10, "richtung": "OSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T05:00:00+02:00", "h": 5, "temp": 6.5, "tmin": 6.2, "tmax": 6.7, "regen": 0.0, "wind": 11, "richtung": "OSO", "lage": "klar", "symbol": "🌙", "n": 3}, {"t": "2026-10-21T06:00:00+02:00", "h": 6, "temp": 6.8, "tmin": 6.4, "tmax": 7.0, "regen": 0.0, "wind": 11, "richtung": "OSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T07:00:00+02:00", "h": 7, "temp": 7.4, "tmin": 7.2, "tmax": 7.6, "regen": 0.03, "wind": 13, "richtung": "OSO", "lage": "bedeckt", "symbol": "☁️", "n": 3}, {"t": "2026-10-21T08:00:00+02:00", "h": 8, "temp": 7.8, "tmin": 7.6, "tmax": 8.0, "regen": 0.12, "wind": 13, "richtung": "SO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T09:00:00+02:00", "h": 9, "temp": 8.1, "tmin": 7.7, "tmax": 8.6, "regen": 0.25, "wind": 14, "richtung": "SO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T10:00:00+02:00", "h": 10, "temp": 8.3, "tmin": 7.9, "tmax": 8.8, "regen": 0.2, "wind": 15, "richtung": "SO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T11:00:00+02:00", "h": 11, "temp": 8.5, "tmin": 8.3, "tmax": 8.8, "regen": 0.2, "wind": 15, "richtung": "SSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T12:00:00+02:00", "h": 12, "temp": 8.6, "tmin": 8.5, "tmax": 8.8, "regen": 0.2, "wind": 14, "richtung": "SSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T13:00:00+02:00", "h": 13, "temp": 8.8, "tmin": 8.7, "tmax": 9.0, "regen": 0.25, "wind": 13, "richtung": "SSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T14:00:00+02:00", "h": 14, "temp": 8.9, "tmin": 8.7, "tmax": 9.1, "regen": 0.33, "wind": 13, "richtung": "SSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T15:00:00+02:00", "h": 15, "temp": 9.1, "tmin": 8.7, "tmax": 9.4, "regen": 0.38, "wind": 11, "richtung": "SO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T16:00:00+02:00", "h": 16, "temp": 9.2, "tmin": 8.7, "tmax": 9.5, "regen": 0.33, "wind": 10, "richtung": "SO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T17:00:00+02:00", "h": 17, "temp": 9.4, "tmin": 8.8, "tmax": 9.8, "regen": 0.48, "wind": 9, "richtung": "SO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T18:00:00+02:00", "h": 18, "temp": 9.4, "tmin": 8.8, "tmax": 9.8, "regen": 0.7, "wind": 9, "richtung": "SO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T19:00:00+02:00", "h": 19, "temp": 9.3, "tmin": 8.7, "tmax": 9.7, "regen": 1.09, "wind": 10, "richtung": "SO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T20:00:00+02:00", "h": 20, "temp": 9.2, "tmin": 8.6, "tmax": 9.5, "regen": 1.23, "wind": 11, "richtung": "SSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T21:00:00+02:00", "h": 21, "temp": 9.2, "tmin": 8.6, "tmax": 9.6, "regen": 1.11, "wind": 10, "richtung": "SSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T22:00:00+02:00", "h": 22, "temp": 9.1, "tmin": 8.5, "tmax": 9.6, "regen": 0.56, "wind": 10, "richtung": "SSO", "lage": "Regen", "symbol": "🌧️", "n": 3}, {"t": "2026-10-21T23:00:00+02:00", "h": 23, "temp": 9.1, "tmin": 8.4, "tmax": 9.6, "regen": 0.28, "wind": 10, "richtung": "S", "lage": "Regen", "symbol": "🌧️", "n": 3}];
+const HOEHE = { temp: 190, regen: 120 };
+const RAND = { links: 34, rechts: 8, oben: 10, unten: 22 };
+const NS = "http://www.w3.org/2000/svg";
+const zahl = (x, s = 1) => x.toLocaleString("de-DE", { minimumFractionDigits: s, maximumFractionDigits: s });
+
+function el(name, attrs, eltern) {
+  const e = document.createElementNS(NS, name);
+  for (const [k, w] of Object.entries(attrs)) e.setAttribute(k, w);
+  if (eltern) eltern.appendChild(e);
+  return e;
+}
+
+function schritte(min, max, anzahl) {
+  const roh = (max - min) / anzahl;
+  const basis = Math.pow(10, Math.floor(Math.log10(roh)));
+  const schritt = [1, 2, 2.5, 5, 10].map(f => f * basis).find(s => s >= roh);
+  const werte = [];
+  for (let w = Math.floor(min / schritt) * schritt; w <= max + 1e-9; w += schritt) werte.push(+w.toFixed(4));
+  return werte;
+}
+
+const diagramme = [];
+
+function zeichne() {
+  diagramme.length = 0;
+  for (const art of ["temp", "regen"]) {
+    const box = document.getElementById("d-" + art);
+    box.querySelector("svg")?.remove();
+    const breite = box.clientWidth, hoehe = HOEHE[art];
+    const svg = el("svg", { viewBox: `0 0 ${breite} ${hoehe}`, height: hoehe, "aria-hidden": "true" }, box);
+    const n = DATEN.length;
+    if (!n) return;
+    const innen = breite - RAND.links - RAND.rechts;
+    const schritt = innen / n;
+    const x = i => RAND.links + schritt * (i + 0.5);
+
+    let min, max;
+    if (art === "temp") {
+      min = Math.min(...DATEN.map(d => d.tmin)); max = Math.max(...DATEN.map(d => d.tmax));
+      const puffer = Math.max(1, (max - min) * 0.1); min -= puffer; max += puffer;
+    } else {
+      min = 0; max = Math.max(1, ...DATEN.map(d => d.regen)) * 1.1;
+    }
+    const ticks = schritte(min, max, art === "temp" ? 4 : 3);
+    min = Math.min(min, ticks[0]); max = Math.max(max, ticks[ticks.length - 1]);
+    const y = w => RAND.oben + (hoehe - RAND.oben - RAND.unten) * (1 - (w - min) / (max - min));
+
+    const achse = el("g", { class: "achse" }, svg);
+    for (const t of ticks) {
+      el("line", { class: "gitter", x1: RAND.links, x2: breite - RAND.rechts, y1: y(t), y2: y(t) }, achse);
+      el("text", { x: RAND.links - 6, y: y(t) + 4, "text-anchor": "end" }, achse).textContent = zahl(t, t % 1 ? 1 : 0);
+    }
+    const jedeN = innen < 500 ? 6 : 3;
+    DATEN.forEach((d, i) => {
+      if (d.h === 0 && i > 0) {
+        const xs = RAND.links + schritt * i;
+        el("line", { class: "tagesgrenze", x1: xs, x2: xs, y1: RAND.oben, y2: hoehe - RAND.unten }, svg);
+        if (art === "temp") el("text", { class: "tageslabel", x: xs + 5, y: RAND.oben + 10 }, svg).textContent = "Morgen";
+      }
+      if (d.h % jedeN === 0) el("text", { x: x(i), y: hoehe - 6, "text-anchor": "middle" }, achse).textContent = d.h + " Uhr";
+    });
+
+    if (art === "temp") {
+      const oben = DATEN.map((d, i) => `${x(i)},${y(d.tmax)}`);
+      const unten = DATEN.map((d, i) => `${x(i)},${y(d.tmin)}`).reverse();
+      el("polygon", { points: oben.concat(unten).join(" "), fill: "var(--temp)", "fill-opacity": 0.16 }, svg);
+      el("polyline", { points: DATEN.map((d, i) => `${x(i)},${y(d.temp)}`).join(" "),
+        fill: "none", stroke: "var(--temp)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+      // Höchst- und Tiefstwert direkt beschriften
+      for (const fn of [Math.max, Math.min]) {
+        const ziel = fn(...DATEN.map(d => d.temp)), i = DATEN.findIndex(d => d.temp === ziel);
+        const istMax = fn === Math.max;
+        el("circle", { cx: x(i), cy: y(ziel), r: 4, fill: "var(--temp)", stroke: "var(--karte)", "stroke-width": 2 }, svg);
+        el("text", { x: x(i), y: y(ziel) + (istMax ? -9 : 17), "text-anchor": "middle", class: "tageslabel" }, svg)
+          .textContent = zahl(ziel) + "°";
+      }
+    } else {
+      const b = Math.max(1, schritt - 2);
+      DATEN.forEach((d, i) => {
+        if (d.regen <= 0) return;
+        const h = Math.max(1, y(0) - y(d.regen)), r = Math.min(2, b / 2, h);
+        const x0 = x(i) - b / 2, y0 = y(d.regen);
+        el("path", { fill: "var(--regen)", d: `M${x0},${y(0)} V${y0 + r} Q${x0},${y0} ${x0 + r},${y0} H${x0 + b - r} Q${x0 + b},${y0} ${x0 + b},${y0 + r} V${y(0)} Z` }, svg);
+      });
+    }
+
+    const kreuz = el("line", { class: "fadenkreuz", y1: RAND.oben, y2: hoehe - RAND.unten, visibility: "hidden" }, svg);
+    const fang = el("rect", { x: RAND.links, y: 0, width: innen, height: hoehe, fill: "transparent" }, svg);
+    diagramme.push({ box, kreuz, x, schritt });
+    const index = ev => Math.max(0, Math.min(n - 1, Math.floor((ev.offsetX - RAND.links) / schritt)));
+    fang.addEventListener("pointermove", ev => zeige(index(ev), box, ev));
+    fang.addEventListener("pointerleave", verstecke);
+  }
+}
+
+function zeige(i, quelle, ev) {
+  const d = DATEN[i];
+  for (const g of diagramme) {
+    g.kreuz.setAttribute("x1", g.x(i)); g.kreuz.setAttribute("x2", g.x(i));
+    g.kreuz.setAttribute("visibility", "visible");
+  }
+  const tip = document.getElementById("tooltip");
+  const zeit = new Date(d.t).toLocaleString("de-DE", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+  tip.innerHTML = `<b>${zeit} Uhr · ${d.symbol} ${d.lage}</b>`
+    + `${zahl(d.temp)} °C <span class="muted">(${zahl(d.tmin)} bis ${zahl(d.tmax)})</span><br>`
+    + `Regen ${zahl(d.regen)} mm<br>`
+    + (d.wind != null ? `Wind ${d.wind} km/h ${d.richtung}<br>` : "")
+    + `<span class="muted">${d.n} Quellen</span>`;
+  tip.style.display = "block";
+  const block = document.getElementById("verlauf").getBoundingClientRect();
+  const r = quelle.getBoundingClientRect();
+  let links = r.left - block.left + diagramme[0].x(i) + 14;
+  if (links + tip.offsetWidth > block.width - 8) links -= tip.offsetWidth + 28;
+  tip.style.left = links + "px";
+  tip.style.top = (r.top - block.top + 24) + "px";
+}
+
+function verstecke() {
+  document.getElementById("tooltip").style.display = "none";
+  for (const g of diagramme) g.kreuz.setAttribute("visibility", "hidden");
+}
+
+document.getElementById("verlauf").style.position = "relative";
+zeichne();
+let timer;
+addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(zeichne, 100); });
+</script>
+</body>
+</html>
