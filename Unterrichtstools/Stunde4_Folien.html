@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informatik 9 · Doppelstunde 4 · Folien</title>
+<style>
+:root {
+  --bg: #1a1a1a;
+  --panel: #262626;
+  --panel-2: #303030;
+  --text: #f2f2f2;
+  --text-soft: #b5b5b5;
+  --accent: #4da3ff;
+  --ok: #4caf50;
+  --warn: #ffb300;
+  --bad: #ef5350;
+  --logo: #888;
+  --logo-opacity: 0.4;
+  --font-base: clamp(18px, 2.1vw, 36px);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: var(--font-base); }
+body { overflow: hidden; }
+.folie { display: none; position: absolute; inset: 0; padding: 3vh 5vw 10vh; flex-direction: column; gap: 1.6vh; }
+.folie.aktiv { display: flex; }
+h1 { margin: 0 0 1vh; font-size: 1.7em; color: var(--accent); }
+h2 { margin: 0; font-size: 1.15em; color: var(--text-soft); font-weight: 600; }
+p { margin: 0; line-height: 1.35; }
+.gross { font-size: 1.45em; line-height: 1.3; }
+.soft { color: var(--text-soft); }
+.schritt { visibility: hidden; }
+.schritt.sichtbar { visibility: visible; }
+.kasten { background: var(--panel); border-radius: 14px; padding: 2vh 2vw; }
+.merke { border-left: 10px solid var(--warn); background: var(--panel); border-radius: 10px; padding: 1.6vh 2vw; font-size: 1.15em; }
+.merke b { color: var(--warn); }
+pre, code, .mono { font-family: "Courier New", ui-monospace, monospace; }
+pre { margin: 0; font-size: 1em; line-height: 1.3; }
+code { background: var(--panel-2); padding: 0 .25em; border-radius: 5px; }
+ol.fragen { margin: 0; padding-left: 1.6em; line-height: 1.45; font-size: 1.08em; }
+ol.fragen li { margin-bottom: .6vh; }
+.zwei { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; align-items: start; }
+.ascii { font-size: .78em; line-height: 1.35; color: var(--text-soft); }
+.loesung { display: grid; grid-template-columns: 2.2em 1fr; gap: 1.1vh 1vw; font-size: 1.05em; line-height: 1.3; }
+.loesung .nr { color: var(--accent); font-weight: 700; }
+.loesung .ok { color: var(--ok); font-weight: 700; }
+.stellen { display: grid; grid-template-columns: repeat(8, 1fr); gap: .4vw; text-align: center; font-family: "Courier New", monospace; font-size: 1.2em; }
+.stellen div { background: var(--panel-2); border-radius: 8px; padding: .5vh 0; }
+.stellen .wert { color: var(--text-soft); font-size: .8em; }
+.stellen .eins { background: var(--accent); color: #111; font-weight: 700; }
+table.heft { border-collapse: collapse; font-family: "Courier New", monospace; font-size: 1em; }
+table.heft td { padding: .5vh 1.2vw; border-bottom: 1px solid #444; }
+table.heft td:first-child { color: var(--text-soft); font-family: system-ui, sans-serif; }
+.befehle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1vh 1.5vw; }
+.befehl { background: var(--panel-2); border-radius: 10px; padding: .6vh 1vw; font-family: "Courier New", monospace; font-size: .95em; }
+.roboter { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; flex: 1; min-height: 0; }
+.roboter textarea { width: 100%; height: 100%; min-height: 30vh; background: var(--panel); color: var(--text); border: 3px solid var(--panel-2);
+  border-radius: 12px; font-family: "Courier New", monospace; font-size: 1em; padding: 1.2vh 1vw; resize: none; }
+.roboter textarea:focus { outline: none; border-color: var(--accent); }
+.ablauf { background: var(--panel); border-radius: 12px; padding: 1.2vh 1vw; overflow: auto; font-family: "Courier New", monospace; font-size: 1em; }
+.ablauf div { padding: .3vh .6vw; border-radius: 8px; }
+.ablauf .jetzt { background: var(--accent); color: #111; font-weight: 700; }
+.ablauf .unbekannt { background: var(--bad); color: #fff; font-weight: 700; }
+.ablauf .fertig { color: var(--text-soft); }
+.ablauf .meldung { font-family: system-ui, sans-serif; margin-top: 1vh; font-weight: 700; }
+.knoepfe { display: flex; gap: 1vw; flex-wrap: wrap; }
+button { font: inherit; font-size: .85em; background: var(--panel-2); color: var(--text); border: 2px solid #555; border-radius: 12px;
+  padding: 1vh 1.4vw; min-height: 48px; cursor: pointer; }
+button:hover, button:focus-visible { border-color: var(--accent); outline: none; }
+button.haupt { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 700; }
+nav { position: fixed; left: 0; right: 0; bottom: 0; height: 9vh; display: flex; align-items: center; justify-content: center; gap: 1.2vw; }
+nav button { font-size: .7em; min-width: 7vw; }
+#punkte { display: flex; gap: .6vw; }
+#punkte span { width: 14px; height: 14px; border-radius: 50%; background: #555; cursor: pointer; }
+#punkte span.an { background: var(--accent); }
+#nummer { color: var(--text-soft); font-size: .65em; min-width: 6em; text-align: center; }
+.fi { position: fixed; right: 1.2vw; bottom: 1vh; color: var(--logo); opacity: var(--logo-opacity); font-size: 14px; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- Folie 1 -->
+<section class="folie" data-titel="Willkommen zurück">
+  <h1>Willkommen zurück!</h1>
+  <p class="gross">Sechs Wochen ohne Informatik.<br>Mal sehen, was noch da ist.</p>
+  <div class="kasten schritt">
+    <p class="gross">1. Rechner einschalten und anmelden.</p>
+    <p class="soft">Passwort vergessen? Du arbeitest heute im Konto deines Nachbarn mit.</p>
+  </div>
+  <div class="kasten schritt">
+    <p class="gross">2. Dann: Bildschirm aus, Blick nach vorn.</p>
+    <p class="soft">Nimm einen Zettel und einen Stift.</p>
+  </div>
+</section>
+
+<!-- Folie 2 -->
+<section class="folie" data-titel="Blitz-Check">
+  <h1>Blitz-Check: Was weißt du noch?</h1>
+  <h2>Allein, auf dem Zettel, ohne Nachsehen · 4 Minuten</h2>
+  <div class="zwei">
+    <ol class="fragen">
+      <li>Wie viele Bit hat ein Byte? Wie viele verschiedene Muster gibt es damit?</li>
+      <li>Rechne um: <code>00010110</code> = ?</li>
+      <li>Schreib die Zahl <b>50</b> als Byte.</li>
+      <li>Decodiere: <code>79 75</code></li>
+      <li>Eine <code>.txt</code> enthält nur <code>Hallo Welt</code> und ein Zeilenende. Wie viele Byte hat sie?<br>
+        <span class="soft">Und warum ist dieselbe Zeile als <code>.odt</code> rund 8800 Byte groß?</span></li>
+    </ol>
+    <div>
+      <div class="kasten ascii mono">A 65 B 66 C 67 D 68 E 69 F 70 G 71<br>H 72 I 73 J 74 K 75 L 76 M 77 N 78<br>O 79 P 80 Q 81 R 82 S 83 T 84 U 85<br>V 86 W 87 X 88 Y 89 Z 90<br>Leerzeichen 32 · a 97 … z 122</div>
+      <div class="kasten schritt" style="margin-top:2vh">
+        <p class="gross">Fertig? Vergleicht mit eurem Nachbarn.</p>
+        <p class="soft">Wo ihr verschieden seid: Wer hat recht?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Folie 3 -->
+<section class="folie" data-titel="Blitz-Check: Lösungen">
+  <h1>Auflösung</h1>
+  <div class="stellen schritt">
+    <div class="wert">128</div><div class="wert">64</div><div class="wert">32</div><div class="wert">16</div>
+    <div class="wert">8</div><div class="wert">4</div><div class="wert">2</div><div class="wert">1</div>
+  </div>
+  <div class="loesung">
+    <span class="nr schritt">1</span><span class="schritt">1 Byte = <b>8 Bit</b> → 2·2·2·2·2·2·2·2 = <span class="ok">256 Muster</span> (die Zahlen 0 bis 255)</span>
+    <span class="nr schritt">2</span><span class="schritt"><code>00010110</code> = 16 + 4 + 2 = <span class="ok">22</span></span>
+    <span class="nr schritt">3</span><span class="schritt">50 = 32 + 16 + 2 → <span class="ok mono">00110010</span></span>
+    <span class="nr schritt">4</span><span class="schritt">79 = O, 75 = K → <span class="ok">OK</span></span>
+    <span class="nr schritt">5</span><span class="schritt">10 Zeichen (das Leerzeichen zählt mit) + 1 Zeilenende = <span class="ok">11 Byte</span>.
+      Die <code>.odt</code> ist ein <b>Paket</b>: Schriftart, Ränder, Vorschaubild … zusammengedrückt.</span>
+  </div>
+  <div class="merke schritt"><b>Der rote Faden:</b> Decodieren kann nur, wer die <b>Verabredung</b> kennt.<br>
+    <span class="soft" style="font-size:.85em">Morsecode · Stellenwerttafel · ASCII · Dateiformat</span></div>
+</section>
+
+<!-- Folie 4 -->
+<section class="folie" data-titel="Die offene Frage">
+  <h1>Die offene Frage vom letzten Mal</h1>
+  <p class="gross">Ein Foto von deinem Handy hat etwa <b>4 MB</b>.</p>
+  <p class="gross schritt">Das sind rund <b>2000 Textseiten</b>.</p>
+  <p class="gross schritt">Aber im Foto steht <b>kein einziges Wort</b>.</p>
+  <div class="merke schritt"><b>Was steckt in diesen 4 Millionen Byte?</b><br>Deine Vermutung in einem Satz.</div>
+</section>
+
+<!-- Folie 5 -->
+<section class="folie" data-titel="Heftbild: dieselben 4 Byte">
+  <h1>Dieselben 4 Byte</h1>
+  <h2>Heftbild, erst am Ende des Einstiegs abschreiben</h2>
+  <table class="heft">
+    <tr><td></td><td>01010010</td><td>01011010</td><td>00100101</td><td>11101011</td></tr>
+    <tr class="schritt"><td>als Zahl</td><td>82</td><td>90</td><td>37</td><td>235</td></tr>
+    <tr class="schritt"><td>als Zeichen</td><td>R</td><td>Z</td><td>%</td><td>ë</td></tr>
+    <tr class="schritt"><td>als Bild</td><td colspan="4" style="font-family:system-ui,sans-serif">32 Bildpunkte: 1 = schwarz, 0 = weiß</td></tr>
+  </table>
+  <div class="merke schritt"><b>Der Speicher weiß nicht, was er enthält.</b><br>Decodieren kann nur, wer die Verabredung kennt.</div>
+</section>
+
+<!-- Folie 6 -->
+<section class="folie" data-titel="Heftbild: Bilder aus Bytes">
+  <h1>Bilder aus Bytes</h1>
+  <h2>Heftbild</h2>
+  <table class="heft">
+    <tr class="schritt"><td>1 Pixel schwarz-weiß</td><td>1 Bit</td><td></td></tr>
+    <tr class="schritt"><td>1 Pixel Graustufe</td><td>1 Byte</td><td>256 Stufen</td></tr>
+    <tr class="schritt"><td>1 Pixel Farbe (RGB)</td><td>3 Byte</td><td>16,7 Mio. Farben</td></tr>
+  </table>
+  <div class="merke schritt"><b>Speicher = Breite × Höhe × Byte je Pixel</b><br>doppelte Kante → vierfacher Speicher</div>
+  <div class="kasten schritt mono">Handy: 4000 × 3000 × 3 = 36 000 000 Byte = 36 MB → Datei 4 MB: komprimiert<br>
+    MEGA:  200 × 70 × 3 = 42 000 Byte → Datei 3 369 / 3 521 Byte</div>
+</section>
+
+<!-- Folie 7 -->
+<section class="folie" data-titel="Der Roboter" id="roboterfolie">
+  <h1 style="margin:0">Ich bin ein Roboter. Ich kann nur diese Befehle:</h1>
+  <div class="befehle">
+    <div class="befehl">gehe __ Schritte</div><div class="befehl">drehe rechts __ Grad</div><div class="befehl">Stift runter</div>
+    <div class="befehl soft" style="font-family:system-ui">1 Schritt = 1 Fußlänge</div><div class="befehl">drehe links __ Grad</div><div class="befehl">Stift hoch</div>
+  </div>
+  <p><b>Auftrag:</b> Lasst mich ein <b>Quadrat</b> laufen und dabei zeichnen. <span class="soft">Erst das ganze Programm, dann Start. Ich mache genau, was dasteht.</span></p>
+  <div class="roboter">
+    <textarea id="programm" spellcheck="false" placeholder="Hier tippt die Programmiererin oder der Programmierer, Zeile für Zeile …"></textarea>
+    <div class="ablauf" id="ablauf"></div>
+  </div>
+  <div class="knoepfe">
+    <button class="haupt" id="schrittKnopf">▶ nächster Befehl</button>
+    <button id="vonVorn">⟲ von vorn</button>
+    <button id="loeschen">Programm löschen</button>
+  </div>
+</section>
+
+<!-- Folie 8 -->
+<section class="folie" data-titel="Heftbild: Algorithmus">
+  <h1>Was musste euer Programm haben?</h1>
+  <h2>Heftbild</h2>
+  <div class="merke"><b>Algorithmus</b> = endliche Folge von Anweisungen, die ein Problem löst</div>
+  <table class="heft" style="font-family:system-ui,sans-serif">
+    <tr class="schritt"><td>eindeutig</td><td>keine Rückfrage nötig („Wie weit? Wohin?“)</td></tr>
+    <tr class="schritt"><td>ausführbar</td><td>nur Befehle, die der Ausführende kennt</td></tr>
+    <tr class="schritt"><td>Reihenfolge zählt</td><td>→ <b>Sequenz</b></td></tr>
+    <tr class="schritt"><td>endlich</td><td>irgendwann ist das Programm fertig</td></tr>
+  </table>
+  <div class="kasten schritt mono" style="white-space:pre">Quadrat:  Stift runter
+          gehe 3 Schritte
+          drehe rechts 90 Grad
+          … noch dreimal gehe + drehe</div>
+</section>
+
+<!-- Folie 9 -->
+<section class="folie" data-titel="Abschluss">
+  <h1>Zum Schluss</h1>
+  <div class="kasten schritt">
+    <p><b>Das Dreieck:</b> Wer hatte 60°? Was ist passiert?</p>
+    <p class="mono schritt" style="margin-top:1vh">Drehung = 180° − Innenwinkel = 180° − 60° = 120°<br>Probe: 3 · 120° = 360°</p>
+  </div>
+  <div class="merke schritt"><b>Zählt die Blöcke in eurem Quadrat.</b> Welche stehen mehrfach da?<br>
+    <span class="soft">Nächstes Mal bringen wir Snap! „viermal dasselbe“ bei.</span></div>
+  <div class="kasten schritt">
+    <p><b>Test 1 am Montag, dem 23.11.</b> Thema: Daten und Codierung, also alles von heute und davor.</p>
+    <p class="soft">Zum Nachlesen in itsLearning: <i>Rückblick 1 bis 3</i> und <i>Testvorbereitung</i>.</p>
+  </div>
+</section>
+
+<nav>
+  <button id="zurueck" aria-label="zurück">◀</button>
+  <div id="punkte"></div>
+  <span id="nummer"></span>
+  <button id="weiter" aria-label="weiter">▶</button>
+</nav>
+<div class="fi">© Fi</div>
+
+<script>
+const folien = [...document.querySelectorAll('.folie')];
+let nr = 0;
+
+function schritte(f) { return [...f.querySelectorAll('.schritt')]; }
+
+function zeige(n, alleAufgedeckt) {
+  nr = Math.max(0, Math.min(folien.length - 1, n));
+  folien.forEach((f, i) => f.classList.toggle('aktiv', i === nr));
+  schritte(folien[nr]).forEach(s => s.classList.toggle('sichtbar', !!alleAufgedeckt));
+  document.querySelectorAll('#punkte span').forEach((p, i) => p.classList.toggle('an', i === nr));
+  document.getElementById('nummer').textContent = 'Folie ' + (nr + 1) + ' / ' + folien.length;
+}
+
+function weiter() {
+  const offen = schritte(folien[nr]).find(s => !s.classList.contains('sichtbar'));
+  if (offen) offen.classList.add('sichtbar');
+  else if (nr < folien.length - 1) zeige(nr + 1, false);
+}
+
+function zurueck() {
+  const sichtbar = schritte(folien[nr]).filter(s => s.classList.contains('sichtbar'));
+  if (sichtbar.length) sichtbar[sichtbar.length - 1].classList.remove('sichtbar');
+  else if (nr > 0) zeige(nr - 1, true);
+}
+
+const punkte = document.getElementById('punkte');
+folien.forEach((f, i) => {
+  const p = document.createElement('span');
+  p.title = (i + 1) + ' ' + f.dataset.titel;
+  p.addEventListener('click', () => zeige(i, false));
+  punkte.appendChild(p);
+});
+document.getElementById('weiter').addEventListener('click', weiter);
+document.getElementById('zurueck').addEventListener('click', zurueck);
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'TEXTAREA') {
+    if (e.key === 'Escape') e.target.blur();
+    return;
+  }
+  if (['ArrowRight', ' ', 'PageDown', 'Enter'].includes(e.key)) { e.preventDefault(); weiter(); }
+  if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); zurueck(); }
+  if (e.key === 'Home') zeige(0, false);
+  if (e.key === 'End') zeige(folien.length - 1, false);
+});
+
+// Roboter: Programm Zeile für Zeile ausführen
+const programm = document.getElementById('programm');
+const ablauf = document.getElementById('ablauf');
+let zeiger = -1;
+
+const muster = [
+  /^stift\s+(runter|hoch)$/,
+  /^gehe\s+\d+(\s+schritte?)?$/,
+  /^drehe\s+(rechts|links)\s+\d+(\s*(grad|°))?$/
+];
+
+function zeilen() {
+  return programm.value.split('\n').map(z => z.trim()).filter(z => z !== '');
+}
+
+function bekannt(z) {
+  const n = z.toLowerCase().replace(/\s+/g, ' ');
+  return muster.some(m => m.test(n));
+}
+
+function zeichneAblauf() {
+  const zs = zeilen();
+  ablauf.innerHTML = '';
+  if (!zs.length) {
+    ablauf.innerHTML = '<div class="soft" style="font-family:system-ui">Noch kein Programm.</div>';
+    return;
+  }
+  zs.forEach((z, i) => {
+    const d = document.createElement('div');
+    d.textContent = (i + 1) + '  ' + z;
+    if (i < zeiger) d.className = 'fertig';
+    if (i === zeiger) d.className = bekannt(z) ? 'jetzt' : 'unbekannt';
+    ablauf.appendChild(d);
+  });
+  const m = document.createElement('div');
+  m.className = 'meldung';
+  if (zeiger >= 0 && zeiger < zs.length && !bekannt(zs[zeiger])) {
+    m.style.color = 'var(--bad)';
+    m.textContent = '✖ Befehl unbekannt. Der Roboter bleibt stehen.';
+  } else if (zeiger >= zs.length) {
+    m.style.color = 'var(--ok)';
+    m.textContent = '■ Programm zu Ende.';
+  }
+  ablauf.appendChild(m);
+  const jetzt = ablauf.querySelector('.jetzt, .unbekannt');
+  if (jetzt) jetzt.scrollIntoView({ block: 'nearest' });
+}
+
+document.getElementById('schrittKnopf').addEventListener('click', () => {
+  const zs = zeilen();
+  if (zeiger >= 0 && zeiger < zs.length && !bekannt(zs[zeiger])) return;
+  if (zeiger < zs.length) zeiger++;
+  zeichneAblauf();
+});
+document.getElementById('vonVorn').addEventListener('click', () => { zeiger = -1; zeichneAblauf(); });
+document.getElementById('loeschen').addEventListener('click', () => { programm.value = ''; zeiger = -1; zeichneAblauf(); });
+programm.addEventListener('input', () => { zeiger = -1; zeichneAblauf(); });
+
+zeichneAblauf();
+zeige(0, false);
+</script>
+</body>
+</html>

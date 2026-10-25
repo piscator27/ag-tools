@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="de" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Der Binär-Zauberer</title>
+<style>
+  :root {
+    --bg: #1a1a1a;
+    --panel: #262626;
+    --text: #f2f2f2;
+    --text-soft: #b5b5b5;
+    --accent: #4da3ff;
+    --wert: #9ec5fe;
+    --gelb: #fccb00;
+    --gelb-rand: #fff0a8;
+    --gelb-glow: rgba(252,203,0,0.45);
+    --aus: #2a2a2a;
+    --aus-rand: #555;
+    --ok: #4caf50;
+    --warn: #ffb300;
+    --bad: #ef5350;
+    --karte: #ffffff;
+    --karte-text: #111111;
+    --karte-linie: #d5d5d5;
+    --karte-an: #fff4c2;
+    --logo: #888;
+    --logo-opacity: 0.4;
+  }
+  * { box-sizing: border-box; }
+  html { --u: min(1vh, 0.5625vw); }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: var(--bg); color: var(--text);
+    font-family: Verdana, "Segoe UI", Arial, sans-serif;
+  }
+  .folie {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    padding: calc(var(--u) * 4) calc(var(--u) * 6) calc(var(--u) * 10);
+    text-align: center;
+  }
+  .folie.aktiv { display: flex; }
+  h1 { font-size: calc(var(--u) * 7); margin: 0 0 calc(var(--u) * 2); }
+  h2 { font-size: calc(var(--u) * 5.2); margin: 0 0 calc(var(--u) * 2.5); }
+  p, li { font-size: calc(var(--u) * 3.6); line-height: 1.4; }
+  .soft { color: var(--text-soft); }
+  .gelb { color: var(--gelb); }
+  .blau { color: var(--wert); }
+  .mono { font-family: Consolas, "Courier New", monospace; }
+  .warnung { font-size: calc(var(--u) * 4.2); font-weight: bold; color: var(--bad); margin: 0 0 calc(var(--u) * 2); }
+  .warnung::before { content: "\25A0\00a0"; }
+
+  /* Kärtchen */
+  .karten { display: flex; gap: calc(var(--u) * 2.2); justify-content: center; align-items: flex-start; }
+  .karte {
+    background: var(--karte); color: var(--karte-text);
+    border-radius: calc(var(--u) * 1.4);
+    padding: calc(var(--u) * 1.3) calc(var(--u) * 1.8) calc(var(--u) * 1.8);
+    border: calc(var(--u) * 0.6) solid transparent;
+    box-shadow: 0 calc(var(--u) * 0.8) 0 rgba(0,0,0,0.45);
+    cursor: pointer; user-select: none;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s, opacity 0.15s;
+  }
+  .karte.an { background: var(--karte-an); border-color: var(--gelb); transform: translateY(calc(var(--u) * -1.5)); }
+  .karte.weg { opacity: 0.28; }
+  .karte .kopf {
+    font-size: calc(var(--u) * 5); font-weight: bold; line-height: 1;
+    padding-bottom: calc(var(--u) * 1); margin-bottom: calc(var(--u) * 1.2);
+    border-bottom: calc(var(--u) * 0.3) solid var(--karte-linie);
+  }
+  .karte .zahlen {
+    display: grid; grid-template-columns: repeat(4, calc(var(--u) * 5.6));
+    row-gap: calc(var(--u) * 0.9);
+    font-size: calc(var(--u) * 3.1); font-weight: bold; text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .karte .zahlen span.erste.da { color: #c62828; text-decoration: underline; }
+  .karte .wertschild {
+    margin-top: calc(var(--u) * 1.2); font-size: calc(var(--u) * 4.2); font-weight: bold;
+    color: #1565c0;
+  }
+
+  .ergebnis {
+    margin-top: calc(var(--u) * 3.5); min-height: calc(var(--u) * 15);
+    display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 3);
+  }
+  .zauberzahl {
+    font-size: calc(var(--u) * 13); font-weight: bold; color: var(--gelb);
+    text-shadow: 0 0 calc(var(--u) * 4) var(--gelb-glow);
+    transform: scale(0.2); opacity: 0; transition: transform 0.45s cubic-bezier(.2,1.6,.4,1), opacity 0.3s;
+  }
+  .zauberzahl.da { transform: scale(1); opacity: 1; }
+
+  /* Stockwerk */
+  .stock { display: grid; grid-template-columns: repeat(8, calc(var(--u) * 11)); gap: calc(var(--u) * 1.3); justify-content: center; }
+  .stock .w { font-family: Consolas, monospace; font-weight: bold; font-size: calc(var(--u) * 3.6); color: var(--wert); }
+  .stock .f {
+    height: calc(var(--u) * 11); border: calc(var(--u) * 0.45) solid var(--aus-rand);
+    border-radius: calc(var(--u) * 1); background: var(--aus);
+  }
+  .stock .f.an { background: var(--gelb); border-color: var(--gelb-rand); box-shadow: 0 0 calc(var(--u) * 3) var(--gelb-glow); }
+  .stock .b { font-family: Consolas, monospace; font-weight: bold; font-size: calc(var(--u) * 5); }
+  .stock .grau { opacity: 0.35; }
+  .summe { font-size: calc(var(--u) * 5); margin-top: calc(var(--u) * 2.5); min-height: calc(var(--u) * 7); }
+
+  /* Schritte, die aufgedeckt werden */
+  .schritt { visibility: hidden; }
+  .schritt.da { visibility: visible; }
+
+  /* Aufträge */
+  .auftrag { text-align: left; max-width: calc(var(--u) * 150); }
+  .auftrag li { margin-bottom: calc(var(--u) * 1.4); }
+  .rolle { display: inline-block; min-width: calc(var(--u) * 5); padding: 0 calc(var(--u) * 1); border-radius: calc(var(--u) * 0.8); background: var(--accent); color: #000; font-weight: bold; text-align: center; }
+  .uhr { font-size: calc(var(--u) * 9); font-family: Consolas, monospace; font-weight: bold; color: var(--gelb); margin-top: calc(var(--u) * 1); }
+  .uhr.ende { color: var(--bad); }
+  .uhrhinweis { font-size: calc(var(--u) * 2.4); color: var(--text-soft); }
+
+  /* Bingo */
+  .pool { display: grid; grid-template-columns: repeat(8, auto); gap: calc(var(--u) * 1.4) calc(var(--u) * 3); margin: calc(var(--u) * 2) 0; }
+  .pool div { font-size: calc(var(--u) * 6); font-weight: bold; color: var(--gelb); font-variant-numeric: tabular-nums; }
+  .gitter { display: inline-grid; grid-template-columns: repeat(3, calc(var(--u) * 9)); gap: 0; border: 2px solid var(--text-soft); }
+  .gitter div { height: calc(var(--u) * 7); border: 1px solid var(--text-soft); font-size: calc(var(--u) * 3.2); display: flex; align-items: center; justify-content: center; color: var(--text-soft); }
+  .zug { font-family: Consolas, monospace; font-weight: bold; font-size: calc(var(--u) * 15); letter-spacing: calc(var(--u) * 1.5); color: var(--text); }
+  .zug .null { color: #777; }
+  .zugnr { font-size: calc(var(--u) * 3); color: var(--text-soft); margin-bottom: calc(var(--u) * 1); }
+  .verlauf { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 1) calc(var(--u) * 2.5); justify-content: center; margin-top: calc(var(--u) * 3); max-width: calc(var(--u) * 160); }
+  .verlauf div { font-family: Consolas, monospace; font-size: calc(var(--u) * 2.8); color: var(--text-soft); }
+  .verlauf b { color: var(--gelb); font-family: Verdana, sans-serif; }
+
+  /* Test-Check */
+  .check { text-align: left; max-width: calc(var(--u) * 160); width: 100%; }
+  .check .aufg { display: flex; gap: calc(var(--u) * 2.5); align-items: baseline; margin: calc(var(--u) * 1.6) 0; font-size: calc(var(--u) * 3.6); }
+  .check .nr { font-weight: bold; color: var(--accent); min-width: calc(var(--u) * 4); }
+  .check .lsg { color: var(--ok); font-weight: bold; visibility: hidden; margin-left: auto; white-space: nowrap; }
+  .check .lsg::before { content: "\2713\00a0"; }
+  .check .lsg.da { visibility: visible; }
+  .ampel { margin-top: calc(var(--u) * 3); font-size: calc(var(--u) * 3.2); color: var(--text-soft); }
+
+  .tafel { font-family: Consolas, monospace; font-size: calc(var(--u) * 3.4); text-align: left; background: var(--panel); padding: calc(var(--u) * 2) calc(var(--u) * 4); border-radius: calc(var(--u) * 1); white-space: pre; line-height: 1.35; }
+
+  /* Navigation */
+  .nav { position: fixed; left: calc(var(--u) * 2); bottom: calc(var(--u) * 1.8); display: flex; gap: calc(var(--u) * 1); align-items: center; }
+  .nav button, .knopf {
+    font: inherit; font-size: calc(var(--u) * 2.6); color: var(--text); background: var(--panel);
+    border: 1px solid #444; border-radius: calc(var(--u) * 0.8); padding: calc(var(--u) * 0.8) calc(var(--u) * 1.8);
+    cursor: pointer; min-height: 44px;
+  }
+  .knopf.gross { font-size: calc(var(--u) * 3.4); padding: calc(var(--u) * 1.2) calc(var(--u) * 3.2); }
+  .knopf.haupt { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+  .knoepfe { display: flex; gap: calc(var(--u) * 1.5); justify-content: center; margin-top: calc(var(--u) * 2.5); }
+  .nav .nr { font-size: calc(var(--u) * 2.4); color: var(--text-soft); margin-left: calc(var(--u) * 1); }
+  .tasten { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--u) * 2); font-size: calc(var(--u) * 1.9); color: #666; }
+  .fi { position: fixed; right: calc(var(--u) * 2.5); bottom: calc(var(--u) * 1.8); font-size: calc(var(--u) * 2.2); color: var(--logo); opacity: var(--logo-opacity); font-weight: bold; }
+</style>
+</head>
+<body>
+
+<!-- 1 Der Gedankenleser -->
+<section class="folie" data-tasten="Karte anklicken oder Taste A–E · Enter = zaubern · N = neue Runde">
+  <div class="warnung">Rechner bleiben aus.</div>
+  <h2>Denk dir eine Zahl von <span class="gelb">1</span> bis <span class="gelb">31</span>.<br>Sag mir nur, auf welchen Kärtchen sie steht!</h2>
+  <div class="karten" id="karten1"></div>
+  <div class="ergebnis">
+    <button class="knopf gross haupt" id="zauber">✨ Zaubern</button>
+    <div class="zauberzahl" id="zauberzahl"></div>
+    <button class="knopf" id="neu1">Neue Runde</button>
+  </div>
+</section>
+
+<!-- 2 Wie funktioniert das? -->
+<section class="folie" data-tasten="Klick / → deckt auf · Karten anklicken (A–E) schaltet Fenster · N = alles aus">
+  <h2>Wie funktioniert der Trick?</h2>
+  <div class="karten" id="karten2"></div>
+  <p class="schritt" data-s="1" style="margin:calc(var(--u)*2) 0 calc(var(--u)*1.5)">Mit welcher Zahl fängt jedes Kärtchen an? <span class="schritt" data-s="2">— <b class="gelb">Wo habt ihr diese Zahlen schon gesehen?</b></span></p>
+  <div class="schritt" data-s="3">
+    <div class="stock" id="stock2"></div>
+    <div class="summe" id="summe2"></div>
+  </div>
+</section>
+
+<!-- 3 Zauberlehrlinge -->
+<section class="folie" data-tasten="Leertaste = Uhr starten/anhalten · R = Uhr zurück · Klick auf Runde 2 deckt auf">
+  <h2>Ihr seid jetzt die Zauberer · <span class="gelb">Partnerarbeit</span></h2>
+  <ol class="auftrag">
+    <li><b>Runde 1 – Gedanken lesen:</b> <span class="rolle">A</span> denkt sich eine Zahl (1–31) und nennt nur die Kärtchen.
+      <span class="rolle">B</span> zaubert die Zahl. Ins Heft: <span class="mono gelb">Kärtchen → Bitfolge → Zahl</span>. Dann tauschen.</li>
+    <li class="schritt" data-s="1"><b>Runde 2 – Meisterprüfung:</b> <span class="rolle">B</span> nennt eine Zahl.
+      <span class="rolle">A</span> sagt <b>ohne hinzuschauen</b>, auf welchen Kärtchen sie steht. Erst dann mit den Kärtchen prüfen. Dann tauschen.
+      <br><span class="soft">Wie macht man das am schnellsten? Merkt euch euren Trick!</span></li>
+  </ol>
+  <div class="uhr" id="uhr3">4:00</div>
+  <div class="uhrhinweis">Uhr: Runde 1 = 4 Minuten · Runde 2 = 5 Minuten (Taste 1 / 2)</div>
+</section>
+
+<!-- 4 Sicherung -->
+<section class="folie" data-tasten="Klick / → deckt auf">
+  <h2>Der Zaubertrick ist das Binärsystem</h2>
+  <div class="tafel"><span class="schritt" data-s="1">Kärtchen dabei  =  Fenster an  =  1
+
+128  64  32  16   8   4   2   1
+</span><span class="schritt" data-s="2">
+Bitfolge -> Zahl:  Werte der Einsen addieren
+   00100110 = 32 + 4 + 2 = 38
+</span><span class="schritt" data-s="3">
+Zahl -> Bitfolge:  größter Wert zuerst!
+   37:  32 passt  -> Rest 5
+         4 passt  -> Rest 1
+         1 passt  -> Rest 0
+   37 = 00100101
+</span></div>
+</section>
+
+<!-- 5 Bingo vorbereiten -->
+<section class="folie" data-tasten="Leertaste = Uhr starten · R = Uhr zurück">
+  <h2>Binär-Bingo · <span class="gelb">jeder für sich</span></h2>
+  <p>Zeichne ein 3 × 3-Feld ins Heft. Trage <b>9</b> dieser 16 Zahlen ein – wie du willst:</p>
+  <div class="pool" id="pool"></div>
+  <div style="display:flex;gap:calc(var(--u)*6);align-items:center">
+    <div class="gitter"><div>18</div><div>255</div><div>5</div><div>96</div><div>64</div><div>136</div><div>12</div><div>33</div><div>100</div></div>
+    <p class="soft" style="text-align:left;max-width:calc(var(--u)*85)">Ich zeige Bitfolgen. Rechne sie im Kopf oder am Rand um.<br>
+    Steht die Zahl in deinem Feld: durchstreichen.<br>
+    <b class="gelb">Drei in einer Reihe</b> (waagerecht, senkrecht, schräg) → „Bingo!“ – aber nur, wenn du die Rechnung vorlesen kannst.</p>
+  </div>
+  <div class="uhr" id="uhr5" style="font-size:calc(var(--u)*6)">1:30</div>
+</section>
+
+<!-- 6 Bingo spielen -->
+<section class="folie" data-tasten="Leertaste = nächste Bitfolge · F = als Fenster zeigen · L = Lösungen ein/aus · N = neues Spiel">
+  <div class="zugnr" id="zugnr">Leertaste drücken für die erste Bitfolge</div>
+  <div class="zug" id="zug"></div>
+  <div class="stock" id="stock6" style="display:none"></div>
+  <div class="knoepfe">
+    <button class="knopf gross haupt" id="naechste">Nächste Bitfolge</button>
+    <button class="knopf" id="fenster6">Als Fenster</button>
+    <button class="knopf" id="loes6">Lösungen</button>
+    <button class="knopf" id="neu6">Neues Spiel</button>
+  </div>
+  <div class="verlauf" id="verlauf"></div>
+</section>
+
+<!-- 7 Test-Check -->
+<section class="folie" data-tasten="L = Lösungen nacheinander aufdecken">
+  <h2>Test-Check · <span class="gelb">allein, ins Heft, 4 Minuten</span></h2>
+  <div class="check">
+    <div class="aufg"><span class="nr">a)</span><span>Schreibe <span class="mono gelb">00100101</span> als Zahl. Gib die Rechnung an.</span><span class="lsg">32 + 4 + 1 = 37</span></div>
+    <div class="aufg"><span class="nr">b)</span><span>Welche Zahl ist größer: <span class="mono gelb">00100000</span> oder <span class="mono gelb">00000100</span>? Begründe.</span><span class="lsg">die erste: 32 &gt; 4</span></div>
+    <div class="aufg"><span class="nr">c)</span><span>Schreibe die Zahl <b class="gelb">50</b> als Bitfolge mit 8 Stellen.</span><span class="lsg mono">00110010</span></div>
+    <div class="aufg"><span class="nr">d)</span><span>Wie viele verschiedene Muster gibt es mit <b class="gelb">4</b> Fenstern?</span><span class="lsg">16</span></div>
+  </div>
+  <p class="ampel schritt" data-s="1" id="ampelzeile">Begründung b): Das Fenster weiter <b>links</b> hat den größeren Wert. · c): 32 + 16 + 2 = 50 · d): 2 · 2 · 2 · 2 = 16<br>
+  Jede Aufgabe einzeln: <b class="gelb">Daumen hoch</b> = sicher · <b class="gelb">Daumen quer</b> = mit Fehler · <b class="gelb">Daumen runter</b> = nicht geschafft</p>
+</section>
+
+<!-- 8 Abschluss -->
+<section class="folie" data-tasten="">
+  <h1>✨ Zauberlehrlinge bestanden</h1>
+  <p>Zum Weiterüben: <b>itsLearning → Notiz „Binär-Training“</b></p>
+  <p class="soft">Zaubert zu Hause: Mach dir die 5 Kärtchen selbst – und lies deiner Familie die Gedanken.</p>
+  <p class="gelb" id="testzeile"></p>
+</section>
+
+<nav class="nav">
+  <button id="zurueck">◀</button><button id="weiter">▶</button><span class="nr" id="nr"></span>
+</nav>
+<div class="tasten" id="tasten"></div>
+<div class="fi">© Fi</div>
+
+<script>
+  // Klassenabhängige Zeile — für die 7c-Fassung nur diese Zeile ändern.
+  const TESTZEILE = "Test: Mo 16.11. — Binärzahlen lesen und schreiben gehören dazu.";
+
+  const BUCHST = ["A", "B", "C", "D", "E"];
+  const POOL = [5, 9, 12, 18, 24, 33, 48, 64, 65, 80, 96, 100, 129, 136, 160, 255];
+  const folien = [...document.querySelectorAll(".folie")];
+  let akt = 0;
+
+  function bits(n) { return n.toString(2).padStart(8, "0"); }
+
+  // ---------- Kärtchen ----------
+  function baueKarten(ziel, reihenfolge, mitWert) {
+    const box = document.getElementById(ziel);
+    const karten = {};
+    reihenfolge.forEach(i => {
+      const wert = 1 << i;
+      const k = document.createElement("div");
+      k.className = "karte";
+      const kopf = document.createElement("div"); kopf.className = "kopf"; kopf.textContent = BUCHST[i];
+      const z = document.createElement("div"); z.className = "zahlen";
+      let erste = true;
+      for (let n = 1; n <= 31; n++) {
+        if (n & wert) {
+          const s = document.createElement("span"); s.textContent = n;
+          if (erste && mitWert) { s.className = "erste"; s.dataset.s = "1"; erste = false; }
+          z.appendChild(s);
+        }
+      }
+      k.append(kopf, z);
+      if (mitWert) {
+        const w = document.createElement("div"); w.className = "wertschild schritt"; w.dataset.s = "2"; w.textContent = wert;
+        k.appendChild(w);
+      }
+      box.appendChild(k);
+      karten[i] = k;
+    });
+    return karten;
+  }
+
+  // Folie 1: Gedankenleser
+  const karten1 = baueKarten("karten1", [0, 1, 2, 3, 4], false);
+  const gewaehlt1 = new Set();
+  const zz = document.getElementById("zauberzahl");
+  function toggle1(i) {
+    gewaehlt1.has(i) ? gewaehlt1.delete(i) : gewaehlt1.add(i);
+    karten1[i].classList.toggle("an", gewaehlt1.has(i));
+    zz.classList.remove("da");
+  }
+  function zaubern() {
+    let s = 0; gewaehlt1.forEach(i => s += 1 << i);
+    zz.textContent = s || "?";
+    zz.classList.remove("da"); void zz.offsetWidth; zz.classList.add("da");
+  }
+  function neu1() { gewaehlt1.clear(); Object.values(karten1).forEach(k => k.classList.remove("an")); zz.classList.remove("da"); }
+  Object.entries(karten1).forEach(([i, k]) => k.addEventListener("click", () => toggle1(+i)));
+  document.getElementById("zauber").onclick = zaubern;
+  document.getElementById("neu1").onclick = neu1;
+
+  // Folie 2: Auflösung, Kärtchen nach Wert sortiert (E D C B A = 16 8 4 2 1)
+  const karten2 = baueKarten("karten2", [4, 3, 2, 1, 0], true);
+  const stock2 = document.getElementById("stock2");
+  const stockFenster2 = baueStock(stock2, true);
+  const gewaehlt2 = new Set();
+  function baueStock(box, grauOben) {
+    const fenster = [];
+    for (let r = 0; r < 3; r++) for (let j = 7; j >= 0; j--) {
+      const d = document.createElement("div");
+      if (r === 0) { d.className = "w"; d.textContent = 1 << j; }
+      if (r === 1) { d.className = "f"; fenster[j] = d; }
+      if (r === 2) { d.className = "b"; d.textContent = "0"; d.dataset.j = j; }
+      if (grauOben && j > 4) d.classList.add("grau");
+      box.appendChild(d);
+    }
+    return fenster;
+  }
+  function zeichne2() {
+    let s = 0; const teile = [];
+    for (let j = 7; j >= 0; j--) {
+      const an = gewaehlt2.has(j);
+      stockFenster2[j].classList.toggle("an", an);
+      stock2.querySelector(`.b[data-j="${j}"]`).textContent = an ? "1" : "0";
+      if (an) { s += 1 << j; teile.push(1 << j); }
+    }
+    Object.entries(karten2).forEach(([i, k]) => k.classList.toggle("an", gewaehlt2.has(+i)));
+    document.getElementById("summe2").innerHTML = teile.length
+      ? `<span class="mono">${bits(s)}</span> = ${teile.join(" + ")} = <b class="gelb">${s}</b>` : "";
+  }
+  function toggle2(i) { gewaehlt2.has(i) ? gewaehlt2.delete(i) : gewaehlt2.add(i); zeichne2(); }
+  Object.entries(karten2).forEach(([i, k]) => k.addEventListener("click", e => { e.stopPropagation(); toggle2(+i); }));
+  stockFenster2.forEach((f, j) => { if (j <= 4) { f.style.cursor = "pointer"; f.addEventListener("click", e => { e.stopPropagation(); toggle2(j); }); } });
+  zeichne2();
+
+  // ---------- Schritte aufdecken ----------
+  function schritte(f) { return Math.max(0, ...[...f.querySelectorAll("[data-s]")].map(e => +e.dataset.s)); }
+  function stand(f) { return +(f.dataset.stand || 0); }
+  function setzeStand(f, n) {
+    f.dataset.stand = n;
+    f.querySelectorAll("[data-s]").forEach(e => e.classList.toggle("da", +e.dataset.s <= n));
+  }
+  folien.forEach(f => setzeStand(f, 0));
+
+  // ---------- Uhren ----------
+  function Uhr(id, sek) {
+    const el = document.getElementById(id);
+    let rest = sek, start = sek, t = null;
+    const zeig = () => { el.textContent = Math.floor(rest / 60) + ":" + String(rest % 60).padStart(2, "0"); el.classList.toggle("ende", rest === 0); };
+    return {
+      toggle() { if (t) { clearInterval(t); t = null; } else t = setInterval(() => { if (rest > 0) rest--; zeig(); if (rest === 0) { clearInterval(t); t = null; } }, 1000); },
+      reset(s) { if (t) { clearInterval(t); t = null; } if (s) start = s; rest = start; zeig(); }
+    };
+  }
+  const uhr3 = Uhr("uhr3", 240), uhr5 = Uhr("uhr5", 90);
+
+  // ---------- Bingo ----------
+  const poolBox = document.getElementById("pool");
+  POOL.forEach(n => { const d = document.createElement("div"); d.textContent = n; poolBox.appendChild(d); });
+  const stock6 = document.getElementById("stock6");
+  const stockFenster6 = baueStock(stock6, false);
+  let stapel = [], gezogen = [], alsFenster = false, loesungen = false;
+  function mische() {
+    stapel = POOL.slice();
+    for (let i = stapel.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [stapel[i], stapel[j]] = [stapel[j], stapel[i]]; }
+    gezogen = []; zeige6();
+  }
+  function zeige6() {
+    const zug = document.getElementById("zug"), nr = document.getElementById("zugnr");
+    const n = gezogen[gezogen.length - 1];
+    if (n === undefined) { zug.innerHTML = ""; nr.textContent = "Leertaste drücken für die erste Bitfolge"; }
+    else {
+      nr.textContent = `Bitfolge ${gezogen.length} von ${POOL.length}`;
+      zug.innerHTML = bits(n).split("").map(c => c === "0" ? '<span class="null">0</span>' : c).join("");
+      for (let j = 0; j < 8; j++) {
+        stockFenster6[j].classList.toggle("an", !!(n & (1 << j)));
+        stock6.querySelector(`.b[data-j="${j}"]`).textContent = n & (1 << j) ? "1" : "0";
+      }
+    }
+    zug.style.display = alsFenster ? "none" : "";
+    stock6.style.display = alsFenster && n !== undefined ? "grid" : "none";
+    stock6.querySelectorAll(".b").forEach(b => b.style.visibility = "hidden");
+    document.getElementById("verlauf").innerHTML = gezogen.slice(0, -1).map(g =>
+      `<div>${bits(g)}${loesungen ? " = <b>" + g + "</b>" : ""}</div>`).join("") +
+      (loesungen && n !== undefined ? `<div>${bits(n)} = <b>${n}</b></div>` : "");
+    document.getElementById("loes6").textContent = loesungen ? "Lösungen aus" : "Lösungen";
+    document.getElementById("fenster6").textContent = alsFenster ? "Als Ziffern" : "Als Fenster";
+  }
+  function naechste() { if (stapel.length) { gezogen.push(stapel.pop()); zeige6(); } }
+  document.getElementById("naechste").onclick = naechste;
+  document.getElementById("fenster6").onclick = () => { alsFenster = !alsFenster; zeige6(); };
+  document.getElementById("loes6").onclick = () => { loesungen = !loesungen; zeige6(); };
+  document.getElementById("neu6").onclick = () => { loesungen = false; mische(); };
+  mische();
+
+  document.getElementById("testzeile").textContent = TESTZEILE;
+
+  // ---------- Navigation ----------
+  function zeige(i) {
+    akt = Math.max(0, Math.min(folien.length - 1, i));
+    folien.forEach((f, k) => f.classList.toggle("aktiv", k === akt));
+    document.getElementById("nr").textContent = `Folie ${akt + 1} / ${folien.length}`;
+    document.getElementById("tasten").textContent = folien[akt].dataset.tasten;
+  }
+  function vor() { const f = folien[akt]; if (stand(f) < schritte(f)) setzeStand(f, stand(f) + 1); else zeige(akt + 1); }
+  function zurueck() { const f = folien[akt]; if (stand(f) > 0) setzeStand(f, stand(f) - 1); else zeige(akt - 1); }
+  document.getElementById("weiter").onclick = vor;
+  document.getElementById("zurueck").onclick = zurueck;
+  // Klick auf freie Fläche der Aufdeck-Folien deckt auf
+  [1, 2, 3].forEach(k => folien[k].addEventListener("click", e => { if (!e.target.closest("button, .karte, .f")) vor(); }));
+
+  document.addEventListener("keydown", e => {
+    const k = e.key;
+    if (k === "ArrowRight" || k === "PageDown") { vor(); e.preventDefault(); return; }
+    if (k === "ArrowLeft" || k === "PageUp") { zurueck(); e.preventDefault(); return; }
+    if (k === "Home") { zeige(0); return; }
+    const kl = k.toLowerCase();
+    const bi = "abcde".indexOf(kl);
+    if (akt === 0) {
+      if (bi >= 0 && kl.length === 1) toggle1(bi);
+      if (k === "Enter") zaubern();
+      if (kl === "n") neu1();
+    }
+    if (akt === 1) {
+      if (bi >= 0 && kl.length === 1) toggle2(bi);
+      if (kl === "n") { gewaehlt2.clear(); zeichne2(); }
+    }
+    if (akt === 2) {
+      if (k === " ") { uhr3.toggle(); e.preventDefault(); }
+      if (kl === "r") uhr3.reset();
+      if (k === "1") uhr3.reset(240);
+      if (k === "2") { uhr3.reset(300); if (stand(folien[2]) < 1) setzeStand(folien[2], 1); }
+    }
+    if (akt === 4) { if (k === " ") { uhr5.toggle(); e.preventDefault(); } if (kl === "r") uhr5.reset(); }
+    if (akt === 5) {
+      if (k === " " || k === "Enter") { naechste(); e.preventDefault(); }
+      if (kl === "f") { alsFenster = !alsFenster; zeige6(); }
+      if (kl === "l") { loesungen = !loesungen; zeige6(); }
+      if (kl === "n") { loesungen = false; mische(); }
+    }
+    if (akt === 6 && kl === "l") {
+      const l = [...folien[6].querySelectorAll(".lsg:not(.da)")];
+      if (l.length) l[0].classList.add("da"); else setzeStand(folien[6], 1);
+    }
+  });
+  zeige(0);
+</script>
+</body>
+</html>

@@ -163,7 +163,8 @@ button.haupt:hover{
 
 /* ---------- Abfragezettel (nur beim Drucken sichtbar) ---------- */
 
-#zettelseite{
+#zettelseite,
+#aufgabenseite{
     display:none;
 }
 
@@ -174,14 +175,24 @@ button.haupt:hover{
         margin:0;
     }
 
-    body.zettel-druck{
+    body.zettel-druck > *{
+        display:none !important;
+    }
+
+    body.zettel-druck,
+    body.aufgaben-druck{
         margin:0;
         padding:0;
         background:white;
     }
 
-    body.zettel-druck > *{
+    body.aufgaben-druck > *{
         display:none !important;
+    }
+
+    body.aufgaben-druck #aufgabenseite{
+        display:block !important;
+        padding:20mm;
     }
 
     body.zettel-druck #zettelseite{
@@ -197,7 +208,7 @@ button.haupt:hover{
 
 .zettel{
     box-sizing:border-box;
-    padding:6mm;
+    padding:3mm 6mm 6mm 6mm;
     font-size:11pt;
     border-color:#999;
     border-style:dashed;
@@ -227,7 +238,7 @@ button.haupt:hover{
 .zettel-spalten{
     display:grid;
     grid-template-columns:39mm 54mm;
-    margin-top:4mm;
+    margin-top:2mm;
 }
 
 .zettel-spalte:first-child{
@@ -240,6 +251,7 @@ button.haupt:hover{
 
 .zettel-spalte h3{
     font-size:11pt;
+    line-height:4.5mm;
     margin:0 0 1mm 0;
     padding-bottom:1mm;
     border-bottom:0.3mm solid black;
@@ -273,6 +285,27 @@ button.haupt:hover{
     margin-right:3mm;
 }
 
+/* ---------- Aufgabenblatt (nur beim Drucken sichtbar) ---------- */
+
+#aufgabenseite h1{
+    font-size:20pt;
+    color:black;
+    margin:0 0 8mm 0;
+}
+
+#aufgabenseite h2{
+    font-size:14pt;
+    margin:0 0 3mm 0;
+}
+
+#aufgabenseite pre{
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:14pt;
+    line-height:1.7;
+    margin:0 0 10mm 0;
+    white-space:pre-wrap;
+}
+
 </style>
 </head>
 
@@ -294,6 +327,7 @@ button.haupt:hover{
 <button class="haupt" onclick="erzeuge()">Aufgaben erzeugen</button>
 <button onclick="teile()">Teilen</button>
 <button onclick="kopieren()">Kopieren</button>
+<button onclick="aufgabenDrucken()">Aufgaben drucken</button>
 <button onclick="zettelDrucken()">Abfragezettel drucken</button>
 </div>
 
@@ -317,6 +351,7 @@ button.haupt:hover{
 </div>
 
 <div id="zettelseite"></div>
+<div id="aufgabenseite"></div>
 
 <script>
 let vorwaerts = [];
@@ -511,6 +546,30 @@ function teile(){
 
 }
 
+// ---------- Aufgaben drucken ----------
+// druckt denselben Inhalt wie beim Teilen, ohne Knöpfe und Farben
+
+function aufgabenDrucken(){
+
+    if(document.getElementById("vor").textContent===""){
+        alert("Bitte zuerst Aufgaben erzeugen.");
+        return;
+    }
+
+    let seite=document.getElementById("aufgabenseite");
+
+    seite.innerHTML="<h1>Einmaleins</h1><h2>Vorwärts</h2><pre></pre><h2>Rückwärts</h2><pre></pre>";
+
+    let bloecke=seite.querySelectorAll("pre");
+    bloecke[0].textContent=document.getElementById("vor").textContent;
+    bloecke[1].textContent=document.getElementById("rueck").textContent;
+
+    document.body.classList.add("aufgaben-druck");
+
+    window.print();
+
+}
+
 // ---------- Abfragezettel ----------
 // 6 leere Zettel (10,5 × 9,9 cm) auf einer A4-Seite:
 // links 10 Zeilen für die Ergebnisse (vorwärts), rechts 10 Zeilen für die Aufgaben (rückwärts)
@@ -556,7 +615,7 @@ function zettelDrucken(){
 }
 
 window.addEventListener("afterprint",()=>{
-    document.body.classList.remove("zettel-druck");
+    document.body.classList.remove("zettel-druck","aufgaben-druck");
 });
 
 </script>

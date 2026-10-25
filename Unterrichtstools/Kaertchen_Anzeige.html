@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Das Zahlenrätsel</title>
+<style>
+  :root{
+    --bg:#1a1a1a;
+    --text:#f2f2f2;
+    --text-soft:#b5b5b5;
+    --accent:#fccb00;
+    --warn:#ff6b6b;
+    --card-bg:#ffffff;
+    --card-text:#111111;
+    --card-soft:#555555;
+    --card-line:#d5d5d5;
+    --logo:#888;
+    --logo-opacity:0.4;
+  }
+  *{box-sizing:border-box}
+  /* Alle Größen hängen an --u: passt sich 16:9, 16:10 und 4:3 an, ohne dass etwas überläuft. */
+  html{ --u:min(1vh, 0.5625vw); }
+  html,body{
+    margin:0;padding:0;width:100%;height:100%;
+    background:var(--bg);color:var(--text);
+    font-family:"Verdana","Segoe UI",Arial,sans-serif;
+    overflow:hidden;
+  }
+  .page{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    text-align:center;
+  }
+  .warnung{
+    font-size:calc(var(--u) * 6);font-weight:bold;color:var(--warn);
+    margin-bottom:calc(var(--u) * 2.4);
+  }
+  .warnung::before{content:"\25A0\00a0"}   /* Symbol zusätzlich zur Farbe */
+  .auftrag{
+    font-size:calc(var(--u) * 4.2);line-height:1.4;
+    margin:0 0 calc(var(--u) * 4) 0;
+  }
+  .auftrag b{color:var(--accent)}
+
+  .cards{
+    display:flex;gap:calc(var(--u) * 2.6);justify-content:center;align-items:flex-start;
+  }
+  .card{
+    background:var(--card-bg);color:var(--card-text);
+    border-radius:calc(var(--u) * 1.6);
+    padding:calc(var(--u) * 1.6) calc(var(--u) * 2.2) calc(var(--u) * 2.2);
+    box-shadow:0 calc(var(--u) * 0.8) 0 rgba(0,0,0,0.45);
+  }
+  .card .buchstabe{
+    font-size:calc(var(--u) * 6);font-weight:bold;line-height:1;
+    padding-bottom:calc(var(--u) * 1.2);margin-bottom:calc(var(--u) * 1.4);
+    border-bottom:calc(var(--u) * 0.3) solid var(--card-line);
+  }
+  .card .zahlen{
+    display:grid;grid-template-columns:repeat(4, calc(var(--u) * 6.6));
+    row-gap:calc(var(--u) * 1.2);
+    font-size:calc(var(--u) * 3.6);font-weight:bold;
+    font-variant-numeric:tabular-nums;
+    text-align:right;
+  }
+
+  .fi-logo{
+    position:absolute;bottom:1.5vh;right:2vw;
+    font-size:calc(var(--u) * 2.2);color:var(--logo);opacity:var(--logo-opacity);
+    font-weight:bold;letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="warnung">Bildschirme aus. Nicht abmelden.</div>
+  <p class="auftrag">Denk dir eine Zahl zwischen <b>1</b> und <b>31</b> aus.<br>
+    Sag mir nur, auf welchen Kärtchen sie steht!</p>
+  <div class="cards" id="cards"></div>
+</div>
+
+<div class="fi-logo">Fi</div>
+
+<script>
+  // Standardtrick: Kärtchen n enthält alle Zahlen 1..31, bei denen das Bit mit dem Wert 2^n gesetzt ist.
+  var buchstaben = ['A', 'B', 'C', 'D', 'E'];
+  var cardsEl = document.getElementById('cards');
+  buchstaben.forEach(function (b, i) {
+    var wert = 1 << i;
+    var karte = document.createElement('div');
+    karte.className = 'card';
+    var kopf = document.createElement('div');
+    kopf.className = 'buchstabe';
+    kopf.textContent = b;
+    var zahlen = document.createElement('div');
+    zahlen.className = 'zahlen';
+    for (var z = 1; z <= 31; z++) {
+      if (z & wert) {
+        var s = document.createElement('span');
+        s.textContent = z;
+        zahlen.appendChild(s);
+      }
+    }
+    karte.appendChild(kopf);
+    karte.appendChild(zahlen);
+    cardsEl.appendChild(karte);
+  });
+</script>
+</body>
+</html>
