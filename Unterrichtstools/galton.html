@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galton-Brett</title>
+<style>
+:root {
+  --bg: #1a1a1a;
+  --panel: #262626;
+  --panel2: #363636;
+  --text: #f2f2f2;
+  --text-soft: #b5b5b5;
+  --accent: #4da3ff;
+  --ok: #4caf50;
+  --warn: #ffb300;
+  --bad: #ef5350;
+  --peg: #8a8a8a;
+  --ball: #e8e8e8;
+  --wall: #555555;
+  --sel: rgba(77, 163, 255, 0.16);
+  --logo: #888;
+  --logo-opacity: 0.4;
+  --font-base: 28px;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%;
+  background: var(--bg); color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: var(--font-base);
+}
+body {
+  display: flex; flex-direction: column; overflow: hidden;
+  -webkit-user-select: none; user-select: none;
+}
+header {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: .2em 1.2em; padding: .25em .6em .1em;
+}
+h1 { margin: 0; font-size: 1.25em; }
+h1 small { font-weight: normal; color: var(--text-soft); font-size: .7em; margin-left: .4em; }
+#statistik { display: flex; flex-wrap: wrap; gap: .2em 1.1em; font-variant-numeric: tabular-nums; }
+#statistik b { color: var(--accent); }
+#statistik .theo { color: var(--warn); }
+main { flex: 1; display: flex; min-height: 0; gap: .4em; padding: 0 .4em .4em; }
+#buehne { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#leinwandBox { flex: 1; position: relative; min-height: 0; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: manipulation; cursor: pointer; }
+#weg, #fachinfo { padding: .1em .4em; min-height: 1.4em; font-variant-numeric: tabular-nums; }
+#weg { color: var(--text-soft); }
+#weg .pfad { color: var(--bad); font-weight: bold; letter-spacing: .08em; }
+#fachinfo { font-size: 1.05em; }
+#fachinfo .theo { color: var(--warn); }
+aside {
+  width: 410px; flex-shrink: 0; background: var(--panel); border-radius: 14px;
+  padding: .45em; overflow-y: auto; display: flex; flex-direction: column; gap: .5em;
+  font-size: .9em;
+}
+.lbl { color: var(--text-soft); font-size: .85em; margin-bottom: .15em; }
+.reihe { display: flex; gap: .3em; }
+.reihe > * { flex: 1; }
+button {
+  font: inherit; color: var(--text); background: var(--panel2);
+  border: 2px solid transparent; border-radius: 10px;
+  min-height: 1.9em; padding: .1em .3em; cursor: pointer;
+  touch-action: manipulation;
+}
+button:active { filter: brightness(1.3); }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.stepper { display: flex; align-items: center; gap: .3em; }
+.stepper button { width: 1.9em; font-size: 1.1em; font-weight: bold; flex: none; }
+.stepper output { flex: 1; text-align: center; font-size: 1.35em; font-weight: bold; font-variant-numeric: tabular-nums; }
+.klein { font-size: .9em; }
+.gewaehlt { border-color: var(--accent); color: var(--accent); }
+#dauer.an { background: var(--ok); color: #101010; font-weight: bold; }
+.tog { text-align: left; padding-left: .5em; }
+.tog::before { content: "○ "; }
+.tog.an { border-color: var(--accent); }
+.tog.an::before { content: "✓ "; color: var(--accent); font-weight: bold; }
+#reset { color: var(--bad); }
+.fi {
+  position: fixed; right: .5em; bottom: .25em;
+  color: var(--logo); opacity: var(--logo-opacity); font-size: 14px; pointer-events: none;
+}
+@media (max-width: 1150px), (max-height: 760px) {
+  :root { --font-base: 22px; }
+  aside { width: 330px; }
+}
+@media (max-width: 760px), (orientation: portrait) and (max-width: 1100px) {
+  main { flex-direction: column; }
+  aside { width: auto; max-height: 42%; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Galton-Brett <small id="untertitel"></small></h1>
+  <div id="statistik"></div>
+</header>
+<main>
+  <div id="buehne">
+    <div id="leinwandBox"><canvas id="lw"></canvas></div>
+    <div id="weg"></div>
+    <div id="fachinfo"></div>
+  </div>
+  <aside>
+    <div>
+      <div class="lbl">Reihen n</div>
+      <div class="stepper"><button id="nMinus" aria-label="weniger Reihen">−</button><output id="nWert"></output><button id="nPlus" aria-label="mehr Reihen">+</button></div>
+    </div>
+    <div>
+      <div class="lbl">p = P(rechts)</div>
+      <div class="stepper"><button id="pMinus" aria-label="p kleiner">−</button><output id="pWert"></output><button id="pPlus" aria-label="p größer">+</button></div>
+      <div class="reihe" style="margin-top:.3em">
+        <button class="klein preset" data-preset="0">1/2</button>
+        <button class="klein preset" data-preset="1">1/6</button>
+        <button class="klein preset" data-preset="2">1/4</button>
+      </div>
+    </div>
+    <div>
+      <div class="lbl">Kugeln</div>
+      <div class="reihe">
+        <button data-add="1">+1</button>
+        <button data-add="10">+10</button>
+        <button data-add="100">+100</button>
+        <button data-add="1000" title="sofort, ohne Animation">+1000</button>
+      </div>
+      <button id="dauer" style="width:100%;margin-top:.3em">▶ Dauerlauf</button>
+    </div>
+    <div>
+      <div class="lbl">Tempo</div>
+      <div class="reihe">
+        <button class="klein tempo" data-tempo="0">langsam</button>
+        <button class="klein tempo" data-tempo="1">mittel</button>
+        <button class="klein tempo" data-tempo="2">schnell</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.3em">
+      <div class="lbl">Einblenden</div>
+      <button class="tog" data-tog="pascal">Pascal-Zahlen (Wege)</button>
+      <button class="tog" data-tog="theorie">Theorie B(n; p)</button>
+      <button class="tog" data-tog="weg">Weg der letzten Kugel</button>
+      <button class="tog" data-tog="relativ">relative Häufigkeit</button>
+    </div>
+    <div class="reihe" style="margin-top:auto">
+      <button id="reset" class="klein">Zurücksetzen</button>
+      <button id="voll" class="klein">Vollbild</button>
+    </div>
+  </aside>
+</main>
+<div class="fi">© Fi</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const css = getComputedStyle(document.documentElement);
+const F = {};
+["text", "text-soft", "accent", "warn", "bad", "peg", "ball", "wall", "sel", "panel2"].forEach(k => F[k] = css.getPropertyValue("--" + k).trim());
+
+const PRESETS = [
+  { v: 1 / 2, l: "1/2", q: "1/2" },
+  { v: 1 / 6, l: "1/6", q: "5/6" },
+  { v: 1 / 4, l: "1/4", q: "3/4" }
+];
+const TEMPO = [420, 170, 60];   // ms pro Reihe
+const N_MIN = 1, N_MAX = 15;
+
+// Einstellungen (nur diese werden gespeichert)
+const S = { n: 10, p: 0.5, preset: 0, tempo: 1, pascal: false, theorie: false, weg: true, relativ: false };
+try { Object.assign(S, JSON.parse(localStorage.getItem("galton-einstellungen") || "{}")); } catch (e) {}
+function speichern() { try { localStorage.setItem("galton-einstellungen", JSON.stringify(S)); } catch (e) {} }
+
+let zaehler = [], N = 0, kugeln = [], warte = 0, dauer = false, letzterWeg = null, auswahl = null, spawnUhr = 0;
+
+function binom(n, k) {
+  if (k < 0 || k > n) return 0;
+  let r = 1;
+  for (let i = 1; i <= k; i++) r = r * (n - k + i) / i;
+  return Math.round(r);
+}
+function P(k) { return binom(S.n, k) * Math.pow(S.p, k) * Math.pow(1 - S.p, S.n - k); }
+function dez(x, st) { return x.toFixed(st).replace(".", ","); }
+function tsd(x) { return x.toLocaleString("de-DE"); }
+function pText() { return S.preset !== null ? PRESETS[S.preset].l : dez(S.p, 2); }
+function qText() { return S.preset !== null ? PRESETS[S.preset].q : dez(1 - S.p, 2); }
+
+function neu() {
+  zaehler = new Array(S.n + 1).fill(0);
+  N = 0; kugeln = []; warte = 0; letzterWeg = null;
+  if (auswahl !== null && auswahl > S.n) auswahl = null;
+  bedienung();
+}
+
+// ---------- Geometrie ----------
+const lw = $("lw"), ctx = lw.getContext("2d");
+let W = 0, H = 0;
+function groesse() {
+  const r = lw.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  W = r.width; H = r.height;
+  lw.width = Math.round(W * dpr); lw.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+new ResizeObserver(groesse).observe($("leinwandBox"));
+
+function geo() {
+  const n = S.n;
+  const top = H * 0.03;
+  const VERH = 1.3;                                    // Nagelabstand waagerecht : Reihenabstand
+  const dx = Math.min(W * 0.96 / (n + 1), H * 0.62 / (n + 0.5) * VERH);
+  const rowH = dx / VERH;
+  const cx = W / 2;
+  const fs = Math.max(13, Math.min(dx * 0.42, rowH * 0.6, 28));     // Schrift für Zahlen
+  const base = H - fs * 1.5;                            // Grundlinie der Fächer
+  const pegR = Math.max(3, Math.min(dx * 0.08, 12));
+  const ballR = Math.max(3, Math.min(dx * 0.14, 20));
+  const pegX = (i, j) => cx + (j - i / 2) * dx;
+  const pegY = i => top + (i + 0.6) * rowH;
+  const binX = k => cx + (k - n / 2) * dx;
+  const wallTop = pegY(n - 1);
+  const binZahlY = wallTop + rowH * 0.55 + fs * 0.6;   // Pascal-Zahl über dem Fach
+  const histTop = binZahlY + fs * 1.6;                 // darunter Platz für den Wert
+  return { n, top, rowH, dx, cx, fs, base, pegR, ballR, pegX, pegY, binX, wallTop, binZahlY, histTop };
+}
+
+// ---------- Kugeln ----------
+function wurf() { const d = []; for (let i = 0; i < S.n; i++) d.push(Math.random() < S.p ? 1 : 0); return d; }
+
+function starteKugel() { kugeln.push({ d: wurf(), t: 0 }); }
+
+function punkte(g, d) {
+  const pts = [{ x: g.cx, y: Math.max(g.ballR + 2, g.top - g.ballR) }];
+  let j = 0;
+  for (let i = 0; i < g.n; i++) {
+    pts.push({ x: g.pegX(i, j), y: g.pegY(i) - g.pegR - g.ballR });
+    j += d[i];
+  }
+  pts.push({ x: g.binX(j), y: g.wallTop + g.rowH * 0.3 });
+  pts.push({ x: g.binX(j), y: g.base - g.ballR });
+  return { pts, k: j };
+}
+
+function kugelPos(g, b) {
+  const { pts } = punkte(g, b.d);
+  const s = Math.min(Math.floor(b.t), pts.length - 2), u = b.t - s;
+  const a = pts[s], e = pts[s + 1];
+  if (s >= 1 && s <= g.n) {                     // Wurfparabel von Nagel zu Nagel bzw. ins Fach:
+    const b = 0.5;                               // waagerecht gleichförmig, senkrecht kleiner Abprall, dann Fall
+    return { x: a.x + (e.x - a.x) * u, y: a.y + (e.y - a.y) * ((1 + b) * u * u - b * u) };
+  }
+  const uf = u * u;                              // freier Fall
+  return { x: a.x + (e.x - a.x) * uf, y: a.y + (e.y - a.y) * uf };
+}
+
+function lande(d) {
+  const k = d.reduce((s, x) => s + x, 0);
+  zaehler[k]++; N++;
+  letzterWeg = d;
+}
+
+function sofort(anzahl) {
+  for (let i = 0; i < anzahl; i++) {
+    let k = 0;
+    for (let j = 0; j < S.n; j++) if (Math.random() < S.p) k++;
+    zaehler[k]++;
+  }
+  N += anzahl;
+  texte();
+}
+
+// ---------- Zeichnen ----------
+// Schriftgröße, bei der eine fette Zahl noch in die Breite passt
+function passend(t, max, breite) {
+  ctx.font = "bold 100px system-ui, sans-serif";
+  return Math.floor(Math.max(8, Math.min(max, breite / ctx.measureText(t).width * 100)));
+}
+
+function zeichne() {
+  ctx.clearRect(0, 0, W, H);
+  if (W < 10 || H < 10) return;
+  const g = geo(), n = g.n;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+
+  // ausgewähltes Fach
+  if (auswahl !== null) {
+    ctx.fillStyle = F.sel;
+    ctx.fillRect(g.binX(auswahl) - g.dx / 2, g.wallTop, g.dx, g.base - g.wallTop);
+  }
+
+  // Nägel bzw. Pascal-Zahlen
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j <= i; j++) {
+      const x = g.pegX(i, j), y = g.pegY(i);
+      if (S.pascal) {
+        const t = String(binom(i, j));
+        ctx.font = "bold " + passend(t, g.fs * 0.8, g.dx * 0.85) + "px system-ui, sans-serif";
+        const w = Math.max(ctx.measureText(t).width + 8, g.fs);
+        ctx.fillStyle = F.panel2;
+        ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - w / 2, y - g.fs * 0.55, w, g.fs * 1.1, 6) : ctx.rect(x - w / 2, y - g.fs * 0.55, w, g.fs * 1.1); ctx.fill();
+        ctx.fillStyle = F.text; ctx.fillText(t, x, y + 1);
+      } else {
+        ctx.fillStyle = F.peg;
+        ctx.beginPath(); ctx.arc(x, y, g.pegR, 0, 2 * Math.PI); ctx.fill();
+      }
+    }
+  }
+
+  // Fachwände
+  ctx.strokeStyle = F.wall; ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let k = 0; k <= n + 1; k++) {
+    const x = g.binX(k) - g.dx / 2;
+    ctx.moveTo(x, k === 0 || k === n + 1 ? g.wallTop - g.rowH * 0.3 : g.wallTop + (S.pascal ? g.fs * 0.6 : 0));
+    ctx.lineTo(x, g.base);
+  }
+  ctx.moveTo(g.binX(0) - g.dx / 2, g.base); ctx.lineTo(g.binX(n) + g.dx / 2, g.base);
+  ctx.stroke();
+
+  // Säulen
+  const werte = zaehler.map(c => S.relativ ? (N ? c / N : 0) : c);
+  const theo = zaehler.map((_, k) => P(k) * (S.relativ ? 1 : N));
+  let maxV = Math.max(...werte, S.theorie ? Math.max(...theo) : 0);
+  maxV = Math.max(maxV, S.relativ ? 0.05 : 5) * 1.05;
+  const histH = g.base - g.histTop;
+  const bw = g.dx * 0.78;
+  ctx.font = Math.round(g.fs * 0.8) + "px system-ui, sans-serif";
+  for (let k = 0; k <= n; k++) {
+    const x = g.binX(k), h = werte[k] / maxV * histH;
+    ctx.fillStyle = F.accent;
+    ctx.fillRect(x - bw / 2, g.base - h, bw, h);
+    if (zaehler[k] > 0 && g.dx > 34) {
+      ctx.fillStyle = F.text;
+      const t = S.relativ ? dez(werte[k], 3) : tsd(zaehler[k]);
+      const ht = S.theorie ? Math.max(h, theo[k] / maxV * histH) : h;
+      ctx.fillText(t, x, g.base - ht - g.fs * 0.5);
+    }
+  }
+
+  // Theorie
+  if (S.theorie) {
+    ctx.strokeStyle = F.warn; ctx.lineWidth = 4;
+    for (let k = 0; k <= n; k++) {
+      const y = g.base - theo[k] / maxV * histH;
+      ctx.beginPath(); ctx.moveTo(g.binX(k) - g.dx * 0.46, y); ctx.lineTo(g.binX(k) + g.dx * 0.46, y); ctx.stroke();
+    }
+  }
+
+  // Fachnummern
+  ctx.font = "bold " + Math.round(g.fs) + "px system-ui, sans-serif";
+  for (let k = 0; k <= n; k++) {
+    ctx.fillStyle = auswahl === k ? F.accent : F["text-soft"];
+    ctx.fillText(String(k), g.binX(k), g.base + g.fs * 0.75);
+  }
+
+  // Pascal-Zahlen über den Fächern
+  if (S.pascal) {
+    ctx.fillStyle = F.warn;
+    for (let k = 0; k <= n; k++) {
+      const t = String(binom(n, k));
+      ctx.font = "bold " + passend(t, g.fs * 0.85, g.dx * 0.92) + "px system-ui, sans-serif";
+      ctx.fillText(t, g.binX(k), g.binZahlY);
+    }
+  }
+
+  // Weg der letzten Kugel
+  if (S.weg && letzterWeg && letzterWeg.length === n) {
+    const { pts } = punkte(g, letzterWeg);
+    ctx.strokeStyle = F.bad; ctx.lineWidth = 4; ctx.lineJoin = "round";
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length - 1; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // fallende Kugeln
+  ctx.fillStyle = F.ball;
+  for (const b of kugeln) {
+    const p = kugelPos(g, b);
+    ctx.beginPath(); ctx.arc(p.x, p.y, g.ballR, 0, 2 * Math.PI); ctx.fill();
+  }
+}
+
+// ---------- Texte ----------
+function texte() {
+  $("untertitel").textContent = "n = " + S.n + " · p = " + pText();
+  let st = "<span>Kugeln: <b>" + tsd(N) + "</b></span>";
+  if (N > 0) {
+    let m = 0, v = 0;
+    zaehler.forEach((c, k) => m += k * c); m /= N;
+    zaehler.forEach((c, k) => v += c * (k - m) * (k - m)); v /= N;
+    st += "<span>x̄ = <b>" + dez(m, 2) + "</b>" + (S.theorie ? " <span class='theo'>(μ = " + dez(S.n * S.p, 2) + ")</span>" : "") + "</span>";
+    st += "<span>s = <b>" + dez(Math.sqrt(v), 2) + "</b>" + (S.theorie ? " <span class='theo'>(σ = " + dez(Math.sqrt(S.n * S.p * (1 - S.p)), 2) + ")</span>" : "") + "</span>";
+  } else if (S.theorie) {
+    st += "<span class='theo'>μ = " + dez(S.n * S.p, 2) + " · σ = " + dez(Math.sqrt(S.n * S.p * (1 - S.p)), 2) + "</span>";
+  }
+  $("statistik").innerHTML = st;
+
+  if (S.weg && letzterWeg && letzterWeg.length === S.n) {
+    const k = letzterWeg.reduce((s, x) => s + x, 0);
+    $("weg").innerHTML = "Letzte Kugel: <span class='pfad'>" + letzterWeg.map(x => x ? "R" : "L").join(" ") +
+      "</span> → Fach " + k + " (" + k + "-mal rechts)";
+  } else {
+    $("weg").innerHTML = S.weg ? "Fach antippen für Details · Leertaste = 1 Kugel" : "";
+  }
+
+  if (auswahl !== null) {
+    const k = auswahl, n = S.n, c = zaehler[k];
+    let t = "<b>Fach " + k + ":</b> ";
+    if (S.pascal) t += "<span class='theo'>" + tsd(binom(n, k)) + " Wege</span> · ";
+    if (S.theorie) t += "<span class='theo'>P(X = " + k + ") = " + tsd(binom(n, k)) + " · (" + pText() + ")<sup>" + k +
+      "</sup> · (" + qText() + ")<sup>" + (n - k) + "</sup> ≈ " + dez(P(k), 4) + "</span> · ";
+    t += "beobachtet " + tsd(c) + " von " + tsd(N) + (N ? " (h ≈ " + dez(c / N, 4) + ")" : "");
+    $("fachinfo").innerHTML = t;
+  } else {
+    $("fachinfo").innerHTML = "";
+  }
+}
+
+function bedienung() {
+  $("nWert").textContent = S.n;
+  $("pWert").textContent = pText();
+  document.querySelectorAll(".preset").forEach(b => b.classList.toggle("gewaehlt", +b.dataset.preset === S.preset));
+  document.querySelectorAll(".tempo").forEach(b => b.classList.toggle("gewaehlt", +b.dataset.tempo === S.tempo));
+  document.querySelectorAll(".tog").forEach(b => {
+    b.classList.toggle("an", !!S[b.dataset.tog]);
+    b.setAttribute("aria-pressed", S[b.dataset.tog] ? "true" : "false");
+  });
+  $("dauer").classList.toggle("an", dauer);
+  $("dauer").textContent = dauer ? "⏸ Dauerlauf stoppen" : "▶ Dauerlauf";
+  texte();
+}
+
+// ---------- Schleife ----------
+let zuletzt = performance.now();
+function schritt(jetzt) {
+  const dt = Math.min(jetzt - zuletzt, 60); zuletzt = jetzt;
+  const ms = TEMPO[S.tempo];
+  const intervall = ms * (S.tempo === 2 ? 0.35 : 0.6);
+  if (warte > 0 || dauer) {
+    spawnUhr += dt;
+    while (spawnUhr >= intervall && (warte > 0 || dauer) && kugeln.length < 500) {
+      spawnUhr -= intervall;
+      starteKugel();
+      if (warte > 0) warte--;
+    }
+    if (spawnUhr > intervall) spawnUhr = intervall;
+  } else {
+    spawnUhr = intervall;   // nächste Kugel startet sofort
+  }
+  let gelandet = false;
+  const ende = S.n + 2;
+  for (const b of kugeln) {
+    b.t += dt / ms;
+    if (b.t >= ende) { lande(b.d); b.fertig = true; gelandet = true; }
+  }
+  if (gelandet) { kugeln = kugeln.filter(b => !b.fertig); texte(); }
+  zeichne();
+  requestAnimationFrame(schritt);
+}
+
+// ---------- Bedienung ----------
+function setzeN(n) {
+  n = Math.max(N_MIN, Math.min(N_MAX, n));
+  if (n === S.n) return;
+  S.n = n; speichern(); neu();
+}
+function setzeP(p, preset) {
+  p = Math.max(0.05, Math.min(0.95, p));
+  S.p = p; S.preset = preset; speichern(); neu();
+}
+function schrittP(r) { setzeP(Math.round((S.p + r * 0.05) * 20) / 20, null); }
+function hinzu(a) { if (a >= 1000) sofort(a); else warte += a; }
+function umschalten(name) { S[name] = !S[name]; speichern(); bedienung(); }
+function vollbild() {
+  const d = document, el = d.documentElement;
+  if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+  else if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+
+$("nMinus").onclick = () => setzeN(S.n - 1);
+$("nPlus").onclick = () => setzeN(S.n + 1);
+$("pMinus").onclick = () => schrittP(-1);
+$("pPlus").onclick = () => schrittP(1);
+document.querySelectorAll(".preset").forEach(b => b.onclick = () => setzeP(PRESETS[+b.dataset.preset].v, +b.dataset.preset));
+document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => hinzu(+b.dataset.add));
+document.querySelectorAll(".tempo").forEach(b => b.onclick = () => { S.tempo = +b.dataset.tempo; speichern(); bedienung(); });
+document.querySelectorAll(".tog").forEach(b => b.onclick = () => umschalten(b.dataset.tog));
+$("dauer").onclick = () => { dauer = !dauer; bedienung(); };
+$("reset").onclick = () => { dauer = false; auswahl = null; neu(); };
+$("voll").onclick = vollbild;
+
+lw.addEventListener("click", e => {
+  const r = lw.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  const g = geo();
+  if (y < g.wallTop) { auswahl = null; texte(); return; }
+  const k = Math.round((x - g.cx) / g.dx + g.n / 2);
+  auswahl = (k >= 0 && k <= g.n && auswahl !== k) ? k : null;
+  texte();
+});
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  const aktion = {
+    " ": () => hinzu(1), "1": () => hinzu(10), "2": () => hinzu(100), "3": () => hinzu(1000),
+    "d": () => $("dauer").click(), "p": () => umschalten("pascal"), "t": () => umschalten("theorie"),
+    "w": () => umschalten("weg"), "h": () => umschalten("relativ"), "r": () => $("reset").click(),
+    "f": vollbild, "arrowleft": () => setzeN(S.n - 1), "arrowright": () => setzeN(S.n + 1),
+    "arrowdown": () => schrittP(-1), "arrowup": () => schrittP(1)
+  }[k];
+  if (aktion) { e.preventDefault(); aktion(); }
+});
+
+// Fokus nach Klick vom Button nehmen, damit die Leertaste nicht den Button erneut auslöst
+document.querySelectorAll("button").forEach(b => b.addEventListener("mouseup", () => b.blur()));
+
+S.n = Math.max(N_MIN, Math.min(N_MAX, S.n | 0 || 10));
+groesse();
+neu();
+requestAnimationFrame(schritt);
+</script>
+</body>
+</html>
