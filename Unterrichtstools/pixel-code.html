@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel-Code</title>
+<style>
+:root {
+  --bg: #1a1a1a;
+  --panel: #262626;
+  --panel-hi: #333333;
+  --text: #f2f2f2;
+  --text-soft: #b5b5b5;
+  --accent: #4da3ff;
+  --accent-text: #0d1b2a;
+  --ok: #4caf50;
+  --warn: #ffb300;
+  --bad: #ef5350;
+  --paper: #ffffff;
+  --ink: #000000;
+  --line: #9a9a9a;
+  --logo: #888;
+  --logo-opacity: 0.4;
+  --font-base: 28px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--text);
+  font: var(--font-base)/1.3 system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: flex; flex-direction: column;
+  -webkit-user-select: none; user-select: none;
+}
+header {
+  display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
+  padding: 0.5rem 1.2rem; background: var(--panel);
+}
+header h1 { font-size: 1.15em; margin: 0 1rem 0 0; font-weight: 700; }
+.tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+button {
+  font: inherit; font-size: 0.8em; color: var(--text); background: var(--panel-hi);
+  border: 2px solid transparent; border-radius: 10px; padding: 0.35em 0.8em;
+  cursor: pointer; min-height: 48px;
+}
+button:hover { border-color: var(--text-soft); }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button.aktiv, button.primaer { background: var(--accent); color: var(--accent-text); font-weight: 700; }
+button:disabled { opacity: 0.35; cursor: default; border-color: transparent; }
+main { flex: 1; display: flex; min-height: 0; }
+section { display: none; flex: 1; padding: 1rem 1.4rem; gap: 2rem; min-height: 0; }
+section.sichtbar { display: flex; }
+.spalte { display: flex; flex-direction: column; gap: 0.8rem; min-width: 0; }
+.wachsen { flex: 1; }
+.hinweis { color: var(--text-soft); font-size: 0.75em; margin: 0; }
+.knopfreihe { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* Raster */
+.raster {
+  display: grid; gap: 0;
+  --zelle: min(8.2vh, 5.2vw);
+  touch-action: none;
+}
+.raster .lab {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-soft); font-size: calc(var(--zelle) * 0.42); font-weight: 600;
+  width: var(--zelle); height: var(--zelle);
+}
+.raster .z {
+  width: var(--zelle); height: var(--zelle);
+  background: var(--paper); border: 1px solid var(--line);
+  transition: background-color 0.12s;
+}
+.raster .z.an { background: var(--ink); }
+.raster .z.neu { background: var(--accent); }
+.raster.klickbar .z { cursor: pointer; }
+.raster.klein { --zelle: min(5vh, 3.2vw); }
+
+/* Code-Anzeige */
+.code { display: flex; flex-direction: column; gap: 0.25em; font-variant-numeric: tabular-nums; }
+.code .zeile { display: flex; flex-wrap: wrap; gap: 0.15em 0.55em; }
+.code .t { padding: 0 0.15em; border-radius: 6px; }
+.code .t.erledigt { color: var(--text-soft); }
+.code .t.jetzt { background: var(--accent); color: var(--accent-text); }
+.code.gross { font-size: 1.05em; }
+.code.mittel { font-size: 0.8em; }
+
+.liste { display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; min-width: 9em; }
+.liste button { text-align: left; }
+.aufloesung { font-size: 1.4em; font-weight: 700; min-height: 1.4em; }
+.aufloesung .haken { color: var(--ok); }
+
+/* Bingo */
+.ziehung { font-size: 9em; font-weight: 800; line-height: 1; letter-spacing: 0.02em; }
+.zaehler { color: var(--text-soft); }
+.verlauf { display: flex; flex-wrap: wrap; gap: 0.2em 0.5em; font-size: 0.7em; color: var(--text-soft); max-width: 18em; }
+.verlauf span:last-child { color: var(--text); font-weight: 700; }
+
+/* Editor */
+.namenfeld { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+input[type=text] {
+  font: inherit; font-size: 0.8em; padding: 0.3em 0.5em; border-radius: 10px;
+  border: 2px solid var(--panel-hi); background: var(--panel); color: var(--text); width: 9em;
+}
+input[type=text]:focus-visible { outline: 3px solid var(--accent); }
+.meldung { min-height: 1.3em; font-size: 0.75em; }
+.meldung.ok { color: var(--ok); }
+.meldung.warn { color: var(--warn); }
+
+.fi {
+  position: fixed; right: 0.8rem; bottom: 0.4rem; font-size: 14px;
+  color: var(--logo); opacity: var(--logo-opacity); pointer-events: none;
+}
+@media (max-width: 900px) {
+  :root { --font-base: 20px; }
+  section.sichtbar { flex-wrap: wrap; }
+  .raster { --zelle: min(10vw, 6vh); }
+  .ziehung { font-size: 5em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .raster .z { transition: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pixel-Code</h1>
+  <nav class="tabs" role="tablist">
+    <button class="aktiv" data-tab="raetsel">Rätsel</button>
+    <button data-tab="bingo">Bingo</button>
+    <button data-tab="editor">Eigenes Bild</button>
+  </nav>
+</header>
+
+<main>
+  <!-- RÄTSEL -->
+  <section id="raetsel" class="sichtbar">
+    <div class="liste" id="raetselListe"></div>
+    <div class="spalte wachsen">
+      <div class="code gross" id="raetselCode"></div>
+      <div class="aufloesung" id="raetselName"></div>
+      <div class="knopfreihe">
+        <button class="primaer" id="btnAufdecken">Lösung aufdecken</button>
+        <button id="btnSofort">Sofort zeigen</button>
+        <button id="btnLeeren">Raster leeren</button>
+      </div>
+    </div>
+    <div class="spalte"><div class="raster" id="raetselRaster"></div></div>
+  </section>
+
+  <!-- BINGO -->
+  <section id="bingo">
+    <div class="spalte wachsen">
+      <div class="knopfreihe">
+        <button id="b6" class="aktiv">6 × 6</button>
+        <button id="b8">8 × 8</button>
+      </div>
+      <div class="ziehung" id="bingoFeld">–</div>
+      <div class="zaehler" id="bingoZaehler">Noch kein Feld aufgerufen</div>
+      <div class="knopfreihe">
+        <button class="primaer" id="btnZiehen">Nächstes Feld</button>
+        <button id="btnNeueRunde">Neue Runde</button>
+      </div>
+      <p class="hinweis">Leertaste ruft auch das nächste Feld auf. Bei „Bingo!“ liest das Kind seine Felder vor; aufgerufene Felder sind rechts schwarz.</p>
+      <div class="verlauf" id="bingoVerlauf"></div>
+    </div>
+    <div class="spalte"><div class="raster" id="bingoRaster"></div></div>
+  </section>
+
+  <!-- EDITOR -->
+  <section id="editor">
+    <div class="spalte"><div class="raster klickbar" id="editorRaster"></div></div>
+    <div class="spalte wachsen">
+      <div class="zaehler" id="editorZaehler">0 Felder schwarz</div>
+      <div class="code mittel" id="editorCode"></div>
+      <div class="knopfreihe">
+        <button id="btnSpiegeln">Spiegeln</button>
+        <button id="btnNegativ">Negativ</button>
+        <button id="btnEditorLeeren">Leeren</button>
+      </div>
+      <div class="namenfeld">
+        <input type="text" id="raetselNameEingabe" placeholder="Name" maxlength="20" aria-label="Name des Rätsels">
+        <button class="primaer" id="btnSpeichern">Als Rätsel speichern</button>
+      </div>
+      <div class="meldung" id="editorMeldung"></div>
+      <p class="hinweis">Klicken oder wischen färbt Felder. Gespeicherte Rätsel erscheinen unter „Rätsel“ und bleiben in diesem Browser erhalten.</p>
+      <div class="knopfreihe"><button id="btnEigeneLoeschen">Eigene Rätsel löschen</button></div>
+    </div>
+  </section>
+</main>
+<div class="fi">© Fi</div>
+
+<script>
+"use strict";
+const BUCHST = "ABCDEFGH";
+const SPEICHER = "fi-pixelcode-eigene";
+
+const RAETSEL = [
+  { name: "Herz", z: ["01100110","11111111","11111111","01111110","00111100","00011000","00000000","00000000"] },
+  { name: "Haus", z: ["00011000","00111100","01111110","11111111","01111110","01100110","01100110","01111110"] },
+  { name: "Kreuz", leicht: true, z: ["001100","001100","111111","111111","001100","001100"] },
+  { name: "Smiley", z: ["00111100","01000010","10100101","10000001","10100101","10011001","01000010","00111100"] },
+  { name: "Pfeil", z: ["00001000","00001100","11111110","11111111","11111110","00001100","00001000","00000000"] },
+  { name: "Katze", z: ["10000001","11000011","11111111","11011011","11111111","11100111","01111110","00111100"] }
+];
+
+/* ---------- Hilfsfunktionen ---------- */
+function codeAus(zeilen) {
+  const out = [];
+  zeilen.forEach((reihe, i) => {
+    const felder = [];
+    [...reihe].forEach((c, j) => { if (c === "1") felder.push(BUCHST[j] + (i + 1)); });
+    if (felder.length) out.push(felder);
+  });
+  return out;
+}
+function baueRaster(el, spalten, zeilen) {
+  el.innerHTML = "";
+  el.style.gridTemplateColumns = `repeat(${spalten + 1}, var(--zelle))`;
+  const zellen = {};
+  el.appendChild(document.createElement("div")).className = "lab";
+  for (let j = 0; j < spalten; j++) {
+    const l = document.createElement("div"); l.className = "lab"; l.textContent = BUCHST[j]; el.appendChild(l);
+  }
+  for (let i = 1; i <= zeilen; i++) {
+    const l = document.createElement("div"); l.className = "lab"; l.textContent = i; el.appendChild(l);
+    for (let j = 0; j < spalten; j++) {
+      const z = document.createElement("div"); z.className = "z";
+      const name = BUCHST[j] + i; z.dataset.feld = name; zellen[name] = z; el.appendChild(z);
+    }
+  }
+  return zellen;
+}
+function zeigeCode(el, codeZeilen) {
+  el.innerHTML = "";
+  const spans = [];
+  if (!codeZeilen.length) { el.innerHTML = '<span class="hinweis">Noch keine Felder gefärbt.</span>'; return spans; }
+  codeZeilen.forEach(reihe => {
+    const div = document.createElement("div"); div.className = "zeile";
+    reihe.forEach((f, k) => {
+      const s = document.createElement("span"); s.className = "t";
+      s.textContent = f + (k < reihe.length - 1 ? "," : "");
+      s.dataset.feld = f; div.appendChild(s); spans.push(s);
+    });
+    el.appendChild(div);
+  });
+  return spans;
+}
+function ladeEigene() {
+  try { return JSON.parse(localStorage.getItem(SPEICHER)) || []; } catch (e) { return []; }
+}
+function speichereEigene(liste) {
+  try { localStorage.setItem(SPEICHER, JSON.stringify(liste)); return true; } catch (e) { return false; }
+}
+const reduziert = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("aktiv", x === b));
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("sichtbar", s.id === b.dataset.tab));
+  stoppeAufdecken();
+  if (b.dataset.tab === "raetsel") baueRaetselListe();
+}));
+
+/* ---------- Rätsel ---------- */
+let aktRaetsel = 0, rZellen = {}, rSpans = [], timer = null;
+function alleRaetsel() {
+  return RAETSEL.concat(ladeEigene().map(r => ({ name: r.name, z: r.z, eigen: true })));
+}
+function baueRaetselListe() {
+  const liste = document.getElementById("raetselListe");
+  liste.innerHTML = "";
+  const alle = alleRaetsel();
+  if (aktRaetsel >= alle.length) aktRaetsel = 0;
+  alle.forEach((r, i) => {
+    const b = document.createElement("button");
+    b.textContent = r.eigen ? `Eigenes ${i - RAETSEL.length + 1}` : `Rätsel ${i + 1}${r.leicht ? " (leicht)" : ""}`;
+    b.classList.toggle("aktiv", i === aktRaetsel);
+    b.addEventListener("click", () => { aktRaetsel = i; baueRaetselListe(); });
+    liste.appendChild(b);
+  });
+  ladeRaetsel();
+}
+function ladeRaetsel() {
+  stoppeAufdecken();
+  const r = alleRaetsel()[aktRaetsel];
+  rZellen = baueRaster(document.getElementById("raetselRaster"), r.z[0].length, r.z.length);
+  rSpans = zeigeCode(document.getElementById("raetselCode"), codeAus(r.z));
+  document.getElementById("raetselName").textContent = "";
+}
+function stoppeAufdecken() { if (timer) { clearInterval(timer); timer = null; } }
+function zeigeName() {
+  document.getElementById("raetselName").innerHTML =
+    '<span class="haken">✓</span> ' + alleRaetsel()[aktRaetsel].name.replace(/</g, "&lt;");
+}
+document.getElementById("btnAufdecken").addEventListener("click", () => {
+  ladeRaetsel();
+  if (reduziert) { document.getElementById("btnSofort").click(); return; }
+  let k = 0;
+  timer = setInterval(() => {
+    if (k > 0) { rSpans[k - 1].classList.replace("jetzt", "erledigt"); rZellen[rSpans[k - 1].dataset.feld].classList.replace("neu", "an"); }
+    if (k >= rSpans.length) { stoppeAufdecken(); zeigeName(); return; }
+    rSpans[k].classList.add("jetzt");
+    rZellen[rSpans[k].dataset.feld].classList.add("neu");
+    k++;
+  }, 260);
+});
+document.getElementById("btnSofort").addEventListener("click", () => {
+  stoppeAufdecken();
+  rSpans.forEach(s => { s.classList.remove("jetzt"); s.classList.add("erledigt"); rZellen[s.dataset.feld].classList.remove("neu"); rZellen[s.dataset.feld].classList.add("an"); });
+  zeigeName();
+});
+document.getElementById("btnLeeren").addEventListener("click", ladeRaetsel);
+
+/* ---------- Bingo ---------- */
+let bGroesse = 6, bReihe = [], bPos = 0, bZellen = {};
+function neueBingoRunde() {
+  bReihe = [];
+  for (let i = 1; i <= bGroesse; i++) for (let j = 0; j < bGroesse; j++) bReihe.push(BUCHST[j] + i);
+  for (let i = bReihe.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [bReihe[i], bReihe[k]] = [bReihe[k], bReihe[i]]; }
+  bPos = 0;
+  bZellen = baueRaster(document.getElementById("bingoRaster"), bGroesse, bGroesse);
+  document.getElementById("bingoRaster").classList.toggle("klein", bGroesse === 8);
+  document.getElementById("bingoFeld").textContent = "–";
+  document.getElementById("bingoVerlauf").innerHTML = "";
+  zeigeZaehler();
+  document.getElementById("btnZiehen").disabled = false;
+}
+function zeigeZaehler() {
+  document.getElementById("bingoZaehler").textContent =
+    bPos === 0 ? "Noch kein Feld aufgerufen" : `${bPos} von ${bReihe.length} Feldern aufgerufen`;
+}
+function ziehe() {
+  if (bPos >= bReihe.length) return;
+  const f = bReihe[bPos++];
+  Object.values(bZellen).forEach(z => z.classList.replace("neu", "an"));
+  bZellen[f].classList.add("neu");
+  document.getElementById("bingoFeld").textContent = f;
+  const s = document.createElement("span"); s.textContent = f;
+  document.getElementById("bingoVerlauf").appendChild(s);
+  zeigeZaehler();
+  if (bPos >= bReihe.length) document.getElementById("btnZiehen").disabled = true;
+}
+document.getElementById("btnZiehen").addEventListener("click", ziehe);
+document.getElementById("btnNeueRunde").addEventListener("click", () => {
+  if (bPos === 0 || confirm("Neue Runde starten? Die aufgerufenen Felder werden gelöscht.")) neueBingoRunde();
+});
+["b6", "b8"].forEach(id => document.getElementById(id).addEventListener("click", () => {
+  const g = id === "b6" ? 6 : 8;
+  if (g === bGroesse) return;
+  if (bPos > 0 && !confirm("Größe wechseln? Die laufende Runde wird gelöscht.")) return;
+  bGroesse = g;
+  document.getElementById("b6").classList.toggle("aktiv", g === 6);
+  document.getElementById("b8").classList.toggle("aktiv", g === 8);
+  neueBingoRunde();
+}));
+document.addEventListener("keydown", e => {
+  if (document.getElementById("bingo").classList.contains("sichtbar") && (e.code === "Space" || e.key === "Enter")
+      && document.activeElement.tagName !== "INPUT") {
+    e.preventDefault(); ziehe();
+  }
+});
+
+/* ---------- Editor ---------- */
+let eFeld = Array.from({ length: 8 }, () => Array(8).fill(0));
+const eRaster = document.getElementById("editorRaster");
+let eZellen = baueRaster(eRaster, 8, 8);
+function eZeilen() { return eFeld.map(r => r.join("")); }
+function eAktualisieren() {
+  for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) eZellen[BUCHST[j] + (i + 1)].classList.toggle("an", !!eFeld[i][j]);
+  zeigeCode(document.getElementById("editorCode"), codeAus(eZeilen()));
+  const n = eFeld.flat().reduce((a, b) => a + b, 0);
+  const z = document.getElementById("editorZaehler");
+  z.textContent = `${n} ${n === 1 ? "Feld" : "Felder"} schwarz`;
+}
+let malt = false, malWert = 1;
+function feldAusPunkt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el && el.classList.contains("z") && eRaster.contains(el) ? el.dataset.feld : null;
+}
+function setze(f) {
+  const j = BUCHST.indexOf(f[0]), i = parseInt(f.slice(1), 10) - 1;
+  if (eFeld[i][j] !== malWert) { eFeld[i][j] = malWert; eAktualisieren(); }
+}
+eRaster.addEventListener("pointerdown", e => {
+  const f = feldAusPunkt(e.clientX, e.clientY); if (!f) return;
+  e.preventDefault();
+  const j = BUCHST.indexOf(f[0]), i = parseInt(f.slice(1), 10) - 1;
+  malWert = eFeld[i][j] ? 0 : 1; malt = true; setze(f);
+});
+window.addEventListener("pointermove", e => { if (!malt) return; const f = feldAusPunkt(e.clientX, e.clientY); if (f) setze(f); });
+window.addEventListener("pointerup", () => { malt = false; });
+window.addEventListener("pointercancel", () => { malt = false; });
+document.getElementById("btnSpiegeln").addEventListener("click", () => { eFeld = eFeld.map(r => r.slice().reverse()); eAktualisieren(); });
+document.getElementById("btnNegativ").addEventListener("click", () => { eFeld = eFeld.map(r => r.map(v => 1 - v)); eAktualisieren(); });
+document.getElementById("btnEditorLeeren").addEventListener("click", () => { eFeld = eFeld.map(r => r.map(() => 0)); eAktualisieren(); });
+function meldung(text, art) { const m = document.getElementById("editorMeldung"); m.textContent = text; m.className = "meldung " + art; }
+document.getElementById("btnSpeichern").addEventListener("click", () => {
+  const name = document.getElementById("raetselNameEingabe").value.trim();
+  if (!eFeld.flat().some(v => v)) { meldung("Zuerst Felder färben, dann speichern.", "warn"); return; }
+  if (!name) { meldung("Bitte einen Namen eintragen – er erscheint erst beim Aufdecken.", "warn"); return; }
+  const liste = ladeEigene(); liste.push({ name, z: eZeilen() });
+  if (speichereEigene(liste)) { meldung(`„${name}“ gespeichert als Eigenes ${liste.length}.`, "ok"); document.getElementById("raetselNameEingabe").value = ""; }
+  else meldung("Speichern ist in diesem Browser nicht möglich.", "warn");
+});
+document.getElementById("btnEigeneLoeschen").addEventListener("click", () => {
+  if (!ladeEigene().length) { meldung("Es sind keine eigenen Rätsel gespeichert.", "warn"); return; }
+  if (confirm("Alle eigenen Rätsel löschen?")) { speichereEigene([]); aktRaetsel = 0; meldung("Eigene Rätsel gelöscht.", "ok"); }
+});
+
+/* ---------- Start ---------- */
+baueRaetselListe();
+neueBingoRunde();
+eAktualisieren();
+</script>
+</body>
+</html>
